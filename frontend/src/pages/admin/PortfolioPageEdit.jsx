@@ -249,10 +249,9 @@ export default function PortfolioPageEdit() {
         ar[`cat_heading_${i}`] = c.heading_ar
         ar[`cat_desc_${i}`] = c.desc_ar
       })
-      // Collect all videos for translation
-      const allVideos = await fetchPortfolioVideos()
+      // Use local videos state (includes unsaved edits)
       const videoLookup = {}
-      allVideos.forEach((v, i) => {
+      videos.forEach((v, i) => {
         en[`video_title_${i}`] = v.title_en || ""
         en[`video_desc_${i}`] = v.description_en || ""
         ar[`video_title_${i}`] = v.title_ar || ""
