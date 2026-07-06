@@ -3,22 +3,35 @@ const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.VITE_R2_BUCKET_
 const CF_API_TOKEN = process.env.CF_API_TOKEN
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID || R2_ENDPOINT?.match(/https?:\/\/(.+)\.r2\.cloudflarestorage\.com/)?.[1]
 
+async function cfFetch(path) {
+  const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}${path}`
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${CF_API_TOKEN}`, "Content-Type": "application/json" },
+  })
+  return res.json()
+}
+
 export default async function handler(req, res) {
   if (!CF_API_TOKEN) return res.status(503).json({ error: "CF_API_TOKEN not configured" })
   if (!CF_ACCOUNT_ID) return res.status(503).json({ error: "Could not determine CF_ACCOUNT_ID" })
 
   try {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/r2/buckets/${R2_BUCKET_NAME}`
-    const cfRes = await fetch(url, {
-      headers: { Authorization: `Bearer ${CF_API_TOKEN}`, "Content-Type": "application/json" },
-    })
-    const data = await cfRes.json()
-    if (!data.success) return res.status(502).json({ error: data.errors?.[0]?.message || "Cloudflare API error" })
+    // try usage endpoint first
+    const usageData = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}/usage`)
+    if (usageData.success) {
+      const objectsSize = usageData.result?.usage?.objectsSize
+      if (objectsSize != null) return res.json({ usedBytes: objectsSize })
+    }
 
-    const bucketSize = data.result?.bucketSize
-    if (bucketSize == null) return res.status(502).json({ error: "bucketSize not in response" })
+    // fallback: bucket detail endpoint
+    const bucketData = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}`)
+    if (!bucketData.success) return res.status(502).json({ error: bucketData.errors?.[0]?.message || "Cloudflare API error" })
 
-    res.json({ usedBytes: bucketSize })
+    const bucketSize = bucketData.result?.bucketSize
+    if (bucketSize != null) return res.json({ usedBytes: bucketSize })
+
+    // if neither worked, return raw response for debugging
+    res.status(502).json({ error: "Could not find storage size in Cloudflare API response", debug: bucketData })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
