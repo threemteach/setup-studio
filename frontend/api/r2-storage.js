@@ -18,8 +18,8 @@ export default async function handler(req, res) {
 
     const usageResp = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}/usage`)
     if (usageResp.body.success) {
-      const objectsSize = usageResp.body.result?.usage?.objectsSize
-      if (objectsSize != null) return res.json({ usedBytes: objectsSize, raw: usageResp.body, status: usageResp.status })
+      const payloadSize = usageResp.body.result?.payloadSize
+      if (payloadSize != null) return res.json({ usedBytes: Number(payloadSize), raw: usageResp.body, status: usageResp.status })
     }
 
     const bucketResp = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}`)
