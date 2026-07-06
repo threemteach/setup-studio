@@ -229,5 +229,5 @@ export async function fetchStorageUsage() {
     if (Contents) total += Contents.reduce((s, o) => s + (o.Size || 0), 0)
     cursor = NextContinuationToken
   } while (cursor)
-  return { usedBytes: total, limitBytes: TOTAL_LIMIT, usedGB: total / (1024 ** 3), limitGB: 100 }
+  return { usedBytes: total, limitBytes: TOTAL_LIMIT, usedGB: total / (1024 ** 3), usedMB: total / (1024 ** 2), limitGB: 100 }
 }
