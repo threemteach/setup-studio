@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo } from "../../lib/portfolio"
 import { autoTranslateSection } from "../../lib/homepage"
@@ -10,10 +10,16 @@ const Diamond = () => (
 )
 
 function HeadingInput({ value, onChange, dark, placeholder }) {
+  const ref = useRef(null)
   const cls = dark
-    ? "w-full min-w-[12rem] bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
-    : "w-full min-w-[12rem] bg-white/50 border border-navy/15 rounded-xl text-navy font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 focus:border-navy/40 focus:bg-white/80 transition-colors"
-  return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
+    ? "flex-1 min-w-[12rem] bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
+    : "flex-1 min-w-[12rem] bg-white/50 border border-navy/15 rounded-xl text-navy font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 focus:border-navy/40 focus:bg-white/80 transition-colors"
+  useEffect(() => {
+    if (ref.current && document.activeElement !== ref.current) {
+      ref.current.value = value
+    }
+  }, [value])
+  return <input ref={ref} type="text" defaultValue={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
 }
 
 function LabelInput({ value, onChange, dark, placeholder }) {
@@ -310,11 +316,9 @@ export default function PortfolioPageEdit() {
         <div className="flex flex-col items-center text-center">
           <div className="flex items-center w-full mb-4">
             <Diamond />
-            <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red shrink-0" />
-            <div className="flex-1 min-w-[12rem]">
-              <HeadingInput value={val("hero_heading")} onChange={(v) => handleChange("hero_heading", v)} dark placeholder="Our Work" />
-            </div>
-            <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red shrink-0" />
+            <span className="block flex-1 h-[2px] bg-red" />
+            <HeadingInput value={val("hero_heading")} onChange={(v) => handleChange("hero_heading", v)} dark placeholder="Our Work" />
+            <span className="block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
           <div className="max-w-[600px] mx-auto w-full">
