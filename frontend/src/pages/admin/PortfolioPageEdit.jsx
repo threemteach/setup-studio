@@ -201,15 +201,17 @@ export default function PortfolioPageEdit() {
     if (!files?.length || !activeCategory) return
     setUploading(true)
     try {
-      for (const file of files) {
-        const result = await uploadVideo(file, activeCategory)
-        await upsertVideo({
+      const results = await Promise.all(
+        Array.from(files).map(file => uploadVideo(file, activeCategory))
+      )
+      await Promise.all(results.map((result, i) =>
+        upsertVideo({
           category: activeCategory,
           video_url: result.video_url,
           video_key: result.video_key,
-          sort_order: videos.length,
+          sort_order: videos.length + i,
         })
-      }
+      ))
       const updated = await fetchPortfolioVideos(activeCategory)
       setVideos(updated)
       showToast(`Uploaded ${files.length} video(s)`)
