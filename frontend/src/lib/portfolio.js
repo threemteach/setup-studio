@@ -223,6 +223,7 @@ export async function fetchStorageUsage() {
     const res = await fetch("/api/r2-storage")
     if (res.ok) {
       const data = await res.json()
+      console.log("CF API raw response:", data)
       if (data.usedBytes != null) return formatStorage(data.usedBytes)
     }
   } catch {}
