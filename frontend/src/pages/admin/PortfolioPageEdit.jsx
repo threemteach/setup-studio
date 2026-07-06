@@ -93,6 +93,7 @@ export default function PortfolioPageEdit() {
   const [activeCategory, setActiveCategory] = useState("")
   const [videos, setVideos] = useState([])
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [translating, setTranslating] = useState(false)
   const fileInputRef = useRef(null)
 
@@ -200,9 +201,18 @@ export default function PortfolioPageEdit() {
   async function handleUpload(files) {
     if (!files?.length || !activeCategory) return
     setUploading(true)
+    setUploadProgress(0)
     try {
+      const fileList = Array.from(files)
+      const totalBytes = fileList.reduce((s, f) => s + f.size, 0)
+      let loadedBytes = 0
       const results = await Promise.all(
-        Array.from(files).map(file => uploadVideo(file, activeCategory))
+        fileList.map(file =>
+          uploadVideo(file, activeCategory, (loaded, total) => {
+            loadedBytes += loaded
+            setUploadProgress(Math.min((loadedBytes / totalBytes) * 100, 99.9))
+          })
+        )
       )
       await Promise.all(results.map((result, i) =>
         upsertVideo({
@@ -212,6 +222,7 @@ export default function PortfolioPageEdit() {
           sort_order: videos.length + i,
         })
       ))
+      setUploadProgress(100)
       const updated = await fetchPortfolioVideos(activeCategory)
       setVideos(updated)
       showToast(`Uploaded ${files.length} video(s)`)
@@ -219,6 +230,7 @@ export default function PortfolioPageEdit() {
       showToast("Upload failed: " + err.message, "error")
     }
     setUploading(false)
+    setUploadProgress(0)
     if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
@@ -421,8 +433,13 @@ export default function PortfolioPageEdit() {
               <input ref={fileInputRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => handleUpload(e.target.files)} />
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
                 className="px-6 py-3 rounded-xl bg-red text-white text-sm font-semibold cursor-pointer hover:bg-red/90 transition-colors border-0 disabled:opacity-50">
-                <i className="fa-solid fa-cloud-arrow-up mr-2" />{uploading ? "Uploading..." : "Upload Videos"}
+                <i className="fa-solid fa-cloud-arrow-up mr-2" />{uploading ? `Uploading ${Math.round(uploadProgress)}%` : "Upload Videos"}
               </button>
+              {uploading && (
+                <div className="mt-4 max-w-xs mx-auto bg-white/10 rounded-full h-2 overflow-hidden">
+                  <div className="h-full bg-red rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                </div>
+              )}
               <p className="text-white/30 text-xs mt-2">Supports MP4, MOV, WebM — uploaded directly to Cloudflare R2</p>
             </div>
 

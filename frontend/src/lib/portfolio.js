@@ -68,7 +68,7 @@ export async function deleteVideo(id, videoKey) {
   if (error) throw error
 }
 
-export async function uploadVideo(file, category) {
+export async function uploadVideo(file, category, onProgress) {
   if (!r2AccessKeyId || !r2SecretAccessKey || !r2PublicUrl) {
     throw new Error("R2 credentials not configured. Add VITE_R2_ACCESS_KEY_ID, VITE_R2_SECRET_ACCESS_KEY, and VITE_R2_PUBLIC_URL to .env")
   }
@@ -83,15 +83,20 @@ export async function uploadVideo(file, category) {
     { expiresIn: 3600 }
   )
 
-  const uploadRes = await fetch(uploadUrl, {
-    method: "PUT",
-    body: file,
-    headers: { "Content-Type": contentType },
+  await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open("PUT", uploadUrl)
+    xhr.setRequestHeader("Content-Type", contentType)
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) onProgress(e.loaded, e.total)
+    }
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) resolve()
+      else reject(new Error(`Upload to R2 failed: HTTP ${xhr.status}`))
+    }
+    xhr.onerror = () => reject(new Error("Upload to R2 failed: network error"))
+    xhr.send(file)
   })
-
-  if (!uploadRes.ok) {
-    throw new Error(`Upload to R2 failed: HTTP ${uploadRes.status}`)
-  }
 
   return { video_url: `${r2PublicUrl}/${key}`, video_key: key }
 }
