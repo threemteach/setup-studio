@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo } from "../../lib/portfolio"
 import { autoTranslateSection } from "../../lib/homepage"
@@ -10,16 +10,10 @@ const Diamond = () => (
 )
 
 function HeadingInput({ value, onChange, dark, placeholder }) {
-  const ref = useRef(null)
   const cls = dark
     ? "flex-1 min-w-[12rem] bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
     : "flex-1 min-w-[12rem] bg-white/50 border border-navy/15 rounded-xl text-navy font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 focus:border-navy/40 focus:bg-white/80 transition-colors"
-  useEffect(() => {
-    if (ref.current && document.activeElement !== ref.current) {
-      ref.current.value = value
-    }
-  }, [value])
-  return <input ref={ref} type="text" defaultValue={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
+  return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
 }
 
 function LabelInput({ value, onChange, dark, placeholder }) {
@@ -29,7 +23,7 @@ function LabelInput({ value, onChange, dark, placeholder }) {
   return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
 }
 
-const TextField = ({ value, onChange, label, placeholder, type = "text", rows, dark = false }) => {
+const TextField = ({ value, onChange, label, placeholder, type = "text", rows, dark = false, onBlur }) => {
   const Tag = type === "textarea" ? "textarea" : "input"
   const base = dark
     ? "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
@@ -37,7 +31,7 @@ const TextField = ({ value, onChange, label, placeholder, type = "text", rows, d
   return (
     <div>
       {label && <label className={`text-xs font-medium mb-1.5 block ${dark ? "text-white/40" : "text-navy/50"}`}>{label}</label>}
-      <Tag value={value} onChange={(e) => onChange(e.target.value)} className={base} rows={rows} placeholder={placeholder || ""} />
+      <Tag value={value} onChange={(e) => onChange(e.target.value)} className={base} rows={rows} placeholder={placeholder || ""} onBlur={onBlur} />
     </div>
   )
 }
@@ -156,8 +150,16 @@ export default function PortfolioPageEdit() {
   function setCatItem(index, key, value) {
     const cats = [...(form?.categories || [])]
     cats[index] = { ...cats[index], [key]: value }
-    if (key === "heading_en") cats[index].slug = makeSlug(value || `cat-${Date.now()}`)
     setVal("categories", cats)
+  }
+
+  function handleHeadingBlur(index) {
+    const cats = [...(form?.categories || [])]
+    const current = cats[index]
+    if (!current.slug || current.slug === "new-category") {
+      cats[index] = { ...current, slug: makeSlug(current.heading_en || `cat-${Date.now()}`) }
+      setVal("categories", cats)
+    }
   }
 
   function addCategory() {
@@ -331,13 +333,14 @@ export default function PortfolioPageEdit() {
       <LightSection id="categories" title="Categories" icon="fa-solid fa-tags" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="space-y-4">
           {categories.map((cat, i) => (
-            <div key={cat.slug || i} className="p-4 rounded-2xl border border-border bg-white relative group">
+            <div key={i} className="p-4 rounded-2xl border border-border bg-white relative group">
               <button onClick={() => removeCategory(i)}
                 className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <i className="fa-solid fa-xmark" />
               </button>
               <TextField value={lang === "en" ? cat.heading_en : cat.heading_ar}
                 onChange={(v) => setCatItem(i, lang === "en" ? "heading_en" : "heading_ar", v)}
+                onBlur={() => handleHeadingBlur(i)}
                 label={`Heading (${lang === "en" ? "EN" : "AR"})`}
                 placeholder={lang === "en" ? "Category heading..." : "عنوان الفئة..."} />
               <div className="mt-1 flex items-center gap-2">
