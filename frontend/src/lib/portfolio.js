@@ -114,20 +114,26 @@ async function uploadMultipart(file, key, contentType, onProgress) {
   const parts = []
   const CONCURRENCY = 6
   try {
+    // Pre-compute all part boundaries
+    const parts_config = Array.from({ length: numParts }, (_, i) => ({
+      start: i * partSize,
+      end: Math.min((i + 1) * partSize, file.size),
+    }))
     for (let batch = 0; batch < numParts; batch += CONCURRENCY) {
       const batchEnd = Math.min(batch + CONCURRENCY, numParts)
+      // Convert blobs to ArrayBuffers before sending (in parallel within batch)
+      const buffers = await Promise.all(
+        parts_config.slice(batch, batchEnd).map(p => file.slice(p.start, p.end).arrayBuffer())
+      )
       const batchResults = await Promise.all(
-        Array.from({ length: batchEnd - batch }, (_, j) => {
+        buffers.map((buf, j) => {
           const i = batch + j
-          const start = i * partSize
-          const end = Math.min(start + partSize, file.size)
-          const body = file.slice(start, end)
           return client.send(new UploadPartCommand({
             Bucket: r2Bucket,
             Key: key,
             UploadId,
             PartNumber: i + 1,
-            Body: body,
+            Body: new Uint8Array(buf),
           })).then(r => {
             done[i] = true
             reportProgress()
