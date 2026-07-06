@@ -28,6 +28,11 @@ const navItems = [
     label: "Academy page",
     icon: "fa-solid fa-graduation-cap",
   },
+  {
+    path: "/admin/portfolio",
+    label: "Portfolio page",
+    icon: "fa-solid fa-folder-open",
+  },
 ];
 
 function isActive(item, pathname) {

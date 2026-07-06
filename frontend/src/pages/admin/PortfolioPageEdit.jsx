@@ -1,0 +1,424 @@
+import { useState, useEffect, useRef } from "react"
+import AdminLayout from "../../components/admin/AdminLayout"
+import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo } from "../../lib/portfolio"
+
+const Diamond = () => (
+  <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+    <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
+  </svg>
+)
+
+function HeadingInput({ value, onChange, dark, placeholder }) {
+  const cls = dark
+    ? "flex-1 bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
+    : "flex-1 bg-white/50 border border-navy/15 rounded-xl text-navy font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 focus:border-navy/40 focus:bg-white/80 transition-colors"
+  return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
+}
+
+function LabelInput({ value, onChange, dark, placeholder }) {
+  const cls = dark
+    ? "bg-transparent border-0 text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-center outline-none placeholder:text-red/30"
+    : "bg-white/50 border border-navy/15 rounded-lg text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-left outline-none px-2 py-0.5 placeholder:text-red/30 focus:border-navy/30 focus:bg-white/80 transition-colors"
+  return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
+}
+
+const TextField = ({ value, onChange, label, placeholder, type = "text", rows, dark = false }) => {
+  const Tag = type === "textarea" ? "textarea" : "input"
+  const base = dark
+    ? "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
+    : "w-full bg-gray-50 border border-border rounded-xl px-4 py-2.5 text-navy text-sm outline-none focus:border-navy/40 transition-colors placeholder:text-muted resize-none"
+  return (
+    <div>
+      {label && <label className={`text-xs font-medium mb-1.5 block ${dark ? "text-white/40" : "text-navy/50"}`}>{label}</label>}
+      <Tag value={value} onChange={(e) => onChange(e.target.value)} className={base} rows={rows} placeholder={placeholder || ""} />
+    </div>
+  )
+}
+
+const DarkSection = ({ id, title, icon, collapsed, onToggle, children }) => (
+  <div className="relative bg-[#0A1216] rounded-3xl overflow-hidden mb-6 shadow-sm border border-white/5">
+    <div className="absolute -top-[12rem] -right-[6rem] w-[30rem] h-[30rem] rounded-full bg-[#11AFFF] opacity-[0.25] blur-[6rem] pointer-events-none" />
+    <div className="absolute -bottom-[10rem] -left-[4rem] w-[22rem] h-[22rem] rounded-full bg-[#11AFFF] opacity-[0.18] blur-[6rem] pointer-events-none" />
+    <div className="absolute top-[4rem] right-[30%] w-[16rem] h-[16rem] rounded-full bg-[#11AFFF] opacity-[0.12] blur-[3rem] pointer-events-none" />
+    <div className="relative z-10">
+      <button onClick={() => onToggle(id)} className="w-full flex items-center justify-between p-6 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-white/5 transition-colors">
+        <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider m-0 flex items-center gap-2">
+          <i className={`${icon} mr-1.5`} />{title}
+        </h3>
+        <i className={`fa-solid fa-chevron-down text-white/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
+      </button>
+      {!collapsed[id] && <div className="px-6 sm:px-8 pb-6 sm:pb-8">{children}</div>}
+    </div>
+  </div>
+)
+
+const LightSection = ({ id, title, icon, collapsed, onToggle, bg = "bg-white", children }) => (
+  <div className={`${bg} rounded-3xl border border-border/50 shadow-sm mb-6 overflow-hidden`}>
+    <button onClick={() => onToggle(id)} className="w-full flex items-center justify-between p-6 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-gray-50/50 transition-colors">
+      <h3 className="text-navy/50 text-xs font-semibold uppercase tracking-wider m-0 flex items-center gap-2">
+        <i className={`${icon} mr-1.5`} />{title}
+      </h3>
+      <i className={`fa-solid fa-chevron-down text-navy/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
+    </button>
+    {!collapsed[id] && <div className="px-6 sm:px-8 pb-6 sm:pb-8">{children}</div>}
+  </div>
+)
+
+const DEFAULT_CATEGORIES = [
+  { slug: "event-coverage", heading_en: "Event Coverage", heading_ar: "تغطية الأحداث", desc_en: "Professional event filming and coverage", desc_ar: "تصوير وتغطية احترافية للأحداث" },
+  { slug: "fashion-content", heading_en: "Fashion Content", heading_ar: "محتوى الأزياء", desc_en: "Fashion shoots and creative content", desc_ar: "جلسات تصوير أزياء ومحتوى إبداعي" },
+  { slug: "food-beverage", heading_en: "Food & Beverage", heading_ar: "الطعام والشراب", desc_en: "Food and beverage commercial content", desc_ar: "محتوى تجاري للطعام والشراب" },
+  { slug: "medical-content", heading_en: "Medical Content", heading_ar: "المحتوى الطبي", desc_en: "Medical and healthcare video production", desc_ar: "إنتاج فيديو طبي وصحي" },
+  { slug: "reels-social", heading_en: "Reels & Social Content", heading_ar: "ريلز ومحتوى التواصل", desc_en: "Short-form content for social media", desc_ar: "محتوى قصير لمنصات التواصل الاجتماعي" },
+  { slug: "ads-campaigns", heading_en: "Social Media Ads", heading_ar: "إعلانات السوشيال ميديا", desc_en: "Paid ad campaigns and promotional content", desc_ar: "حملات إعلانية ومحتوى ترويجي" },
+]
+
+const DEFAULT_EMPTY_FORM = {
+  id: 1,
+  hero_heading_en: "Our Work",
+  hero_heading_ar: "أعمالنا",
+  hero_subtitle_en: "Explore our video production portfolio across different categories",
+  hero_subtitle_ar: "تصفح أعمالنا في إنتاج الفيديو عبر مختلف الفئات",
+  categories: DEFAULT_CATEGORIES,
+}
+
+export default function PortfolioPageEdit() {
+  const [lang, setLang] = useState("en")
+  const [form, setForm] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [toast, setToast] = useState(null)
+  const [collapsed, setCollapsed] = useState({})
+  const [activeCategory, setActiveCategory] = useState("")
+  const [videos, setVideos] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
+
+  function showToast(message, type = "success") {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3500)
+  }
+
+  function toggleCollapse(key) {
+    setCollapsed(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  useEffect(() => {
+    Promise.all([
+      fetchPortfolioContent(),
+    ]).then(([data]) => {
+      if (data) {
+        const merged = { ...DEFAULT_EMPTY_FORM }
+        for (const key of Object.keys(DEFAULT_EMPTY_FORM)) {
+          if (data[key] !== null && data[key] !== undefined && data[key] !== "") merged[key] = data[key]
+        }
+        setForm(merged)
+        const cats = merged.categories || []
+        if (cats.length > 0) setActiveCategory(cats[0].slug)
+      } else {
+        setForm({ ...DEFAULT_EMPTY_FORM })
+        if (DEFAULT_CATEGORIES.length > 0) setActiveCategory(DEFAULT_CATEGORIES[0].slug)
+      }
+    }).catch(console.error)
+    .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (activeCategory) {
+      fetchPortfolioVideos(activeCategory).then(setVideos).catch(() => setVideos([]))
+    }
+  }, [activeCategory])
+
+  function setVal(field, value) {
+    setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  function val(field) {
+    return form?.[`${field}_${lang}`] ?? form?.[`${field}_en`] ?? ""
+  }
+
+  function handleChange(field, value) {
+    setVal(`${field}_${lang}`, value)
+  }
+
+  function makeSlug(text) {
+    return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `cat-${Date.now()}`
+  }
+
+  function setCatItem(index, key, value) {
+    const cats = [...(form?.categories || [])]
+    cats[index] = { ...cats[index], [key]: value }
+    if (key === "heading_en") cats[index].slug = makeSlug(value || `cat-${Date.now()}`)
+    setVal("categories", cats)
+  }
+
+  function addCategory() {
+    const cats = [...(form?.categories || [])]
+    const slug = `new-category`
+    cats.push({ slug, heading_en: "", heading_ar: "", desc_en: "", desc_ar: "" })
+    setVal("categories", cats)
+    setActiveCategory(slug)
+  }
+
+  function removeCategory(index) {
+    const cats = [...(form?.categories || [])]
+    const removed = cats[index]
+    cats.splice(index, 1)
+    setVal("categories", cats)
+    if (activeCategory === removed.slug && cats.length > 0) setActiveCategory(cats[0].slug)
+    else if (cats.length === 0) setActiveCategory("")
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      await updatePortfolioContent({
+        hero_heading_en: form.hero_heading_en,
+        hero_heading_ar: form.hero_heading_ar,
+        hero_subtitle_en: form.hero_subtitle_en,
+        hero_subtitle_ar: form.hero_subtitle_ar,
+        categories: form.categories,
+      })
+      showToast("Saved successfully!")
+    } catch (err) {
+      showToast("Error saving: " + err.message, "error")
+    }
+    setSaving(false)
+  }
+
+  async function handleUpload(files) {
+    if (!files?.length || !activeCategory) return
+    setUploading(true)
+    try {
+      for (const file of files) {
+        const result = await uploadVideo(file, activeCategory)
+        await upsertVideo({
+          category: activeCategory,
+          video_url: result.video_url,
+          video_key: result.video_key,
+          sort_order: videos.length,
+        })
+      }
+      const updated = await fetchPortfolioVideos(activeCategory)
+      setVideos(updated)
+      showToast(`Uploaded ${files.length} video(s)`)
+    } catch (err) {
+      showToast("Upload failed: " + err.message, "error")
+    }
+    setUploading(false)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  async function handleDeleteVideo(video) {
+    if (!confirm("Delete this video?")) return
+    try {
+      await deleteVideo(video.id, video.video_key)
+      setVideos(prev => prev.filter(v => v.id !== video.id))
+      showToast("Video deleted")
+    } catch (err) {
+      showToast("Delete failed: " + err.message, "error")
+    }
+  }
+
+  async function handleVideoFieldChange(videoId, field, value) {
+    setVideos(prev => prev.map(v => v.id === videoId ? { ...v, [field]: value } : v))
+  }
+
+  async function handleSaveVideoMeta(video) {
+    try {
+      await upsertVideo(video)
+      showToast("Video updated")
+    } catch (err) {
+      showToast("Error: " + err.message, "error")
+    }
+  }
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="flex items-center justify-center py-20">
+          <div className="w-8 h-8 border-2 border-navy/20 border-t-navy rounded-full animate-spin" />
+        </div>
+      </AdminLayout>
+    )
+  }
+
+  const categories = form?.categories || []
+
+  return (
+    <AdminLayout>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div>
+          <h1 className="text-navy font-bold text-2xl m-0">Portfolio Page Editor</h1>
+          <p className="text-muted text-sm m-0 mt-1">Manage portfolio categories and videos — bilingual EN / AR</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setLang(lang === "en" ? "ar" : "en")}
+            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors"
+          >{lang === "en" ? "Edit العربية" : "Edit English"}</button>
+          <button onClick={handleSave} disabled={saving}
+            className="px-6 py-2 rounded-xl bg-navy text-white font-semibold text-sm cursor-pointer hover:bg-navy/90 transition-colors disabled:opacity-50"
+          >{saving ? "Saving..." : "Save All"}</button>
+        </div>
+      </div>
+
+      {/* ════════════════════ HERO ════════════════════ */}
+      <DarkSection id="hero" title="Hero Section" icon="fa-solid fa-display" collapsed={collapsed} onToggle={toggleCollapse}>
+        <div className="flex flex-col items-center text-center">
+          <div className="flex items-center w-full mb-4">
+            <Diamond />
+            <span className="block flex-1 h-[2px] bg-red" />
+            <HeadingInput value={val("hero_heading")} onChange={(v) => handleChange("hero_heading", v)} dark placeholder="Our Work" />
+            <span className="block flex-1 h-[2px] bg-red" />
+            <Diamond />
+          </div>
+          <div className="max-w-[600px] mx-auto w-full">
+            <TextField value={val("hero_subtitle")} onChange={(v) => handleChange("hero_subtitle", v)} label="" placeholder="Explore our video production portfolio..." dark />
+          </div>
+        </div>
+      </DarkSection>
+
+      {/* ════════════════════ CATEGORIES ════════════════════ */}
+      <LightSection id="categories" title="Categories" icon="fa-solid fa-tags" collapsed={collapsed} onToggle={toggleCollapse}>
+        <div className="space-y-4">
+          {categories.map((cat, i) => (
+            <div key={cat.slug || i} className="p-4 rounded-2xl border border-border bg-white relative group">
+              <button onClick={() => removeCategory(i)}
+                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                <i className="fa-solid fa-xmark" />
+              </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <TextField value={cat.heading_en}
+                  onChange={(v) => setCatItem(i, "heading_en", v)}
+                  label="Heading (EN)" placeholder="Category heading..." />
+                <TextField value={cat.heading_ar}
+                  onChange={(v) => setCatItem(i, "heading_ar", v)}
+                  label="العنوان (AR)" placeholder="عنوان الفئة..." />
+              </div>
+              <div className="mt-1 flex items-center gap-2">
+                <span className="text-xs font-medium text-navy/50">Slug:</span>
+                <span className="px-2.5 py-1 rounded-lg bg-gray-100 text-navy/60 text-xs font-mono">{cat.slug || makeSlug(cat.heading_en) || "—"}</span>
+              </div>
+              <div className="mt-2">
+                <TextField value={lang === "en" ? cat.desc_en : cat.desc_ar}
+                  onChange={(v) => setCatItem(i, lang === "en" ? "desc_en" : "desc_ar", v)}
+                  label={`Description (${lang === "en" ? "EN" : "AR"})`}
+                  placeholder={lang === "en" ? "Category description..." : "وصف الفئة..."} />
+              </div>
+            </div>
+          ))}
+          <button onClick={addCategory}
+            className="px-4 py-2 rounded-xl border border-dashed border-border bg-gray-50 text-navy text-sm font-semibold cursor-pointer hover:bg-gray-100 transition-colors w-full">
+            <i className="fa-solid fa-plus mr-2" />Add Category
+          </button>
+        </div>
+      </LightSection>
+
+      {/* ════════════════════ VIDEOS ════════════════════ */}
+      <DarkSection id="videos" title="Videos" icon="fa-solid fa-video" collapsed={collapsed} onToggle={toggleCollapse}>
+        {categories.length === 0 ? (
+          <p className="text-white/40 text-sm text-center py-8">Add categories first</p>
+        ) : (
+          <>
+            {/* Category Tabs */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {categories.map((cat) => (
+                <button key={cat.slug} onClick={() => setActiveCategory(cat.slug)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold border-0 cursor-pointer transition-colors ${
+                    activeCategory === cat.slug
+                      ? "bg-red text-white shadow-lg shadow-red/20"
+                      : "bg-white/10 text-white/60 hover:bg-white/20 hover:text-white"
+                  }`}>
+                  {lang === "en" ? (cat.heading_en || cat.slug) : (cat.heading_ar || cat.slug)}
+                </button>
+              ))}
+            </div>
+
+            {/* Upload */}
+            <div className="mb-6 p-6 rounded-2xl border-2 border-dashed border-white/10 text-center">
+              <input ref={fileInputRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => handleUpload(e.target.files)} />
+              <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+                className="px-6 py-3 rounded-xl bg-red text-white text-sm font-semibold cursor-pointer hover:bg-red/90 transition-colors border-0 disabled:opacity-50">
+                <i className="fa-solid fa-cloud-arrow-up mr-2" />{uploading ? "Uploading..." : "Upload Videos"}
+              </button>
+              <p className="text-white/30 text-xs mt-2">Supports MP4, MOV, WebM — uploaded directly to Cloudflare R2</p>
+            </div>
+
+            {/* Video List */}
+            <div className="space-y-4">
+              {videos.length === 0 ? (
+                <p className="text-white/40 text-sm text-center py-4">No videos in this category yet</p>
+              ) : (
+                videos.map((video) => (
+                  <div key={video.id} className="p-4 rounded-2xl border border-white/10 bg-white/5 relative group">
+                    <button onClick={() => handleDeleteVideo(video)}
+                      className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <i className="fa-solid fa-trash-can" />
+                    </button>
+                    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4">
+                      {/* Video Preview */}
+                      <div className="aspect-video md:aspect-[4/3] rounded-xl overflow-hidden bg-black/50">
+                        <video src={video.video_url} className="w-full h-full object-cover" controls />
+                      </div>
+                      {/* Meta */}
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <input type="text" value={video.title_en}
+                            onChange={(e) => handleVideoFieldChange(video.id, "title_en", e.target.value)}
+                            className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
+                            placeholder="Title (EN)" />
+                          <input type="text" value={video.title_ar}
+                            onChange={(e) => handleVideoFieldChange(video.id, "title_ar", e.target.value)}
+                            className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
+                            placeholder="العنوان (AR)" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <textarea value={video.description_en}
+                            onChange={(e) => handleVideoFieldChange(video.id, "description_en", e.target.value)}
+                            className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
+                            rows={2} placeholder="Description (EN)" />
+                          <textarea value={video.description_ar}
+                            onChange={(e) => handleVideoFieldChange(video.id, "description_ar", e.target.value)}
+                            className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
+                            rows={2} placeholder="الوصف (AR)" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <input type="number" value={video.sort_order}
+                            onChange={(e) => handleVideoFieldChange(video.id, "sort_order", parseInt(e.target.value) || 0)}
+                            className="w-20 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-white/30 transition-colors"
+                            placeholder="Order" />
+                          <button onClick={() => handleSaveVideoMeta(video)}
+                            className="px-3 py-1.5 rounded-lg bg-white/10 text-white/70 text-xs font-semibold border-0 cursor-pointer hover:bg-white/20 hover:text-white transition-colors">
+                            <i className="fa-solid fa-floppy-disk mr-1" />Save
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
+      </DarkSection>
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-[300] px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold text-white transition-all duration-300 ${toast.type === "error" ? "bg-red" : "bg-green-600"}`}
+          style={{ animation: "slideUp 0.3s ease-out" }}>
+          <div className="flex items-center gap-2.5">
+            <i className={`fa-solid ${toast.type === "error" ? "fa-circle-exclamation" : "fa-check-circle"}`} />
+            {toast.message}
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+    </AdminLayout>
+  )
+}
