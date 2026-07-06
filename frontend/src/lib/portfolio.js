@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase"
-import { S3Client, PutObjectCommand, DeleteObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, CompleteMultipartUploadCommand, AbortMultipartUploadCommand } from "@aws-sdk/client-s3"
+import { S3Client, PutObjectCommand, DeleteObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, AbortMultipartUploadCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 const r2Endpoint = import.meta.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
@@ -96,62 +96,103 @@ async function uploadSimple(file, key, contentType, onProgress) {
 
 async function uploadMultipart(file, key, contentType, onProgress) {
   const client = getR2Client()
-
-  const { UploadId } = await client.send(
-    new CreateMultipartUploadCommand({ Bucket: r2Bucket, Key: key, ContentType: contentType })
-  )
-
-  const numParts = Math.ceil(file.size / CHUNK_SIZE)
   const partSize = CHUNK_SIZE
-  const done = new Array(numParts).fill(false)
+
+  // 1. Create multipart upload via presigned URL
+  const createUrl = await getSignedUrl(
+    client,
+    new CreateMultipartUploadCommand({ Bucket: r2Bucket, Key: key, ContentType: contentType }),
+    { expiresIn: 3600 }
+  )
+  const createRes = await fetch(createUrl, { method: "POST" })
+  if (!createRes.ok) throw new Error(`CreateMultipartUpload failed: HTTP ${createRes.status}`)
+  const xml = await createRes.text()
+  const uploadId = xml.match(/<UploadId>([^<]+)<\/UploadId>/)?.[1]
+  if (!uploadId) throw new Error("Failed to parse UploadId from CreateMultipartUpload response")
+
+  const numParts = Math.ceil(file.size / partSize)
+  const done = new Array(numParts).fill(0)
   function reportProgress() {
     let bytes = 0
     for (let j = 0; j < numParts; j++) {
-      if (done[j]) bytes += Math.min((j + 1) * partSize, file.size) - j * partSize
+      if (done[j]) {
+        const partBytes = Math.min((j + 1) * partSize, file.size) - j * partSize
+        bytes += done[j] === true ? partBytes : partBytes * done[j]
+      }
     }
     if (onProgress) onProgress(bytes, file.size)
   }
-  const parts = []
+
   const CONCURRENCY = 6
   try {
-    // Pre-compute all part boundaries
     const parts_config = Array.from({ length: numParts }, (_, i) => ({
       start: i * partSize,
       end: Math.min((i + 1) * partSize, file.size),
     }))
+
     for (let batch = 0; batch < numParts; batch += CONCURRENCY) {
       const batchEnd = Math.min(batch + CONCURRENCY, numParts)
-      // Convert blobs to ArrayBuffers before sending (in parallel within batch)
-      const buffers = await Promise.all(
-        parts_config.slice(batch, batchEnd).map(p => file.slice(p.start, p.end).arrayBuffer())
-      )
-      const batchResults = await Promise.all(
-        buffers.map((buf, j) => {
+      const batchSlice = parts_config.slice(batch, batchEnd)
+
+      // Generate presigned URLs for this batch
+      const partUrls = await Promise.all(
+        batchSlice.map((_, j) => {
           const i = batch + j
-          return client.send(new UploadPartCommand({
-            Bucket: r2Bucket,
-            Key: key,
-            UploadId,
-            PartNumber: i + 1,
-            Body: new Uint8Array(buf),
-          })).then(r => {
-            done[i] = true
-            reportProgress()
-            return { ETag: r.ETag, PartNumber: i + 1 }
+          return getSignedUrl(
+            client,
+            new UploadPartCommand({ Bucket: r2Bucket, Key: key, UploadId: uploadId, PartNumber: i + 1 }),
+            { expiresIn: 3600 }
+          )
+        })
+      )
+
+      // Upload parts in parallel via XHR (same as simple upload)
+      await Promise.all(
+        batchSlice.map((p, j) => {
+          const i = batch + j
+          const body = file.slice(p.start, p.end)
+          return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+            xhr.open("PUT", partUrls[j])
+            xhr.setRequestHeader("Content-Type", contentType)
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable && onProgress) {
+                done[i] = e.loaded / e.total
+                reportProgress()
+              }
+            }
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                done[i] = true
+                reportProgress()
+                resolve()
+              } else reject(new Error(`UploadPart ${i + 1} failed: HTTP ${xhr.status}`))
+            }
+            xhr.onerror = () => reject(new Error(`UploadPart ${i + 1} failed: network error`))
+            xhr.send(body)
           })
         })
       )
-      parts.push(...batchResults)
     }
 
-    await client.send(new CompleteMultipartUploadCommand({
-      Bucket: r2Bucket,
-      Key: key,
-      UploadId,
-      MultipartUpload: { Parts: parts.sort((a, b) => a.PartNumber - b.PartNumber) },
-    }))
+    // 3. Complete multipart via server API (no CORS)
+    const apiUrl = import.meta.env.PROD ? "/api/complete-multipart" : "http://localhost:3001/api/complete-multipart"
+    const completeRes = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, uploadId }),
+    })
+    if (!completeRes.ok) {
+      const errData = await completeRes.json().catch(() => ({}))
+      throw new Error(`CompleteMultipartUpload failed: ${errData.error || `HTTP ${completeRes.status}`}`)
+    }
   } catch (err) {
-    await client.send(new AbortMultipartUploadCommand({ Bucket: r2Bucket, Key: key, UploadId })).catch(() => {})
+    const abortUrl = await getSignedUrl(
+      client,
+      new AbortMultipartUploadCommand({ Bucket: r2Bucket, Key: key, UploadId: uploadId }),
+      { expiresIn: 60 }
+    ).catch(() => null)
+    if (abortUrl) await fetch(abortUrl, { method: "DELETE" }).catch(() => {})
     throw err
   }
 }
