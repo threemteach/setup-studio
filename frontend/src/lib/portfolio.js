@@ -64,43 +64,39 @@ export async function deleteVideo(id, videoKey) {
   if (error) throw error
 }
 
-export async function uploadVideo(file, category, onProgress) {
+export async function uploadVideo(file, category) {
   const supabase = getSupabase()
   const session = (await supabase.auth.getSession()).data?.session
   if (!session) throw new Error("Not authenticated")
 
-  const reader = new FileReader()
-  const data = await new Promise((resolve) => {
-    reader.onload = () => {
-      const base64 = reader.result.split(",")[1]
-      resolve(base64)
-    }
-    reader.readAsDataURL(file)
-  })
+  const token = session.access_token
 
-  const res = await fetch("/api/upload-video", {
+  const urlRes = await fetch("/api/generate-upload-url", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({
-      file: { name: `${Date.now()}-${file.name}`, type: file.type, data },
+      filename: file.name,
+      contentType: file.type || "video/mp4",
       category,
     }),
   })
 
-  if (!res.ok) {
-    let detail = "Upload failed"
-    try {
-      const err = await res.json()
-      detail = err.error || `HTTP ${res.status}`
-    } catch {
-      const text = await res.text().catch(() => "")
-      detail = text ? `HTTP ${res.status}: ${text.slice(0, 100)}` : `HTTP ${res.status}`
-    }
-    if (detail.includes("Cannot") || detail.includes("500") || detail.includes("404")) {
-      detail += " — run 'npm run dev:all' instead of 'npm run dev' for API endpoint support"
-    }
-    throw new Error(detail)
+  if (!urlRes.ok) {
+    const err = await urlRes.json().catch(() => ({ error: "Failed to get upload URL" }))
+    throw new Error(err.error || "Failed to get upload URL")
   }
 
-  return res.json()
+  const { upload_url, video_key, video_url } = await urlRes.json()
+
+  const uploadRes = await fetch(upload_url, {
+    method: "PUT",
+    body: file,
+    headers: { "Content-Type": file.type || "video/mp4" },
+  })
+
+  if (!uploadRes.ok) {
+    throw new Error(`Upload to R2 failed: HTTP ${uploadRes.status}`)
+  }
+
+  return { video_url, video_key }
 }
