@@ -257,6 +257,16 @@ export default function PortfolioPageEdit() {
         ar[`cat_heading_${i}`] = c.heading_ar
         ar[`cat_desc_${i}`] = c.desc_ar
       })
+      // Collect all videos for translation
+      const allVideos = await fetchPortfolioVideos()
+      const videoLookup = {}
+      allVideos.forEach((v, i) => {
+        en[`video_title_${i}`] = v.title_en || ""
+        en[`video_desc_${i}`] = v.description_en || ""
+        ar[`video_title_${i}`] = v.title_ar || ""
+        ar[`video_desc_${i}`] = v.description_ar || ""
+        videoLookup[i] = v
+      })
       const result = await autoTranslateSection(en, ar, lang)
       const updates = {}
       const cats = [...(form?.categories || [])]
@@ -274,6 +284,37 @@ export default function PortfolioPageEdit() {
       }
       updates.categories = cats
       setForm((prev) => ({ ...prev, ...updates }))
+      // Translate and save video metadata
+      const videoPromises = []
+      for (const key of Object.keys(result.content_en)) {
+        if (key.startsWith("video_title_")) {
+          const idx = parseInt(key.replace("video_title_", ""), 10)
+          const video = videoLookup[idx]
+          if (video) {
+            video.title_en = result.content_en[key]
+            video.title_ar = result.content_ar[key]
+          }
+        } else if (key.startsWith("video_desc_")) {
+          const idx = parseInt(key.replace("video_desc_", ""), 10)
+          const video = videoLookup[idx]
+          if (video) {
+            video.description_en = result.content_en[key]
+            video.description_ar = result.content_ar[key]
+          }
+        }
+      }
+      for (const v of Object.values(videoLookup)) {
+        if (v.title_en || v.title_ar) {
+          videoPromises.push(upsertVideo(v))
+        }
+      }
+      if (videoPromises.length) {
+        await Promise.all(videoPromises)
+        if (activeCategory) {
+          const updated = await fetchPortfolioVideos(activeCategory)
+          setVideos(updated)
+        }
+      }
       showToast("Translation complete")
     } catch (err) {
       showToast("Translation failed: " + err.message, "error")
