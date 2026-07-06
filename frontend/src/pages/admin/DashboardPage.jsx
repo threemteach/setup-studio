@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchAllPhotos, fetchCoverPhoto } from "../../lib/photos"
 import { optimizeImageUrl } from "../../lib/images"
+import { fetchStorageUsage } from "../../lib/portfolio"
 
 const statCards = [
   {
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const [allPhotos, setAllPhotos] = useState([])
   const [coverPhotos, setCoverPhotos] = useState({})
+  const [storage, setStorage] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -48,6 +50,7 @@ export default function DashboardPage() {
       covers.forEach(({ slug, url }) => { map[slug] = url })
       setCoverPhotos(map)
     }).catch(console.error)
+    fetchStorageUsage().then(setStorage).catch(() => {})
     .finally(() => setLoading(false))
   }, [])
 
@@ -157,6 +160,29 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+
+          {/* ─── R2 Storage Bar ─── */}
+          {storage && (() => {
+            const pct = (storage.usedBytes / storage.limitBytes) * 100
+            const barColor = pct < 70 ? "bg-green-500" : pct < 90 ? "bg-yellow-500" : "bg-red-500"
+            const textColor = pct < 70 ? "text-green-600" : pct < 90 ? "text-yellow-600" : "text-red-600"
+            return (
+              <div className="bg-white rounded-3xl border border-border/50 shadow-sm p-5 mb-8">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-navy font-semibold text-sm"><i className="fa-solid fa-database mr-2 text-navy/40" />R2 Storage</span>
+                  <span className={`text-xs font-bold ${textColor}`}>{storage.usedMB.toFixed(2)} MB / {storage.limitGB} GB</span>
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                  <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                </div>
+                <div className="flex justify-between text-[10px] text-muted/50 mt-1">
+                  <span>0 GB</span>
+                  <span>{pct < 100 ? `${pct.toFixed(1)}% used` : "FULL"}</span>
+                  <span>{storage.limitGB} GB</span>
+                </div>
+              </div>
+            )
+          })()}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6.5 mb-8">
             {/* ─── Column 1 & 2: Dynamic Category Progress & Quick Actions ─── */}
