@@ -1,5 +1,4 @@
 import http from "http"
-import { readFileSync, existsSync } from "fs"
 
 async function loadHandler(name) {
   const mod = await import(`../api/${name}.js`)
@@ -17,7 +16,20 @@ function parseBody(req) {
   })
 }
 
+function wrapRes(res) {
+  res.status = function (code) {
+    res.statusCode = code
+    return res
+  }
+  res.json = function (obj) {
+    res.setHeader("Content-Type", "application/json")
+    res.end(JSON.stringify(obj))
+  }
+  return res
+}
+
 const server = http.createServer(async (req, res) => {
+  wrapRes(res)
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
   res.setHeader("Access-Control-Allow-Headers", "*")
@@ -34,8 +46,7 @@ const server = http.createServer(async (req, res) => {
       req.body = body
       await handler(req, res)
     } catch (err) {
-      res.writeHead(500, { "Content-Type": "application/json" })
-      res.end(JSON.stringify({ error: err.message }))
+      res.status(500).json({ error: err.message })
     }
     return
   }
