@@ -1,0 +1,12 @@
+# Supabase
+VITE_SUPABASE_URL=https://mrtxjbwdcxqmiocpnzvi.supabase.co
+VITE_SUPABASE_ANON_KEY=sb_publishable_eMHBoRF3jGQ2xTFg7ph-iw_M6bmY6TH
+
+# Cloudinary (for photos)
+VITE_CLOUDINARY_CLOUD_NAME=yscxguwn
+VITE_CLOUDINARY_UPLOAD_PRESET=setup_studio
+
+# Cloudflare R2 (for videos)
+VITE_R2_PUBLIC_URL=https://your-bucket.r2.cloudflarestorage.com
+VITE_R2_ACCESS_KEY_ID=your-access-key
+VITE_R2_SECRET_ACCESS_KEY=your-secret-key
