@@ -189,6 +189,7 @@ export default function PortfolioPageEdit() {
         hero_subtitle_ar: form.hero_subtitle_ar,
         categories: form.categories,
       })
+      await Promise.all(videos.filter(v => v.id).map(v => upsertVideo(v).catch(() => {})))
       showToast("Saved successfully!")
     } catch (err) {
       showToast("Error saving: " + err.message, "error")
@@ -232,15 +233,6 @@ export default function PortfolioPageEdit() {
 
   async function handleVideoFieldChange(videoId, field, value) {
     setVideos(prev => prev.map(v => v.id === videoId ? { ...v, [field]: value } : v))
-  }
-
-  async function handleSaveVideoMeta(video) {
-    try {
-      await upsertVideo(video)
-      showToast("Video updated")
-    } catch (err) {
-      showToast("Error: " + err.message, "error")
-    }
   }
 
   async function handleAutoTranslate() {
@@ -461,16 +453,10 @@ export default function PortfolioPageEdit() {
                           onChange={(e) => handleVideoFieldChange(video.id, lang === "en" ? "description_en" : "description_ar", e.target.value)}
                           className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
                           rows={2} placeholder={lang === "en" ? "Description (EN)" : "الوصف (AR)"} />
-                        <div className="flex items-center justify-between">
-                          <input type="number" value={video.sort_order}
-                            onChange={(e) => handleVideoFieldChange(video.id, "sort_order", parseInt(e.target.value) || 0)}
-                            className="w-20 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-white/30 transition-colors"
-                            placeholder="Order" />
-                          <button onClick={() => handleSaveVideoMeta(video)}
-                            className="px-3 py-1.5 rounded-lg bg-white/10 text-white/70 text-xs font-semibold border-0 cursor-pointer hover:bg-white/20 hover:text-white transition-colors">
-                            <i className="fa-solid fa-floppy-disk mr-1" />Save
-                          </button>
-                        </div>
+                        <input type="number" value={video.sort_order}
+                          onChange={(e) => handleVideoFieldChange(video.id, "sort_order", parseInt(e.target.value) || 0)}
+                          className="w-20 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-white/30 transition-colors"
+                          placeholder="Order" />
                       </div>
                     </div>
                   </div>
