@@ -1,5 +1,5 @@
-const R2_ENDPOINT = process.env.R2_ENDPOINT || process.env.VITE_R2_ENDPOINT
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.VITE_R2_BUCKET_NAME
+const R2_ENDPOINT = process.env.R2_ENDPOINT || process.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.VITE_R2_BUCKET_NAME || "setup-studio-videos"
 const CF_API_TOKEN = process.env.CF_API_TOKEN
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID || R2_ENDPOINT?.match(/https?:\/\/(.+)\.r2\.cloudflarestorage\.com/)?.[1]
 
@@ -8,31 +8,28 @@ async function cfFetch(path) {
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${CF_API_TOKEN}`, "Content-Type": "application/json" },
   })
-  return res.json()
+  return { status: res.status, body: await res.json() }
 }
 
 export default async function handler(req, res) {
-  if (!CF_API_TOKEN) return res.status(503).json({ error: "CF_API_TOKEN not configured" })
-  if (!CF_ACCOUNT_ID) return res.status(503).json({ error: "Could not determine CF_ACCOUNT_ID" })
-
   try {
-    // try usage endpoint first
-    const usageData = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}/usage`)
-    if (usageData.success) {
-      const objectsSize = usageData.result?.usage?.objectsSize
-      if (objectsSize != null) return res.json({ usedBytes: objectsSize, raw: usageData })
+    if (!CF_API_TOKEN) return res.json({ error: "CF_API_TOKEN not configured", usedBytes: null })
+    if (!CF_ACCOUNT_ID) return res.json({ error: "Could not determine CF_ACCOUNT_ID", usedBytes: null })
+
+    const usageResp = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}/usage`)
+    if (usageResp.body.success) {
+      const objectsSize = usageResp.body.result?.usage?.objectsSize
+      if (objectsSize != null) return res.json({ usedBytes: objectsSize, raw: usageResp.body, status: usageResp.status })
     }
 
-    // fallback: bucket detail endpoint
-    const bucketData = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}`)
-    if (!bucketData.success) return res.status(502).json({ error: bucketData.errors?.[0]?.message || "Cloudflare API error", raw: bucketData })
+    const bucketResp = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}`)
+    if (bucketResp.body.success) {
+      const bucketSize = bucketResp.body.result?.bucketSize
+      if (bucketSize != null) return res.json({ usedBytes: bucketSize, raw: bucketResp.body, status: bucketResp.status })
+    }
 
-    const bucketSize = bucketData.result?.bucketSize
-    if (bucketSize != null) return res.json({ usedBytes: bucketSize, raw: bucketData })
-
-    // if neither worked, return raw response for debugging
-    res.status(502).json({ error: "Could not find storage size in Cloudflare API response", raw: bucketData })
+    res.json({ error: "Cloudflare API did not return storage size", usedBytes: null, raw: [usageResp, bucketResp] })
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.json({ error: err.message, usedBytes: null })
   }
 }
