@@ -218,6 +218,15 @@ export async function uploadVideo(file, category, onProgress) {
 const TOTAL_LIMIT = 100 * 1024 * 1024 * 1024 // 100 GB
 
 export async function fetchStorageUsage() {
+  // try Cloudflare API first (exact dashboard number)
+  try {
+    const res = await fetch("/api/r2-storage")
+    if (res.ok) {
+      const data = await res.json()
+      if (data.usedBytes != null) return formatStorage(data.usedBytes)
+    }
+  } catch {}
+  // fallback: S3-based calculation
   const client = getR2Client()
   let total = 0, isTruncated = true, cursor
   while (isTruncated) {
@@ -229,7 +238,6 @@ export async function fetchStorageUsage() {
     cursor = result.NextContinuationToken
     isTruncated = result.IsTruncated
   }
-  // also count parts from in-progress multipart uploads (R2 dashboard includes them)
   let muTruncated = true, muKey, muUploadId
   while (muTruncated) {
     const muResult = await client.send(new ListMultipartUploadsCommand({
@@ -251,5 +259,9 @@ export async function fetchStorageUsage() {
     }
     muKey = muResult.NextKeyMarker; muUploadId = muResult.NextUploadIdMarker; muTruncated = muResult.IsTruncated
   }
+  return formatStorage(total)
+}
+
+function formatStorage(total) {
   return { usedBytes: total, limitBytes: TOTAL_LIMIT, usedGB: total / (1024 ** 3), usedMB: total / (1024 ** 2), limitGB: 100 }
 }
