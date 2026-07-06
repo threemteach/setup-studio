@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase"
-import { S3Client, PutObjectCommand, DeleteObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, AbortMultipartUploadCommand, ListObjectsV2Command } from "@aws-sdk/client-s3"
+import { S3Client, PutObjectCommand, DeleteObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, AbortMultipartUploadCommand, ListObjectsV2Command, ListMultipartUploadsCommand, ListPartsCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 const r2Endpoint = import.meta.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
@@ -219,15 +219,37 @@ const TOTAL_LIMIT = 100 * 1024 * 1024 * 1024 // 100 GB
 
 export async function fetchStorageUsage() {
   const client = getR2Client()
-  let total = 0
-  let cursor
-  do {
-    const { Contents, NextContinuationToken } = await client.send(new ListObjectsV2Command({
+  let total = 0, isTruncated = true, cursor
+  while (isTruncated) {
+    const result = await client.send(new ListObjectsV2Command({
       Bucket: r2Bucket,
       ContinuationToken: cursor,
     }))
-    if (Contents) total += Contents.reduce((s, o) => s + (o.Size || 0), 0)
-    cursor = NextContinuationToken
-  } while (cursor)
+    if (result.Contents) total += result.Contents.reduce((s, o) => s + (o.Size || 0), 0)
+    cursor = result.NextContinuationToken
+    isTruncated = result.IsTruncated
+  }
+  // also count parts from in-progress multipart uploads (R2 dashboard includes them)
+  let muTruncated = true, muKey, muUploadId
+  while (muTruncated) {
+    const muResult = await client.send(new ListMultipartUploadsCommand({
+      Bucket: r2Bucket,
+      KeyMarker: muKey,
+      UploadIdMarker: muUploadId,
+    }))
+    if (muResult.Uploads) {
+      for (const upload of muResult.Uploads) {
+        let pt = true, pm
+        while (pt) {
+          const pr = await client.send(new ListPartsCommand({
+            Bucket: r2Bucket, Key: upload.Key, UploadId: upload.UploadId, PartNumberMarker: pm,
+          }))
+          if (pr.Parts) total += pr.Parts.reduce((s, p) => s + (p.Size || 0), 0)
+          pm = pr.NextPartNumberMarker; pt = pr.IsTruncated
+        }
+      }
+    }
+    muKey = muResult.NextKeyMarker; muUploadId = muResult.NextUploadIdMarker; muTruncated = muResult.IsTruncated
+  }
   return { usedBytes: total, limitBytes: TOTAL_LIMIT, usedGB: total / (1024 ** 3), usedMB: total / (1024 ** 2), limitGB: 100 }
 }
