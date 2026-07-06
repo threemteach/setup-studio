@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase"
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
+import { S3Client, PutObjectCommand, DeleteObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, CompleteMultipartUploadCommand, AbortMultipartUploadCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 const r2Endpoint = import.meta.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
@@ -7,6 +7,9 @@ const r2Bucket = import.meta.env.VITE_R2_BUCKET_NAME || "setup-studio-videos"
 const r2PublicUrl = import.meta.env.VITE_R2_PUBLIC_URL
 const r2AccessKeyId = import.meta.env.VITE_R2_ACCESS_KEY_ID
 const r2SecretAccessKey = import.meta.env.VITE_R2_SECRET_ACCESS_KEY
+
+const CHUNK_SIZE = 10 * 1024 * 1024 // 10MB per part
+const MULTIPART_THRESHOLD = 50 * 1024 * 1024 // 50MB
 
 function getR2Client() {
   return new S3Client({
@@ -68,21 +71,13 @@ export async function deleteVideo(id, videoKey) {
   if (error) throw error
 }
 
-export async function uploadVideo(file, category, onProgress) {
-  if (!r2AccessKeyId || !r2SecretAccessKey || !r2PublicUrl) {
-    throw new Error("R2 credentials not configured. Add VITE_R2_ACCESS_KEY_ID, VITE_R2_SECRET_ACCESS_KEY, and VITE_R2_PUBLIC_URL to .env")
-  }
-
+async function uploadSimple(file, key, contentType, onProgress) {
   const client = getR2Client()
-  const key = `${category}/${Date.now()}-${file.name}`
-  const contentType = file.type || "video/mp4"
-
   const uploadUrl = await getSignedUrl(
     client,
     new PutObjectCommand({ Bucket: r2Bucket, Key: key, ContentType: contentType }),
     { expiresIn: 3600 }
   )
-
   await new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
     xhr.open("PUT", uploadUrl)
@@ -97,6 +92,78 @@ export async function uploadVideo(file, category, onProgress) {
     xhr.onerror = () => reject(new Error("Upload to R2 failed: network error"))
     xhr.send(file)
   })
+}
+
+async function uploadMultipart(file, key, contentType, onProgress) {
+  const client = getR2Client()
+
+  const { UploadId } = await client.send(
+    new CreateMultipartUploadCommand({ Bucket: r2Bucket, Key: key, ContentType: contentType })
+  )
+
+  const numParts = Math.ceil(file.size / CHUNK_SIZE)
+  const partSize = CHUNK_SIZE
+  const done = new Array(numParts).fill(false)
+  function reportProgress() {
+    let bytes = 0
+    for (let j = 0; j < numParts; j++) {
+      if (done[j]) bytes += Math.min((j + 1) * partSize, file.size) - j * partSize
+    }
+    if (onProgress) onProgress(bytes, file.size)
+  }
+  const parts = []
+  const CONCURRENCY = 6
+  try {
+    for (let batch = 0; batch < numParts; batch += CONCURRENCY) {
+      const batchEnd = Math.min(batch + CONCURRENCY, numParts)
+      const batchResults = await Promise.all(
+        Array.from({ length: batchEnd - batch }, (_, j) => {
+          const i = batch + j
+          const start = i * partSize
+          const end = Math.min(start + partSize, file.size)
+          const body = file.slice(start, end)
+          return client.send(new UploadPartCommand({
+            Bucket: r2Bucket,
+            Key: key,
+            UploadId,
+            PartNumber: i + 1,
+            Body: body,
+          })).then(r => {
+            done[i] = true
+            reportProgress()
+            return { ETag: r.ETag, PartNumber: i + 1 }
+          })
+        })
+      )
+      parts.push(...batchResults)
+    }
+
+    await client.send(new CompleteMultipartUploadCommand({
+      Bucket: r2Bucket,
+      Key: key,
+      UploadId,
+      MultipartUpload: { Parts: parts.sort((a, b) => a.PartNumber - b.PartNumber) },
+    }))
+  } catch (err) {
+    await client.send(new AbortMultipartUploadCommand({ Bucket: r2Bucket, Key: key, UploadId })).catch(() => {})
+    throw err
+  }
+}
+
+export async function uploadVideo(file, category, onProgress) {
+  if (!r2AccessKeyId || !r2SecretAccessKey || !r2PublicUrl) {
+    throw new Error("R2 credentials not configured. Add VITE_R2_ACCESS_KEY_ID, VITE_R2_SECRET_ACCESS_KEY, and VITE_R2_PUBLIC_URL to .env")
+  }
+
+  const client = getR2Client()
+  const key = `${category}/${Date.now()}-${file.name}`
+  const contentType = file.type || "video/mp4"
+
+  if (file.size < MULTIPART_THRESHOLD) {
+    await uploadSimple(file, key, contentType, onProgress)
+  } else {
+    await uploadMultipart(file, key, contentType, onProgress)
+  }
 
   return { video_url: `${r2PublicUrl}/${key}`, video_key: key }
 }

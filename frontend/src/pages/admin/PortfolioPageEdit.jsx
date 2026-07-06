@@ -204,13 +204,12 @@ export default function PortfolioPageEdit() {
     setUploadProgress(0)
     try {
       const fileList = Array.from(files)
-      const totalBytes = fileList.reduce((s, f) => s + f.size, 0)
-      let loadedBytes = 0
+      const fractions = fileList.map(() => 0)
       const results = await Promise.all(
-        fileList.map(file =>
+        fileList.map((file, i) =>
           uploadVideo(file, activeCategory, (loaded, total) => {
-            loadedBytes += loaded
-            setUploadProgress(Math.min((loadedBytes / totalBytes) * 100, 99.9))
+            fractions[i] = total > 0 ? loaded / total : 0
+            setUploadProgress(Math.min((fractions.reduce((a, b) => a + b, 0) / fileList.length) * 100, 99.9))
           })
         )
       )
