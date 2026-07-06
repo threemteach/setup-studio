@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import LocationsPage from './pages/LocationsPage'
 import AcademyPage from './pages/AcademyPage'
+import PortfolioPage from './pages/PortfolioPage'
 import LoginPage from './pages/admin/LoginPage'
 import DashboardPage from './pages/admin/DashboardPage'
 import LocationsManage from './pages/admin/LocationsManage'
@@ -13,6 +14,7 @@ import LocationCategory from './pages/admin/LocationCategory'
 import HomepageEdit from './pages/admin/HomepageEdit'
 import AboutPageEdit from './pages/admin/AboutPageEdit'
 import AcademyPageEdit from './pages/admin/AcademyPageEdit'
+import PortfolioPageEdit from './pages/admin/PortfolioPageEdit'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
@@ -26,6 +28,7 @@ function App() {
             <Route path="locations" element={<LocationsPage />} />
             <Route path="locations/:category" element={<LocationsPage />} />
             <Route path="academy" element={<AcademyPage />} />
+            <Route path="portfolio" element={<PortfolioPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
           <Route path="/admin/login" element={<LoginPage />} />
@@ -49,6 +52,9 @@ function App() {
           } />
           <Route path="/admin/academy" element={
             <ProtectedRoute><AcademyPageEdit /></ProtectedRoute>
+          } />
+          <Route path="/admin/portfolio" element={
+            <ProtectedRoute><PortfolioPageEdit /></ProtectedRoute>
           } />
           <Route path="/admin/*" element={<NotFoundPage />} />
         </Routes>

@@ -1,0 +1,172 @@
+import { useState, useEffect } from "react"
+import Reveal from "../components/ui/Reveal"
+import { useTranslation } from "../context/LanguageContext"
+import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
+
+const t = (en, ar, lang) => lang === "ar" ? ar : en
+
+export default function PortfolioPage() {
+  const { lang } = useTranslation()
+  const [cmsData, setCmsData] = useState(null)
+  const [videosByCategory, setVideosByCategory] = useState({})
+  const [activeVideo, setActiveVideo] = useState(null)
+  const [activeCategory, setActiveCategory] = useState("")
+
+  useEffect(() => {
+    fetchPortfolioContent().then(async (data) => {
+      setCmsData(data)
+      const cats = data?.categories || []
+      if (cats.length > 0) {
+        setActiveCategory(cats[0].slug)
+        const all = {}
+        for (const cat of cats) {
+          const vids = await fetchPortfolioVideos(cat.slug).catch(() => [])
+          all[cat.slug] = vids
+        }
+        setVideosByCategory(all)
+      }
+    }).catch(() => {})
+  }, [])
+
+  const cms = (field) => cmsData?.[`${field}_${lang}`] || cmsData?.[`${field}_en`] || ""
+  const categories = cmsData?.categories || []
+
+  return (
+    <div className="page-enter">
+      {/* ═══════════ HERO ═══════════ */}
+      <section className="w-full bg-[#0A1216] py-[clamp(3rem,8vw,5.5rem)] overflow-hidden relative">
+        <div className="absolute -top-[clamp(8rem,15vw,12rem)] ltr:-right-[clamp(4rem,8vw,6rem)] rtl:-left-[clamp(4rem,8vw,6rem)] w-[clamp(16rem,40vw,30rem)] h-[clamp(16rem,40vw,30rem)] rounded-full bg-[#11AFFF] opacity-[0.25] blur-[clamp(4rem,8vw,6rem)] pointer-events-none" />
+        <div className="absolute -bottom-[clamp(6rem,12vw,10rem)] ltr:-left-[clamp(2rem,4vw,4rem)] rtl:-right-[clamp(2rem,4vw,4rem)] w-[clamp(12rem,30vw,22rem)] h-[clamp(12rem,30vw,22rem)] rounded-full bg-[#11AFFF] opacity-[0.18] blur-[clamp(4rem,8vw,6rem)] pointer-events-none" />
+        <div className="absolute top-[clamp(2rem,5vw,4rem)] ltr:right-[clamp(10%,20%,30%)] rtl:left-[clamp(10%,20%,30%)] w-[clamp(8rem,20vw,16rem)] h-[clamp(8rem,20vw,16rem)] rounded-full bg-[#11AFFF] opacity-[0.12] blur-[clamp(2rem,4vw,3rem)] pointer-events-none" />
+        <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)] relative z-10">
+          <Reveal>
+            <div className={`flex flex-col items-center text-center ${lang === 'ar' ? 'lg:items-start lg:text-right' : 'lg:items-start lg:text-left'}`}>
+              <div className="flex items-center w-full mb-4 lg:justify-start justify-center">
+                <div className="flex items-center min-w-0 shrink">
+                  <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+                    <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
+                  </svg>
+                  <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
+                </div>
+                <h1 className={`text-white font-bold text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap w-full ${lang === 'ar' ? 'text-right' : ''}`}>
+                  {cms("hero_heading") || t("Our Work", "أعمالنا", lang)}
+                </h1>
+                <div className="flex items-center min-w-0 shrink">
+                  <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
+                  <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+                    <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
+                  </svg>
+                </div>
+              </div>
+              <p className={`text-white/70 font-semibold text-[clamp(1rem,1.8vw,1.2rem)] max-w-[620px] leading-snug m-0 w-full ${lang === 'ar' ? 'text-right' : ''}`}>
+                {cms("hero_subtitle") || t("Explore our video production portfolio across different categories", "تصفح أعمالنا في إنتاج الفيديو عبر مختلف الفئات", lang)}
+              </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ═══════════ CATEGORY TABS ═══════════ */}
+      {categories.length > 0 && (
+        <section className="w-full bg-white py-8 sticky top-0 z-20 border-b border-border/50">
+          <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)]">
+            <div className="flex flex-wrap gap-2 justify-center">
+              {categories.map((cat) => (
+                <button key={cat.slug} onClick={() => setActiveCategory(cat.slug)}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-semibold border-0 cursor-pointer transition-all duration-200 ${
+                    activeCategory === cat.slug
+                      ? "bg-navy text-white shadow-lg shadow-navy/20"
+                      : "bg-gray-100 text-navy/60 hover:bg-gray-200 hover:text-navy"
+                  }`}>
+                  {t(cat.heading_en, cat.heading_ar, lang)}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ═══════════ VIDEOS GRID ═══════════ */}
+      <section className="w-full bg-white pb-[clamp(2rem,5vw,5rem)]">
+        <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)]">
+          {categories.map((cat) => {
+            if (activeCategory && activeCategory !== cat.slug) return null
+            const vids = videosByCategory[cat.slug] || []
+            return (
+              <div key={cat.slug}>
+                <Reveal>
+                  <div className={`flex flex-col mb-8 ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+                    <h2 className="text-navy font-bold text-[clamp(1.5rem,3vw,2rem)] m-0">
+                      {t(cat.heading_en, cat.heading_ar, lang)}
+                    </h2>
+                    {cat.desc_en && (
+                      <p className={`text-muted text-sm mt-2 max-w-[600px] ${lang === 'ar' ? 'text-right' : ''}`}>
+                        {t(cat.desc_en, cat.desc_ar, lang)}
+                      </p>
+                    )}
+                  </div>
+                </Reveal>
+
+                {vids.length === 0 ? (
+                  <p className="text-muted/50 text-sm text-center py-12">{t("No videos yet", "لا توجد فيديوهات بعد", lang)}</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {vids.map((video) => (
+                      <Reveal key={video.id}>
+                        <div className="group cursor-pointer" onClick={() => setActiveVideo(video)}>
+                          <div className="aspect-video rounded-2xl overflow-hidden bg-gray-900 relative shadow-md">
+                            <video src={video.video_url} className="w-full h-full object-cover" muted playsInline />
+                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="w-16 h-16 rounded-full bg-red/90 flex items-center justify-center shadow-xl">
+                                <i className="fa-solid fa-play text-white text-xl ml-1" />
+                              </div>
+                            </div>
+                          </div>
+                          <div className={`mt-3 ${lang === 'ar' ? 'text-right' : ''}`}>
+                            <h3 className="text-navy font-bold text-sm m-0 line-clamp-1">
+                              {t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)}
+                            </h3>
+                            {video.description_en && (
+                              <p className="text-muted text-xs mt-1 m-0 line-clamp-2">
+                                {t(video.description_en, video.description_ar, lang)}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </Reveal>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ═══════════ VIDEO PLAYER MODAL ═══════════ */}
+      {activeVideo && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setActiveVideo(null)}>
+          <div className="w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="relative">
+              <video src={activeVideo.video_url} controls autoPlay className="w-full aspect-video object-contain bg-black" />
+              <button onClick={() => setActiveVideo(null)}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white border-0 cursor-pointer hover:bg-black/70 transition-colors flex items-center justify-center text-lg">
+                <i className="fa-solid fa-xmark" />
+              </button>
+            </div>
+            <div className="p-6 bg-[#0A1216]">
+              <h3 className="text-white font-bold text-lg m-0">
+                {t(activeVideo.title_en, activeVideo.title_ar, lang) || t("Untitled", "بدون عنوان", lang)}
+              </h3>
+              {(activeVideo.description_en || activeVideo.description_ar) && (
+                <p className="text-white/60 text-sm mt-2 m-0">
+                  {t(activeVideo.description_en, activeVideo.description_ar, lang)}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

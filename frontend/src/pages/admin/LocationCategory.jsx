@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import AdminLayout from "../../components/admin/AdminLayout"
 import Button from "../../components/ui/Button"
+import Toast from "../../components/ui/Toast"
 import CropModal from "../../components/admin/CropModal"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 import { uploadToCloudinary } from "../../lib/cloudinary"
@@ -31,7 +32,6 @@ export default function LocationCategory() {
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
-  const [uploadError, setUploadError] = useState("")
   const [uploadCount, setUploadCount] = useState(0)
 
   const [cropPhoto, setCropPhoto] = useState(null)
@@ -46,7 +46,9 @@ export default function LocationCategory() {
   const [editAlt, setEditAlt] = useState("")
   const [draggedIdx, setDraggedIdx] = useState(null)
 
-  const [deleteError, setDeleteError] = useState("")
+  const [toast, setToast] = useState(null)
+  const showToast = useCallback((message, type = "success") => setToast({ message, type }), [])
+  const closeToast = useCallback(() => setToast(null), [])
   const [confirmDelete, setConfirmDelete] = useState(null)
 
   useEffect(() => {
@@ -79,7 +81,6 @@ export default function LocationCategory() {
   }, [cat, loadPhotos])
 
   const uploadFile = async (file, replaceId) => {
-    setUploadError("")
     setUploading(true)
     try {
       const result = await uploadToCloudinary(file, category)
@@ -121,7 +122,7 @@ export default function LocationCategory() {
         setEditAlt("")
       }
     } catch (err) {
-      setUploadError(err.message || "Upload failed")
+      showToast(err.message || "Upload failed", "error")
       setUploading(false)
       return
     }
@@ -150,8 +151,8 @@ export default function LocationCategory() {
   }
 
   const handleDelete = async (id) => {
-    setDeleteError("")
     setUploadCount(0)
+    setToast(null)
     const photo = photos.find((p) => p.id === id)
     const wasCover = photo?.is_cover
     const remaining = photos.filter((p) => p.id !== id)
@@ -166,8 +167,7 @@ export default function LocationCategory() {
         setPhotos((prev) => prev.map((p) => (p.id === updated.id ? updated : { ...p, is_cover: false })))
       }
     } catch (err) {
-      const msg = err.message || "Delete failed"
-      setDeleteError(msg)
+      showToast(err.message || "Delete failed", "error")
       console.error("Failed to delete:", err)
     }
   }
@@ -198,7 +198,7 @@ export default function LocationCategory() {
       const updated = await setCoverPhoto(category, photo.id)
       setPhotos((prev) => prev.map((p) => (p.category === category ? { ...p, is_cover: p.id === photo.id } : p)))
     } catch (err) {
-      setDeleteError(err.message || "Failed to set main photo")
+      showToast(err.message || "Failed to set main photo", "error")
       console.error("Failed to set cover:", err)
     }
   }
@@ -210,7 +210,7 @@ export default function LocationCategory() {
       const file = new File([blob], "image.jpg", { type: blob.type })
       setCropPhoto({ photo, file })
     } catch {
-      setUploadError("Failed to load image for cropping")
+      showToast("Failed to load image for cropping", "error")
     }
   }
 
@@ -242,7 +242,7 @@ export default function LocationCategory() {
       setUploading(false)
       loadPhotos()
     } catch (err) {
-      setUploadError(err.message || "Crop upload failed")
+      showToast(err.message || "Crop upload failed", "error")
       setUploading(false)
     }
   }
@@ -328,21 +328,7 @@ export default function LocationCategory() {
           </div>
         </div>
 
-        {uploadError && (
-          <div className="mt-4 bg-red/5 border border-red/20 rounded-xl px-4 py-3 text-red text-sm flex items-center gap-2">
-            <i className="fa-solid fa-circle-exclamation shrink-0" />
-            <span>{uploadError}</span>
-          </div>
-        )}
-        {deleteError && (
-          <div className="mt-4 bg-red/5 border border-red/20 rounded-xl px-4 py-3 text-red text-sm flex items-center gap-2">
-            <i className="fa-solid fa-circle-exclamation shrink-0" />
-            <span>{deleteError}</span>
-          </div>
-        )}
       </div>
-
-
 
       {/* Photo grid */}
       <div className="flex items-center justify-between mb-4">
@@ -611,6 +597,8 @@ export default function LocationCategory() {
           onCancel={() => setConfirmDelete(null)}
         />
       )}
+
+      <Toast toast={toast} onClose={closeToast} />
     </AdminLayout>
   )
 }

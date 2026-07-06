@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
+import Toast from "../../components/ui/Toast"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchAcademyContent, updateAcademyContent, uploadAcademyImage, copyImageToAcademy } from "../../lib/academy"
 import { optimizeImageUrl } from "../../lib/images"
@@ -242,10 +243,8 @@ export default function AcademyPageEdit() {
   const fileInputRef = useRef(null)
   const [collapsed, setCollapsed] = useState({})
 
-  function showToast(message, type = "success") {
-    setToast({ message, type })
-    setTimeout(() => setToast(null), 3500)
-  }
+  const showToast = useCallback((message, type = "success") => setToast({ message, type }), [])
+  const closeToast = useCallback(() => setToast(null), [])
 
   function toggleCollapse(key) {
     setCollapsed(prev => ({ ...prev, [key]: !prev[key] }))
@@ -918,23 +917,7 @@ export default function AcademyPageEdit() {
         </div>
       )}
 
-      {/* ─── Toast ─── */}
-      {toast && (
-        <div className={`fixed bottom-6 right-6 z-[300] px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold text-white transition-all duration-300 ${toast.type === "error" ? "bg-red" : "bg-green-600"}`}
-          style={{ animation: "slideUp 0.3s ease-out" }}>
-          <div className="flex items-center gap-2.5">
-            <i className={`fa-solid ${toast.type === "error" ? "fa-circle-exclamation" : "fa-check-circle"}`} />
-            {toast.message}
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      <Toast toast={toast} onClose={closeToast} />
     </AdminLayout>
   )
 }

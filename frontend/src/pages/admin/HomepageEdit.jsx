@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
+import Toast from "../../components/ui/Toast"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, copyImageToHomepage, autoTranslateSection } from "../../lib/homepage"
 import { optimizeImageUrl } from "../../lib/images"
@@ -24,7 +25,14 @@ export default function HomepageEdit() {
   const [translating, setTranslating] = useState(false)
   const [allPhotos, setAllPhotos] = useState([])
   const [photoPicker, setPhotoPicker] = useState(null)
+  const [toast, setToast] = useState(null)
   const fileInputRef = useRef(null)
+
+  const showToast = useCallback((message, type = "success") => {
+    setToast({ message, type })
+  }, [])
+
+  const closeToast = useCallback(() => setToast(null), [])
 
   useEffect(() => {
     Promise.all([
@@ -63,9 +71,9 @@ export default function HomepageEdit() {
         const row = content[key]
         await updateHomepageSection(key, row.content_en || defaultContent[key], row.content_ar || defaultContent[key])
       }
-      alert("Saved successfully!")
+      showToast("Saved successfully!")
     } catch (err) {
-      alert("Error saving: " + err.message)
+      showToast("Error saving: " + err.message, "error")
     }
     setSaving(false)
   }
@@ -90,7 +98,7 @@ export default function HomepageEdit() {
       photos[photoPicker.index] = { id: result.public_id, url: result.secure_url }
       setPhotos(sectionName, photos)
     } catch (err) {
-      alert("Failed to copy photo: " + err.message)
+      showToast("Failed to copy photo: " + err.message, "error")
     }
     setPhotoPicker(null)
   }
@@ -106,7 +114,7 @@ export default function HomepageEdit() {
       photos[photoPicker.index] = { id: result.public_id, url: result.secure_url }
       setPhotos(sectionName, photos)
     } catch (err) {
-      alert("Upload failed: " + err.message)
+      showToast("Upload failed: " + err.message, "error")
     }
     setPhotoPicker(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
@@ -132,7 +140,7 @@ export default function HomepageEdit() {
         [key]: { ...prev[key], content_en: result.content_en, content_ar: result.content_ar },
       }))
     } catch (err) {
-      alert("Translation failed: " + err.message)
+      showToast("Translation failed: " + err.message, "error")
     }
     setTranslating(false)
   }
@@ -499,6 +507,8 @@ export default function HomepageEdit() {
           </div>
         </div>
       )}
+
+      <Toast toast={toast} onClose={closeToast} />
     </AdminLayout>
   )
 }

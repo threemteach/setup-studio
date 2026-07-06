@@ -65,9 +65,11 @@ export default function LoginPage() {
         <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/[0.06]">
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             {error && (
-              <div className="bg-red/10 border border-red/20 rounded-xl px-4 py-3 text-red text-sm flex items-center gap-2">
-                <i className="fa-solid fa-circle-exclamation shrink-0" />
-                {error}
+              <div className="bg-red/10 border-l-4 border-red rounded-xl px-4 py-3 text-red text-sm flex items-center gap-2.5 shadow-lg shadow-red/5" style={{ animation: "toastSlideUp 0.3s ease-out" }}>
+                <div className="w-7 h-7 rounded-full bg-red/15 flex items-center justify-center shrink-0">
+                  <i className="fa-solid fa-circle-exclamation text-xs" />
+                </div>
+                <span className="font-medium">{error}</span>
               </div>
             )}
             <div>
