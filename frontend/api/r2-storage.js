@@ -18,6 +18,7 @@ export default async function handler(req, res) {
   try {
     // try usage endpoint first
     const usageData = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}/usage`)
+    console.log("Cloudflare /usage response:", JSON.stringify(usageData, null, 2))
     if (usageData.success) {
       const objectsSize = usageData.result?.usage?.objectsSize
       if (objectsSize != null) return res.json({ usedBytes: objectsSize })
@@ -25,6 +26,7 @@ export default async function handler(req, res) {
 
     // fallback: bucket detail endpoint
     const bucketData = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}`)
+    console.log("Cloudflare /buckets response:", JSON.stringify(bucketData, null, 2))
     if (!bucketData.success) return res.status(502).json({ error: bucketData.errors?.[0]?.message || "Cloudflare API error" })
 
     const bucketSize = bucketData.result?.bucketSize
