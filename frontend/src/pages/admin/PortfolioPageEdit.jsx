@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo } from "../../lib/portfolio"
+import { autoTranslateSection } from "../../lib/homepage"
 
 const Diamond = () => (
   <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
@@ -10,8 +11,8 @@ const Diamond = () => (
 
 function HeadingInput({ value, onChange, dark, placeholder }) {
   const cls = dark
-    ? "flex-1 bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
-    : "flex-1 bg-white/50 border border-navy/15 rounded-xl text-navy font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 focus:border-navy/40 focus:bg-white/80 transition-colors"
+    ? "flex-1 min-w-[8rem] bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
+    : "flex-1 min-w-[8rem] bg-white/50 border border-navy/15 rounded-xl text-navy font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 focus:border-navy/40 focus:bg-white/80 transition-colors"
   return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
 }
 
@@ -92,6 +93,7 @@ export default function PortfolioPageEdit() {
   const [activeCategory, setActiveCategory] = useState("")
   const [videos, setVideos] = useState([])
   const [uploading, setUploading] = useState(false)
+  const [translating, setTranslating] = useState(false)
   const fileInputRef = useRef(null)
 
   function showToast(message, type = "success") {
@@ -233,6 +235,44 @@ export default function PortfolioPageEdit() {
     }
   }
 
+  async function handleAutoTranslate() {
+    setTranslating(true)
+    try {
+      const en = {}, ar = {}
+      en.hero_heading = form.hero_heading_en
+      en.hero_subtitle = form.hero_subtitle_en
+      ar.hero_heading = form.hero_heading_ar
+      ar.hero_subtitle = form.hero_subtitle_ar
+      ;(form?.categories || []).forEach((c, i) => {
+        en[`cat_heading_${i}`] = c.heading_en
+        en[`cat_desc_${i}`] = c.desc_en
+        ar[`cat_heading_${i}`] = c.heading_ar
+        ar[`cat_desc_${i}`] = c.desc_ar
+      })
+      const result = await autoTranslateSection(en, ar, lang)
+      const updates = {}
+      const cats = [...(form?.categories || [])]
+      for (const key of Object.keys(result.content_en)) {
+        if (key.startsWith("cat_heading_")) {
+          const idx = parseInt(key.replace("cat_heading_", ""), 10)
+          cats[idx] = { ...cats[idx], heading_en: result.content_en[key], heading_ar: result.content_ar[key] }
+        } else if (key.startsWith("cat_desc_")) {
+          const idx = parseInt(key.replace("cat_desc_", ""), 10)
+          cats[idx] = { ...cats[idx], desc_en: result.content_en[key], desc_ar: result.content_ar[key] }
+        } else {
+          updates[`${key}_en`] = result.content_en[key]
+          updates[`${key}_ar`] = result.content_ar[key]
+        }
+      }
+      updates.categories = cats
+      setForm((prev) => ({ ...prev, ...updates }))
+      showToast("Translation complete")
+    } catch (err) {
+      showToast("Translation failed: " + err.message, "error")
+    }
+    setTranslating(false)
+  }
+
   if (loading) {
     return (
       <AdminLayout>
@@ -256,6 +296,9 @@ export default function PortfolioPageEdit() {
           <button onClick={() => setLang(lang === "en" ? "ar" : "en")}
             className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors"
           >{lang === "en" ? "Edit العربية" : "Edit English"}</button>
+          <button onClick={handleAutoTranslate} disabled={translating}
+            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >{translating ? "Translating..." : "Auto-translate"}</button>
           <button onClick={handleSave} disabled={saving}
             className="px-6 py-2 rounded-xl bg-navy text-white font-semibold text-sm cursor-pointer hover:bg-navy/90 transition-colors disabled:opacity-50"
           >{saving ? "Saving..." : "Save All"}</button>
@@ -266,11 +309,11 @@ export default function PortfolioPageEdit() {
       <DarkSection id="hero" title="Hero Section" icon="fa-solid fa-display" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="flex flex-col items-center text-center">
           <div className="flex items-center w-full mb-4">
-            <Diamond />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor"><polygon points="6.5,0 13,6.5 6.5,13 0,6.5" /></svg>
+            <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
             <HeadingInput value={val("hero_heading")} onChange={(v) => handleChange("hero_heading", v)} dark placeholder="Our Work" />
-            <span className="block flex-1 h-[2px] bg-red" />
-            <Diamond />
+            <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
+            <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor"><polygon points="6.5,0 13,6.5 6.5,13 0,6.5" /></svg>
           </div>
           <div className="max-w-[600px] mx-auto w-full">
             <TextField value={val("hero_subtitle")} onChange={(v) => handleChange("hero_subtitle", v)} label="" placeholder="Explore our video production portfolio..." dark />
@@ -287,14 +330,10 @@ export default function PortfolioPageEdit() {
                 className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <i className="fa-solid fa-xmark" />
               </button>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <TextField value={cat.heading_en}
-                  onChange={(v) => setCatItem(i, "heading_en", v)}
-                  label="Heading (EN)" placeholder="Category heading..." />
-                <TextField value={cat.heading_ar}
-                  onChange={(v) => setCatItem(i, "heading_ar", v)}
-                  label="العنوان (AR)" placeholder="عنوان الفئة..." />
-              </div>
+              <TextField value={lang === "en" ? cat.heading_en : cat.heading_ar}
+                onChange={(v) => setCatItem(i, lang === "en" ? "heading_en" : "heading_ar", v)}
+                label={`Heading (${lang === "en" ? "EN" : "AR"})`}
+                placeholder={lang === "en" ? "Category heading..." : "عنوان الفئة..."} />
               <div className="mt-1 flex items-center gap-2">
                 <span className="text-xs font-medium text-navy/50">Slug:</span>
                 <span className="px-2.5 py-1 rounded-lg bg-gray-100 text-navy/60 text-xs font-mono">{cat.slug || makeSlug(cat.heading_en) || "—"}</span>
@@ -362,26 +401,16 @@ export default function PortfolioPageEdit() {
                       </div>
                       {/* Meta */}
                       <div className="space-y-2">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <input type="text" value={video.title_en}
-                            onChange={(e) => handleVideoFieldChange(video.id, "title_en", e.target.value)}
-                            className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
-                            placeholder="Title (EN)" />
-                          <input type="text" value={video.title_ar}
-                            onChange={(e) => handleVideoFieldChange(video.id, "title_ar", e.target.value)}
-                            className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
-                            placeholder="العنوان (AR)" />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          <textarea value={video.description_en}
-                            onChange={(e) => handleVideoFieldChange(video.id, "description_en", e.target.value)}
-                            className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
-                            rows={2} placeholder="Description (EN)" />
-                          <textarea value={video.description_ar}
-                            onChange={(e) => handleVideoFieldChange(video.id, "description_ar", e.target.value)}
-                            className="bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
-                            rows={2} placeholder="الوصف (AR)" />
-                        </div>
+                        <input type="text"
+                          value={lang === "en" ? video.title_en : video.title_ar}
+                          onChange={(e) => handleVideoFieldChange(video.id, lang === "en" ? "title_en" : "title_ar", e.target.value)}
+                          className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
+                          placeholder={lang === "en" ? "Title (EN)" : "العنوان (AR)"} />
+                        <textarea
+                          value={lang === "en" ? video.description_en : video.description_ar}
+                          onChange={(e) => handleVideoFieldChange(video.id, lang === "en" ? "description_en" : "description_ar", e.target.value)}
+                          className="w-full bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
+                          rows={2} placeholder={lang === "en" ? "Description (EN)" : "الوصف (AR)"} />
                         <div className="flex items-center justify-between">
                           <input type="number" value={video.sort_order}
                             onChange={(e) => handleVideoFieldChange(video.id, "sort_order", parseInt(e.target.value) || 0)}
