@@ -156,10 +156,10 @@ export default function PortfolioPageEdit() {
   function handleHeadingBlur(index) {
     const cats = [...(form?.categories || [])]
     const current = cats[index]
-    if (!current.slug || current.slug === "new-category") {
-      cats[index] = { ...current, slug: makeSlug(current.heading_en || `cat-${Date.now()}`) }
-      setVal("categories", cats)
-    }
+    const newSlug = makeSlug(current.heading_en || `cat-${Date.now()}`)
+    cats[index] = { ...current, slug: newSlug }
+    setVal("categories", cats)
+    if (activeCategory === current.slug) setActiveCategory(newSlug)
   }
 
   function addCategory() {
