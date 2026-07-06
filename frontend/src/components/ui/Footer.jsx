@@ -25,7 +25,7 @@ export default function Footer() {
 
       <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)] py-[clamp(2rem,4vw,3.5rem)] flex flex-col items-center text-center">
         {/* ─── SETUP wordmark centered ─── */}
-        <a href="/" onClick={() => window.location.reload()} className="flex items-center justify-center gap-2 mb-8">
+        <a href="/" onClick={() => window.location.reload()} className="flex items-center justify-center gap-2 mb-8" dir="ltr">
         <svg
           className="h-[clamp(3rem,7vw,6rem)] w-auto"
           viewBox="0 0 551 218"
@@ -40,7 +40,7 @@ export default function Footer() {
           <path d="M335.134 -0.000393149L315.032 26.6885L335.14 53.1257L355.243 26.4368L335.134 -0.000393149Z" fill="#E73B49"/>
           <path d="M550.448 179.68H522.21V216.987H550.448V179.68Z" fill="#E73B49"/>
         </svg>
-        <span className="text-[clamp(0.65rem,1.5vw,1rem)] text-navy font-bold ltr:self-end rtl:self-start tracking-wider">BY VITA</span>
+        <span className="text-[clamp(0.65rem,1.5vw,1rem)] text-navy font-bold self-end tracking-wider">BY VITA</span>
         </a>
 
         {/* ─── Social icons (brand colors, no bg) ─── */}
