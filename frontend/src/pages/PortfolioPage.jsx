@@ -40,15 +40,15 @@ export default function PortfolioPage() {
         <div className="absolute top-[clamp(2rem,5vw,4rem)] ltr:right-[clamp(10%,20%,30%)] rtl:left-[clamp(10%,20%,30%)] w-[clamp(8rem,20vw,16rem)] h-[clamp(8rem,20vw,16rem)] rounded-full bg-[#11AFFF] opacity-[0.12] blur-[clamp(2rem,4vw,3rem)] pointer-events-none" />
         <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)] relative z-10">
           <Reveal>
-            <div className={`flex flex-col items-center text-center ${lang === 'ar' ? 'lg:items-start lg:text-right' : 'lg:items-start lg:text-left'}`}>
-              <div className="flex items-center w-full mb-4 lg:justify-start justify-center">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex items-center w-full mb-4 justify-center">
                 <div className="flex items-center min-w-0 shrink">
                   <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
                     <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
                   </svg>
                   <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
                 </div>
-                <h1 className={`text-white font-bold text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap w-full ${lang === 'ar' ? 'text-right' : ''}`}>
+                <h1 className="text-white font-bold text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap w-full text-center">
                   {cms("hero_heading") || t("Our Work", "أعمالنا", lang)}
                 </h1>
                 <div className="flex items-center min-w-0 shrink">
@@ -58,7 +58,7 @@ export default function PortfolioPage() {
                   </svg>
                 </div>
               </div>
-              <p className={`text-white/70 font-semibold text-[clamp(1rem,1.8vw,1.2rem)] max-w-[620px] leading-snug m-0 w-full ${lang === 'ar' ? 'text-right' : ''}`}>
+              <p className="text-white/70 font-semibold text-[clamp(1rem,1.8vw,1.2rem)] max-w-[620px] leading-snug m-0 w-full text-center">
                 {cms("hero_subtitle") || t("Explore our video production portfolio across different categories", "تصفح أعمالنا في إنتاج الفيديو عبر مختلف الفئات", lang)}
               </p>
             </div>

@@ -89,6 +89,7 @@ export default function PortfolioPageEdit() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
+  const currentVideoRef = useRef(null)
   const [collapsed, setCollapsed] = useState({})
   const [activeCategory, setActiveCategory] = useState("")
   const [videos, setVideos] = useState([])
@@ -481,7 +482,13 @@ export default function PortfolioPageEdit() {
                     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4">
                       {/* Video Preview */}
                       <div className="aspect-video md:aspect-[4/3] rounded-xl overflow-hidden bg-black/50">
-                        <video src={video.video_url} className="w-full h-full object-cover" controls />
+                        <video src={video.video_url} className="w-full h-full object-cover" controls
+                          onPlay={(e) => {
+                            if (currentVideoRef.current && currentVideoRef.current !== e.target) {
+                              currentVideoRef.current.pause()
+                            }
+                            currentVideoRef.current = e.target
+                          }} />
                       </div>
                       {/* Meta */}
                       <div className="space-y-2">
