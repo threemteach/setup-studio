@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
-import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo } from "../../lib/portfolio"
+import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo, fetchStorageUsage } from "../../lib/portfolio"
 import { autoTranslateSection } from "../../lib/homepage"
 
 const Diamond = () => (
@@ -95,6 +95,7 @@ export default function PortfolioPageEdit() {
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [translating, setTranslating] = useState(false)
+  const [storage, setStorage] = useState(null)
   const fileInputRef = useRef(null)
 
   function showToast(message, type = "success") {
@@ -124,6 +125,7 @@ export default function PortfolioPageEdit() {
       }
     }).catch(console.error)
     .finally(() => setLoading(false))
+    fetchStorageUsage().then(setStorage).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -357,6 +359,29 @@ export default function PortfolioPageEdit() {
           >{saving ? "Saving..." : "Save All"}</button>
         </div>
       </div>
+
+      {/* ═══════════ STORAGE USAGE ═══════════ */}
+      {storage && (() => {
+        const pct = (storage.usedBytes / storage.limitBytes) * 100
+        const barColor = pct < 70 ? "bg-green-500" : pct < 90 ? "bg-yellow-500" : "bg-red-500"
+        const textColor = pct < 70 ? "text-green-600" : pct < 90 ? "text-yellow-600" : "text-red-600"
+        return (
+          <div className="bg-white rounded-3xl border border-border/50 shadow-sm p-5 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-navy font-semibold text-sm"><i className="fa-solid fa-database mr-2 text-navy/40" />R2 Storage</span>
+              <span className={`text-xs font-bold ${textColor}`}>{storage.usedGB.toFixed(2)} GB / {storage.limitGB} GB</span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+              <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+            </div>
+            <div className="flex justify-between text-[10px] text-muted/50 mt-1">
+              <span>0 GB</span>
+              <span>{pct < 100 ? `${pct.toFixed(1)}% used` : "FULL"}</span>
+              <span>{storage.limitGB} GB</span>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ════════════════════ HERO ════════════════════ */}
       <DarkSection id="hero" title="Hero Section" icon="fa-solid fa-display" collapsed={collapsed} onToggle={toggleCollapse}>

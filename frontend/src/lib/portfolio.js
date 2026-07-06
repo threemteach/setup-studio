@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase"
-import { S3Client, PutObjectCommand, DeleteObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, AbortMultipartUploadCommand } from "@aws-sdk/client-s3"
+import { S3Client, PutObjectCommand, DeleteObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, AbortMultipartUploadCommand, ListObjectsV2Command } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 const r2Endpoint = import.meta.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
@@ -213,4 +213,21 @@ export async function uploadVideo(file, category, onProgress) {
   }
 
   return { video_url: `${r2PublicUrl}/${key}`, video_key: key }
+}
+
+const TOTAL_LIMIT = 100 * 1024 * 1024 * 1024 // 100 GB
+
+export async function fetchStorageUsage() {
+  const client = getR2Client()
+  let total = 0
+  let cursor
+  do {
+    const { Contents, NextContinuationToken } = await client.send(new ListObjectsV2Command({
+      Bucket: r2Bucket,
+      ContinuationToken: cursor,
+    }))
+    if (Contents) total += Contents.reduce((s, o) => s + (o.Size || 0), 0)
+    cursor = NextContinuationToken
+  } while (cursor)
+  return { usedBytes: total, limitBytes: TOTAL_LIMIT, usedGB: total / (1024 ** 3), limitGB: 100 }
 }
