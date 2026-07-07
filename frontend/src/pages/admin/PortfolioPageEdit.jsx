@@ -3,6 +3,7 @@ import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo, fetchStorageUsage } from "../../lib/portfolio"
 import { autoTranslateSection } from "../../lib/homepage"
 import Toast from "../../components/ui/Toast"
+import ConfirmModal from "../../components/admin/ConfirmModal"
 
 const Diamond = () => (
   <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
@@ -98,6 +99,7 @@ export default function PortfolioPageEdit() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [translating, setTranslating] = useState(false)
   const [storage, setStorage] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null)
   const fileInputRef = useRef(null)
 
   function showToast(message, type = "success") {
@@ -239,10 +241,13 @@ export default function PortfolioPageEdit() {
   }
 
   async function handleDeleteVideo(video) {
-    if (!confirm("Delete this video?")) return
+    setConfirmDelete(video)
+  }
+  async function confirmDeleteVideo() {
+    if (!confirmDelete) return
     try {
-      await deleteVideo(video.id, video.video_key)
-      setVideos(prev => prev.filter(v => v.id !== video.id))
+      await deleteVideo(confirmDelete.id, confirmDelete.video_key)
+      setVideos(prev => prev.filter(v => v.id !== confirmDelete.id))
       showToast("Video deleted")
     } catch (err) {
       showToast("Delete failed: " + err.message, "error")
@@ -518,6 +523,13 @@ export default function PortfolioPageEdit() {
         )}
       </DarkSection>
 
+      {confirmDelete && (
+        <ConfirmModal
+          message={`Delete video "${confirmDelete.title_en || confirmDelete.title_ar || ""}"?`}
+          onConfirm={confirmDeleteVideo}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
       <Toast toast={toast} onClose={() => setToast(null)} />
     </AdminLayout>
   )
