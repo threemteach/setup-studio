@@ -48,6 +48,18 @@ export default async function handler(req, res) {
 
   const usedIds = new Set(photos?.map(p => p.cloudinary_public_id) || [])
 
+  // Also protect portfolio video thumbnails (stored as Cloudinary URLs)
+  const { data: portfolioVideos } = await supabase
+    .from("portfolio_videos")
+    .select("thumbnail_url")
+    .not("thumbnail_url", "is", null)
+    .neq("thumbnail_url", "")
+
+  for (const v of portfolioVideos || []) {
+    const match = v.thumbnail_url.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-z]+$/i)
+    if (match) usedIds.add(match[1])
+  }
+
   // 2. List ONE page of Cloudinary images
   const params = new URLSearchParams({
     prefix: "setup-studio/locations/",

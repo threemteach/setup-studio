@@ -48,16 +48,16 @@ export async function upsertVideo(video) {
 }
 
 export async function deleteVideo(id, videoKey, thumbnailUrl) {
+  const token = (await getSupabase().auth.getSession()).data.session?.access_token
   // Delete thumbnail from Cloudinary
   if (thumbnailUrl) {
     try {
-      await deleteCloudinaryImage(thumbnailUrl)
+      await deleteCloudinaryImage(thumbnailUrl, token)
     } catch { /* ignore Cloudinary delete errors */ }
   }
   // Delete video from R2
   if (videoKey) {
     try {
-      const token = (await getSupabase().auth.getSession()).data.session?.access_token
       const apiUrl = import.meta.env.PROD ? "/api/delete-video" : "http://localhost:3001/api/delete-video"
       await fetch(apiUrl, {
         method: "POST",
