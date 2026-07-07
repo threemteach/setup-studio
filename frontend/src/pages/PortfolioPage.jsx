@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Reveal from "../components/ui/Reveal"
 import Masonry from "react-masonry-css"
 import { useTranslation } from "../context/LanguageContext"
@@ -10,24 +10,7 @@ export default function PortfolioPage() {
   const { lang } = useTranslation()
   const [cmsData, setCmsData] = useState(null)
   const [videosByCategory, setVideosByCategory] = useState({})
-  const [activeVideo, setActiveVideo] = useState(null)
   const [activeCategory, setActiveCategory] = useState("")
-  const videoRef = useRef(null)
-
-  useEffect(() => {
-    const el = videoRef.current
-    if (!activeVideo || !el) return
-    const onExit = () => {
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) setActiveVideo(null)
-    }
-    el.addEventListener("fullscreenchange", onExit)
-    el.addEventListener("webkitfullscreenchange", onExit)
-    el.requestFullscreen?.()?.catch(() => {})
-    return () => {
-      el.removeEventListener("fullscreenchange", onExit)
-      el.removeEventListener("webkitfullscreenchange", onExit)
-    }
-  }, [activeVideo])
 
   useEffect(() => {
     fetchPortfolioContent().then(async (data) => {
@@ -44,6 +27,37 @@ export default function PortfolioPage() {
       }
     }).catch(() => {})
   }, [])
+
+  function playNative(video) {
+    const old = document.getElementById("__native-player")
+    if (old) old.remove()
+
+    const el = document.createElement("video")
+    el.id = "__native-player"
+    el.src = video.video_url
+    el.controls = true
+    el.playsInline = true
+    el.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:9999"
+    document.body.appendChild(el)
+
+    function onExit() {
+      if (document.fullscreenElement || document.webkitFullscreenElement || el.webkitDisplayingFullscreen) return
+      el.pause()
+      el.remove()
+      document.removeEventListener("fullscreenchange", onExit)
+      document.removeEventListener("webkitfullscreenchange", onExit)
+    }
+    document.addEventListener("fullscreenchange", onExit)
+    document.addEventListener("webkitfullscreenchange", onExit)
+
+    if (el.webkitEnterFullscreen) {
+      el.webkitEnterFullscreen()
+    } else {
+      const fs = el.requestFullscreen || el.webkitRequestFullscreen
+      if (fs) { fs.call(el) }
+      el.play().catch(() => {})
+    }
+  }
 
   const cms = (field) => cmsData?.[`${field}_${lang}`] || cmsData?.[`${field}_en`] || ""
   const categories = cmsData?.categories || []
@@ -129,11 +143,15 @@ export default function PortfolioPage() {
                     columnClassName="pl-5 bg-clip-padding">
                     {vids.map((video) => (
                       <Reveal key={video.id}>
-                        <div className="group cursor-pointer mb-5" onClick={() => setActiveVideo(video)}>
+                        <div className="group mb-5">
                           <div className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-border/50 dark:border-[#1e2d3d]/50">
-                            <div className="relative bg-gray-900">
-                              <video src={video.video_url} className="w-full h-auto block" muted playsInline poster={video.thumbnail_url || undefined} />
-                              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-100 transition-opacity group-hover:bg-black/10">
+                            <div className="relative bg-gray-900 cursor-pointer" onClick={() => playNative(video)}>
+                              {video.thumbnail_url ? (
+                                <img src={video.thumbnail_url} alt="" className="w-full h-auto block" loading="lazy" />
+                              ) : (
+                                <video src={video.video_url} className="w-full h-auto block" muted playsInline preload="metadata" />
+                              )}
+                              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-100 transition-opacity group-hover:bg-black/10 pointer-events-none">
                                 <div className="w-16 h-16 rounded-full bg-red/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-200">
                                   <i className="fa-solid fa-play text-white text-xl ml-1" />
                                 </div>
@@ -161,27 +179,6 @@ export default function PortfolioPage() {
         </div>
       </section>
 
-      {activeVideo && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-black" onClick={() => setActiveVideo(null)}>
-          <div className="relative flex-1 min-h-0 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-            <video ref={videoRef} src={activeVideo.video_url} controls autoPlay className="w-full h-full object-contain" poster={activeVideo.thumbnail_url || undefined} />
-            <button onClick={() => setActiveVideo(null)}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white border-0 cursor-pointer hover:bg-black/70 transition-colors flex items-center justify-center text-lg z-10">
-              <i className="fa-solid fa-xmark" />
-            </button>
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-6 pt-12 pb-4 pointer-events-none">
-              <h3 className="text-white font-bold text-lg m-0">
-                {t(activeVideo.title_en, activeVideo.title_ar, lang) || t("Untitled", "بدون عنوان", lang)}
-              </h3>
-              {(activeVideo.description_en || activeVideo.description_ar) && (
-                <p className="text-white/60 text-sm mt-1 m-0">
-                  {t(activeVideo.description_en, activeVideo.description_ar, lang)}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
