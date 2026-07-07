@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import Button from "../../components/ui/Button"
 import { getSupabase } from "../../lib/supabase"
+import { sanitizeError } from "../../lib/errors"
 import { useAuth } from "../../contexts/AuthContext"
 
 export default function LoginPage() {
@@ -27,7 +28,7 @@ export default function LoginPage() {
     })
 
     if (signInError) {
-      setError(signInError.message)
+      setError(sanitizeError(signInError.message))
       setLoading(false)
       return
     }

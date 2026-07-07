@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
+import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, copyImageToHomepage, autoTranslateSection } from "../../lib/homepage"
 import { optimizeImageUrl } from "../../lib/images"
@@ -75,7 +76,7 @@ export default function HomepageEdit() {
       }
       showToast("Saved successfully!")
     } catch (err) {
-      showToast("Error saving: " + err.message, "error")
+      showToast("Error saving: " + sanitizeError(err.message), "error")
     }
     setSaving(false)
   }
@@ -100,7 +101,7 @@ export default function HomepageEdit() {
       photos[photoPicker.index] = { id: result.public_id, url: result.secure_url }
       setPhotos(sectionName, photos)
     } catch (err) {
-      showToast("Failed to copy photo: " + err.message, "error")
+      showToast("Failed to copy photo: " + sanitizeError(err.message), "error")
     }
     setPhotoPicker(null)
   }
@@ -116,7 +117,7 @@ export default function HomepageEdit() {
       photos[photoPicker.index] = { id: result.public_id, url: result.secure_url }
       setPhotos(sectionName, photos)
     } catch (err) {
-      showToast("Upload failed: " + err.message, "error")
+      showToast("Upload failed: " + sanitizeError(err.message), "error")
     }
     setPhotoPicker(null)
     if (fileInputRef.current) fileInputRef.current.value = ""
@@ -155,7 +156,7 @@ export default function HomepageEdit() {
         [key]: { ...prev[key], content_en: result.content_en, content_ar: result.content_ar },
       }))
     } catch (err) {
-      showToast("Translation failed: " + err.message, "error")
+      showToast("Translation failed: " + sanitizeError(err.message), "error")
     }
     setTranslating(false)
   }

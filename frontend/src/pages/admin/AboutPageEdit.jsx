@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
+import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchAboutContent, updateAboutContent, uploadAboutImage, copyImageToAbout, defaultServices, defaultValues } from "../../lib/about"
 import { optimizeImageUrl } from "../../lib/images"
@@ -95,7 +96,7 @@ export default function AboutPageEdit() {
       })
       showToast("Saved successfully!")
     } catch (err) {
-      showToast("Error saving: " + err.message, "error")
+      showToast("Error saving: " + sanitizeError(err.message), "error")
     }
     setSaving(false)
   }
@@ -132,7 +133,7 @@ export default function AboutPageEdit() {
         story_quote_ar: result.content_ar.story_quote,
       }))
     } catch (err) {
-      showToast("Translation failed: " + err.message, "error")
+      showToast("Translation failed: " + sanitizeError(err.message), "error")
     }
     setTranslating(false)
   }
@@ -146,7 +147,7 @@ export default function AboutPageEdit() {
       setVal(`${prefix}_photo_url`, result.secure_url)
       setVal(`${prefix}_photo_id`, result.public_id)
     } catch (err) {
-      showToast("Failed to copy photo: " + err.message, "error")
+      showToast("Failed to copy photo: " + sanitizeError(err.message), "error")
     }
     setPhotoPicker(null)
   }
@@ -161,7 +162,7 @@ export default function AboutPageEdit() {
       setVal(`${prefix}_photo_url`, result.secure_url)
       setVal(`${prefix}_photo_id`, result.public_id)
     } catch (err) {
-      showToast("Upload failed: " + err.message, "error")
+      showToast("Upload failed: " + sanitizeError(err.message), "error")
     }
     setPhotoPicker(null)
     if (fileInputRef.current) fileInputRef.current.value = ""

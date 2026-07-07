@@ -7,6 +7,7 @@ import CropModal from "../../components/admin/CropModal"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 import { uploadToCloudinary } from "../../lib/cloudinary"
 import { getSupabase } from "../../lib/supabase"
+import { sanitizeError } from "../../lib/errors"
 import { fetchPhotos, createPhoto, deletePhoto, updatePhoto, reorderPhotos, setCoverPhoto } from "../../lib/photos"
 import { optimizeImageUrl } from "../../lib/images"
 
@@ -122,7 +123,7 @@ export default function LocationCategory() {
         setEditAlt("")
       }
     } catch (err) {
-      showToast(err.message || "Upload failed", "error")
+      showToast(sanitizeError(err.message) || "Upload failed", "error")
       setUploading(false)
       return
     }
@@ -167,7 +168,7 @@ export default function LocationCategory() {
         setPhotos((prev) => prev.map((p) => (p.id === updated.id ? updated : { ...p, is_cover: false })))
       }
     } catch (err) {
-      showToast(err.message || "Delete failed", "error")
+      showToast(sanitizeError(err.message) || "Delete failed", "error")
       console.error("Failed to delete:", err)
     }
   }
@@ -198,7 +199,7 @@ export default function LocationCategory() {
       const updated = await setCoverPhoto(category, photo.id)
       setPhotos((prev) => prev.map((p) => (p.category === category ? { ...p, is_cover: p.id === photo.id } : p)))
     } catch (err) {
-      showToast(err.message || "Failed to set main photo", "error")
+      showToast(sanitizeError(err.message) || "Failed to set main photo", "error")
       console.error("Failed to set cover:", err)
     }
   }
@@ -242,7 +243,7 @@ export default function LocationCategory() {
       setUploading(false)
       loadPhotos()
     } catch (err) {
-      showToast(err.message || "Crop upload failed", "error")
+      showToast(sanitizeError(err.message) || "Crop upload failed", "error")
       setUploading(false)
     }
   }

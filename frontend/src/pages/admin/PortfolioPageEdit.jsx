@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo, fetchStorageUsage } from "../../lib/portfolio"
 import { autoTranslateSection } from "../../lib/homepage"
+import { sanitizeError } from "../../lib/errors"
 import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 
@@ -206,7 +207,7 @@ export default function PortfolioPageEdit() {
       await Promise.all(videos.filter(v => v.id).map(v => upsertVideo(v).catch(() => {})))
       showToast("Saved successfully!")
     } catch (err) {
-      showToast("Error saving: " + err.message, "error")
+      showToast("Error saving: " + sanitizeError(err.message), "error")
     }
     setSaving(false)
   }
@@ -240,7 +241,7 @@ export default function PortfolioPageEdit() {
       setVideos(updated)
       showToast(`Uploaded ${files.length} video(s)`)
     } catch (err) {
-      showToast("Upload failed: " + err.message, "error")
+      showToast("Upload failed: " + sanitizeError(err.message), "error")
     }
     setUploading(false)
     setUploadProgress(0)
@@ -258,7 +259,7 @@ export default function PortfolioPageEdit() {
       setVideos(prev => prev.filter(v => v.id !== video.id))
       showToast("Video deleted")
     } catch (err) {
-      showToast("Delete failed: " + err.message, "error")
+      showToast("Delete failed: " + sanitizeError(err.message), "error")
     }
     setConfirmAction(null)
   }
@@ -340,7 +341,7 @@ export default function PortfolioPageEdit() {
       }
       showToast("Translation complete")
     } catch (err) {
-      showToast("Translation failed: " + err.message, "error")
+      showToast("Translation failed: " + sanitizeError(err.message), "error")
     }
     setTranslating(false)
   }
