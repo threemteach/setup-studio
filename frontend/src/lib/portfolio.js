@@ -1,4 +1,5 @@
 import { getSupabase } from "./supabase"
+import { uploadToCloudinary } from "./cloudinary"
 
 const CHUNK_SIZE = 10 * 1024 * 1024
 const MULTIPART_THRESHOLD = 50 * 1024 * 1024
@@ -207,7 +208,45 @@ export async function uploadVideo(file, category, onProgress) {
     await uploadMultipart(file, key, contentType, onProgress)
   }
 
-  return { video_url: `${r2PublicUrl}/${key}`, video_key: key }
+  const video_url = `${r2PublicUrl}/${key}`
+  const thumbnail_url = await generateVideoThumbnail(video_url).catch(() => null)
+
+  return { video_url, video_key: key, thumbnail_url }
+}
+
+export async function generateVideoThumbnail(videoUrl) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video")
+    video.crossOrigin = "anonymous"
+    video.src = videoUrl
+    video.muted = true
+    video.currentTime = 0.5
+    video.oncanplay = () => {
+      video.currentTime = 0.5
+    }
+    video.onseeked = () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      canvas.getContext("2d").drawImage(video, 0, 0)
+      canvas.toBlob(async (blob) => {
+        if (!blob) return reject(new Error("Failed to capture thumbnail"))
+        try {
+          const result = await uploadToCloudinary(new File([blob], "thumb.jpg", { type: "image/jpeg" }), "portfolio-thumbnails")
+          resolve(result.secure_url)
+        } catch (err) {
+          reject(err)
+        }
+      }, "image/jpeg", 0.8)
+      video.remove()
+    }
+    video.onerror = () => {
+      video.remove()
+      resolve(null)
+    }
+    // timeout fallback
+    setTimeout(() => { video.remove(); resolve(null) }, 15000)
+  })
 }
 
 export async function fetchStorageUsage() {

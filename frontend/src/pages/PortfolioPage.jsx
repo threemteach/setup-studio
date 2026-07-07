@@ -115,7 +115,7 @@ export default function PortfolioPage() {
                       <Reveal key={video.id}>
                         <div className="group cursor-pointer" onClick={() => setActiveVideo(video)}>
                           <div className="aspect-video rounded-2xl overflow-hidden bg-gray-900 relative shadow-md">
-                            <video src={video.video_url} className="w-full h-full object-cover" muted playsInline />
+                            <video src={video.video_url} className="w-full h-full object-cover" muted playsInline poster={video.thumbnail_url || undefined} />
                             <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="w-16 h-16 rounded-full bg-red/90 flex items-center justify-center shadow-xl">
                                 <i className="fa-solid fa-play text-white text-xl ml-1" />
@@ -148,7 +148,7 @@ export default function PortfolioPage() {
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setActiveVideo(null)}>
           <div className="w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="relative">
-              <video src={activeVideo.video_url} controls autoPlay className="w-full aspect-video object-contain bg-black" />
+              <video src={activeVideo.video_url} controls autoPlay className="w-full aspect-video object-contain bg-black" poster={activeVideo.thumbnail_url || undefined} />
               <button onClick={() => setActiveVideo(null)}
                 className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white border-0 cursor-pointer hover:bg-black/70 transition-colors flex items-center justify-center text-lg">
                 <i className="fa-solid fa-xmark" />
