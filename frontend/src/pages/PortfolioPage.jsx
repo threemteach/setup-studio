@@ -133,23 +133,25 @@ export default function PortfolioPage() {
                     {vids.map((video) => (
                       <Reveal key={video.id}>
                         <div className="group cursor-pointer mb-5" onClick={() => setActiveVideo(video)}>
-                          <div className="rounded-2xl overflow-hidden bg-gray-900 relative shadow-md">
-                            <video src={video.video_url} className="w-full h-auto block" muted playsInline poster={video.thumbnail_url || undefined} />
-                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-100 transition-opacity">
-                              <div className="w-16 h-16 rounded-full bg-red/90 flex items-center justify-center shadow-xl">
-                                <i className="fa-solid fa-play text-white text-xl ml-1" />
+                          <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-border/50">
+                            <div className="relative bg-gray-900">
+                              <video src={video.video_url} className="w-full h-auto block" muted playsInline poster={video.thumbnail_url || undefined} />
+                              <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-100 transition-opacity group-hover:bg-black/10">
+                                <div className="w-16 h-16 rounded-full bg-red/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-200">
+                                  <i className="fa-solid fa-play text-white text-xl ml-1" />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                          <div className={`mt-3 ${lang === 'ar' ? 'text-right' : ''}`}>
-                            <h3 className="text-navy font-bold text-sm m-0 line-clamp-1">
-                              {t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)}
-                            </h3>
-                            {video.description_en && (
-                              <p className="text-muted text-xs mt-1 m-0 line-clamp-2">
-                                {t(video.description_en, video.description_ar, lang)}
-                              </p>
-                            )}
+                            <div className={`p-4 ${lang === 'ar' ? 'text-right' : ''}`}>
+                              <h3 className="text-navy font-bold text-sm m-0 line-clamp-1">
+                                {t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)}
+                              </h3>
+                              {video.description_en && (
+                                <p className="text-muted text-xs mt-1.5 m-0 line-clamp-2 leading-relaxed">
+                                  {t(video.description_en, video.description_ar, lang)}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </Reveal>
