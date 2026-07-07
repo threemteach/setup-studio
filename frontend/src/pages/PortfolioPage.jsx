@@ -9,13 +9,41 @@ const t = (en, ar, lang) => lang === "ar" ? ar : en
 /* ─── VideoCard — native <video> preview + inline playback on click ──────────── */
 function VideoCard({ video, lang }) {
   const previewVidRef = useRef(null)
+  const containerRef = useRef(null)
   const [vidRatio, setVidRatio] = useState(null)
   const [playing, setPlaying] = useState(false)
+  const [inView, setInView] = useState(false)
+  const hasThumbnail = Boolean(video.thumbnail_url)
+
+  /* only start fetching video data once the card is near the viewport —
+     prevents every card on the page from opening a network request at once,
+     which is what makes the grid crawl on mobile connections */
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setInView(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: "600px 0px" } // start loading a bit before it scrolls into view
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
-    if (playing) return
+    if (playing || !inView) return
     const el = previewVidRef.current
     if (!el) return
+
+    // if we already have a real thumbnail, there's no need to touch the
+    // video file at all until the user hits play — this is the single
+    // biggest saving on mobile, since it skips a network request per card
+    if (hasThumbnail) return
+
     function onMeta() {
       if (el.videoWidth && el.videoHeight) setVidRatio((el.videoHeight / el.videoWidth) * 100)
       el.currentTime = 0.001
@@ -23,7 +51,7 @@ function VideoCard({ video, lang }) {
     el.addEventListener("loadedmetadata", onMeta, { once: true })
     el.load()
     return () => el.removeEventListener("loadedmetadata", onMeta)
-  }, [video.video_url, playing])
+  }, [video.video_url, playing, inView, hasThumbnail])
 
   /* pause on fullscreen exit or phone native-player dismissal */
   useEffect(() => {
@@ -45,6 +73,7 @@ function VideoCard({ video, lang }) {
   function handlePlay() {
     const el = previewVidRef.current
     if (!el || playing) return
+    if (!el.src) el.src = video.video_url
     setPlaying(true)
     el.play().catch(() => {
       el.addEventListener("canplay", () => {
@@ -57,7 +86,7 @@ function VideoCard({ video, lang }) {
   }
 
   return (
-    <div className="group mb-5">
+    <div className="group mb-5" ref={containerRef}>
       <div
         className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-border/50 dark:border-[#1e2d3d]/50"
         style={{ transform: "translateZ(0)" }}
@@ -75,8 +104,8 @@ function VideoCard({ video, lang }) {
           >
             <video
               ref={previewVidRef}
-              src={video.video_url}
-              preload="metadata"
+              src={inView || playing ? video.video_url : undefined}
+              preload={playing ? "auto" : hasThumbnail ? "none" : inView ? "metadata" : "none"}
               controls={playing}
               poster={video.thumbnail_url || undefined}
               tabIndex={-1}
