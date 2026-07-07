@@ -61,16 +61,27 @@ export default function DashboardPage() {
     try {
       const token = (await getSupabase().auth.getSession()).data.session?.access_token
       const apiUrl = import.meta.env.PROD ? "/api/cleanup-cloudinary" : "http://localhost:3001/api/cleanup-cloudinary"
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-        throw new Error(err.error || "Cleanup failed")
-      }
-      const data = await res.json()
-      setCleanupState({ status: "done", result: data })
+      let nextCursor = null
+      let totalDeleted = 0
+      let pageNum = 0
+
+      do {
+        pageNum++
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ next_cursor: nextCursor, deleted_so_far: totalDeleted }),
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+          throw new Error(err.error || `Cleanup failed on page ${pageNum}`)
+        }
+        const data = await res.json()
+        totalDeleted = data.total_deleted
+        nextCursor = data.next_cursor
+      } while (nextCursor)
+
+      setCleanupState({ status: "done", result: { deleted: totalDeleted } })
     } catch (err) {
       setCleanupState({ status: "error", result: err.message })
     }
@@ -234,7 +245,6 @@ export default function DashboardPage() {
                 </p>
                 <p className="text-emerald-600 dark:text-emerald-400">
                   {cleanupState.result.deleted} unused images deleted from Cloudinary.
-                  ({cleanupState.result.total_used_in_db} still in use, {cleanupState.result.total_unused} were unused)
                 </p>
               </div>
             )}

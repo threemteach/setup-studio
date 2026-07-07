@@ -35,6 +35,11 @@ export default async function handler(req, res) {
 
   const auth = Buffer.from(`${apiKey}:${apiSecret}`).toString("base64")
 
+  // Accept optional next_cursor + total stats from previous runs
+  const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {}
+  const incomingCursor = body.next_cursor || null
+  const accumulatedDeleted = body.deleted_so_far || 0
+
   // 1. Fetch all used public_ids from the photos table
   const { data: photos } = await supabase
     .from("photos")
@@ -43,45 +48,34 @@ export default async function handler(req, res) {
 
   const usedIds = new Set(photos?.map(p => p.cloudinary_public_id) || [])
 
-  // 2. List all images from Cloudinary (paginated)
-  let allCloudinaryIds = []
-  let nextCursor = null
+  // 2. List ONE page of Cloudinary images
+  const params = new URLSearchParams({
+    prefix: "setup-studio/locations/",
+    max_results: "500",
+    type: "upload",
+  })
+  if (incomingCursor) params.set("next_cursor", incomingCursor)
 
-  do {
-    const params = new URLSearchParams({
-      prefix: "setup-studio/locations/",
-      max_results: "500",
-      type: "upload",
-    })
-    if (nextCursor) params.set("next_cursor", nextCursor)
+  const listRes = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?${params}`,
+    { headers: { Authorization: `Basic ${auth}` } }
+  )
 
-    const listRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?${params}`,
-      {
-        headers: { Authorization: `Basic ${auth}` },
-      }
-    )
+  if (!listRes.ok) {
+    const errText = await listRes.text()
+    return res.status(500).json({ error: `Cloudinary list failed: ${errText}` })
+  }
 
-    if (!listRes.ok) {
-      const errText = await listRes.text()
-      return res.status(500).json({ error: `Cloudinary list failed: ${errText}` })
-    }
+  const listData = await listRes.json()
+  const pageIds = (listData.resources || []).map(r => r.public_id)
+  const nextCursor = listData.next_cursor || null
 
-    const listData = await listRes.json()
-    for (const resource of listData.resources || []) {
-      allCloudinaryIds.push(resource.public_id)
-    }
-    nextCursor = listData.next_cursor || null
-  } while (nextCursor)
+  // 3. Find unused IDs on this page
+  const unusedIds = pageIds.filter(id => !usedIds.has(id))
 
-  // 3. Find unused ones
-  const unusedIds = allCloudinaryIds.filter(id => !usedIds.has(id))
-  const totalUnused = unusedIds.length
-
-  // 4. Delete in batches of 100
+  // 4. Delete this page's unused images in batches of 100
   const BATCH_SIZE = 100
-  let deleted = 0
-  const errors = []
+  let pageDeleted = 0
 
   for (let i = 0; i < unusedIds.length; i += BATCH_SIZE) {
     const batch = unusedIds.slice(i, i + BATCH_SIZE)
@@ -97,23 +91,21 @@ export default async function handler(req, res) {
           body: JSON.stringify({ public_ids: batch }),
         }
       )
-      const delData = await delRes.json()
-      if (delData.deleted) {
-        deleted += Object.values(delData.deleted).filter(s => s === "deleted").length
+      if (delRes.ok) {
+        const delData = await delRes.json()
+        if (delData.deleted) {
+          pageDeleted += Object.values(delData.deleted).filter(s => s === "deleted").length
+        }
       }
-      if (delData.deleted_counts) {
-        deleted += delData.deleted_counts.deleted || 0
-      }
-    } catch (err) {
-      errors.push({ batch: i / BATCH_SIZE, error: err.message })
-    }
+    } catch { /* skip failed batch */ }
   }
 
+  const totalDeleted = accumulatedDeleted + pageDeleted
+
   return res.status(200).json({
-    total_on_cloudinary: allCloudinaryIds.length,
-    total_used_in_db: usedIds.size,
-    total_unused: totalUnused,
-    deleted,
-    errors: errors.length > 0 ? errors : undefined,
+    page_deleted: pageDeleted,
+    total_deleted: totalDeleted,
+    next_cursor: nextCursor,
+    done: !nextCursor,
   })
 }
