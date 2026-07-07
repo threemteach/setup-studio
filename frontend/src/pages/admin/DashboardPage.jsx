@@ -239,17 +239,16 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Quick Actions Panel */}
+              {/* Quick Shortcuts */}
               <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/85 dark:border-[#1e2d3d]/85 p-6.5 shadow-sm">
                 <h3 className="text-navy dark:text-white font-bold text-base mb-4.5">Quick Shortcuts</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Shortcut 1 */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <button
                     onClick={() => navigate("/admin/locations")}
                     className="group flex items-center gap-4 bg-[#F8FAFC] dark:bg-[#1e2d3d] hover:bg-navy hover:text-white rounded-2xl p-4.5 transition-all duration-300 border-0 cursor-pointer ltr:text-left rtl:text-right w-full shadow-sm hover:shadow-lg hover:shadow-navy/10 hover:-translate-y-0.5"
                   >
-                    <div className="w-11 h-11 rounded-xl bg-navy text-white flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-navy transition-all duration-300">
-                      <i className="fa-solid fa-location-dot text-lg" />
+                    <div className="w-11 h-11 rounded-xl bg-navy text-white flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-300">
+                      <i className="fa-solid fa-location-dot text-lg group-hover:text-navy" />
                     </div>
                     <div>
                       <p className="text-navy dark:text-white font-bold text-sm m-0 group-hover:text-white transition-colors duration-300">Manage Locations</p>
@@ -258,19 +257,74 @@ export default function DashboardPage() {
                     <i className="fa-solid fa-chevron-right text-muted/40 dark:text-white/20 text-xs ltr:ml-auto rtl:mr-auto group-hover:text-white/80 group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5 transition-all duration-300" />
                   </button>
 
-                  {/* Shortcut 2 */}
+                  <button
+                    onClick={() => navigate("/admin/homepage")}
+                    className="group flex items-center gap-4 bg-[#F8FAFC] dark:bg-[#1e2d3d] hover:bg-emerald-600 hover:text-white rounded-2xl p-4.5 transition-all duration-300 border-0 cursor-pointer ltr:text-left rtl:text-right w-full shadow-sm hover:shadow-lg hover:shadow-navy/10 hover:-translate-y-0.5"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-300">
+                      <i className="fa-solid fa-house text-lg group-hover:text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-navy dark:text-white font-bold text-sm m-0 group-hover:text-white transition-colors duration-300">Edit Homepage</p>
+                      <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5 group-hover:text-white/70 transition-colors duration-300">Hero, process, quotes & more</p>
+                    </div>
+                    <i className="fa-solid fa-chevron-right text-muted/40 dark:text-white/20 text-xs ltr:ml-auto rtl:mr-auto group-hover:text-white/80 group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5 transition-all duration-300" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/admin/about")}
+                    className="group flex items-center gap-4 bg-[#F8FAFC] dark:bg-[#1e2d3d] hover:bg-violet-600 hover:text-white rounded-2xl p-4.5 transition-all duration-300 border-0 cursor-pointer ltr:text-left rtl:text-right w-full shadow-sm hover:shadow-lg hover:shadow-navy/10 hover:-translate-y-0.5"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-violet-600 text-white flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-300">
+                      <i className="fa-solid fa-circle-info text-lg group-hover:text-violet-600" />
+                    </div>
+                    <div>
+                      <p className="text-navy dark:text-white font-bold text-sm m-0 group-hover:text-white transition-colors duration-300">Edit About Page</p>
+                      <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5 group-hover:text-white/70 transition-colors duration-300">Story, services & values</p>
+                    </div>
+                    <i className="fa-solid fa-chevron-right text-muted/40 dark:text-white/20 text-xs ltr:ml-auto rtl:mr-auto group-hover:text-white/80 group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5 transition-all duration-300" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/admin/academy")}
+                    className="group flex items-center gap-4 bg-[#F8FAFC] dark:bg-[#1e2d3d] hover:bg-amber-600 hover:text-white rounded-2xl p-4.5 transition-all duration-300 border-0 cursor-pointer ltr:text-left rtl:text-right w-full shadow-sm hover:shadow-lg hover:shadow-navy/10 hover:-translate-y-0.5"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-300">
+                      <i className="fa-solid fa-graduation-cap text-lg group-hover:text-amber-600" />
+                    </div>
+                    <div>
+                      <p className="text-navy dark:text-white font-bold text-sm m-0 group-hover:text-white transition-colors duration-300">Edit Academy Page</p>
+                      <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5 group-hover:text-white/70 transition-colors duration-300">Courses, instructors & FAQ</p>
+                    </div>
+                    <i className="fa-solid fa-chevron-right text-muted/40 dark:text-white/20 text-xs ltr:ml-auto rtl:mr-auto group-hover:text-white/80 group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5 transition-all duration-300" />
+                  </button>
+
+                  <button
+                    onClick={() => navigate("/admin/portfolio")}
+                    className="group flex items-center gap-4 bg-[#F8FAFC] dark:bg-[#1e2d3d] hover:bg-sky-600 hover:text-white rounded-2xl p-4.5 transition-all duration-300 border-0 cursor-pointer ltr:text-left rtl:text-right w-full shadow-sm hover:shadow-lg hover:shadow-navy/10 hover:-translate-y-0.5"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-300">
+                      <i className="fa-solid fa-folder-open text-lg group-hover:text-sky-600" />
+                    </div>
+                    <div>
+                      <p className="text-navy dark:text-white font-bold text-sm m-0 group-hover:text-white transition-colors duration-300">Edit Portfolio</p>
+                      <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5 group-hover:text-white/70 transition-colors duration-300">Hero, categories & videos</p>
+                    </div>
+                    <i className="fa-solid fa-chevron-right text-muted/40 dark:text-white/20 text-xs ltr:ml-auto rtl:mr-auto group-hover:text-white/80 group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5 transition-all duration-300" />
+                  </button>
+
                   <button
                     onClick={() => window.open("/", "_blank")}
                     className="group flex items-center gap-4 bg-[#F8FAFC] dark:bg-[#1e2d3d] hover:bg-red hover:text-white rounded-2xl p-4.5 transition-all duration-300 border-0 cursor-pointer ltr:text-left rtl:text-right w-full shadow-sm hover:shadow-lg hover:shadow-red/10 hover:-translate-y-0.5"
                   >
-                    <div className="w-11 h-11 rounded-xl bg-red text-white flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-red transition-all duration-300">
-                      <i className="fa-solid fa-globe text-lg" />
+                    <div className="w-11 h-11 rounded-xl bg-red text-white flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-300">
+                      <i className="fa-solid fa-up-right-from-square text-lg group-hover:text-red" />
                     </div>
                     <div>
                       <p className="text-navy dark:text-white font-bold text-sm m-0 group-hover:text-white transition-colors duration-300">View Public Site</p>
-                      <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5 group-hover:text-white/70 transition-colors duration-300">Open client site in new tab</p>
+                      <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5 group-hover:text-white/70 transition-colors duration-300">Open site in new tab</p>
                     </div>
-                    <i className="fa-solid fa-chevron-right text-muted/40 dark:text-white/20 text-xs ltr:ml-auto rtl:mr-auto group-hover:text-white/80 group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5 transition-all duration-300" />
+                    <i className="fa-solid fa-up-right-from-square text-muted/40 dark:text-white/20 text-xs ltr:ml-auto rtl:mr-auto group-hover:text-white/80 group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5 transition-all duration-300" />
                   </button>
                 </div>
               </div>
