@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import Reveal from "../components/ui/Reveal"
-import Button from "../components/ui/Button"
 import { optimizeImageUrl } from "../lib/images"
 import { useTranslation } from "../context/LanguageContext"
 import { fetchAcademyContent } from "../lib/academy"

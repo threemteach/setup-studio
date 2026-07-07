@@ -19,7 +19,7 @@ const Diamond = () => (
 function HeadingInput({ value, onChange, dark, placeholder }) {
   const cls = dark
     ? "flex-1 bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
-    : "flex-1 bg-white/50 border border-navy/15 rounded-xl text-navy font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 focus:border-navy/40 focus:bg-white/80 transition-colors"
+    : "flex-1 bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-xl text-navy dark:text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 dark:placeholder:text-white/30 focus:border-navy/40 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
   return (
     <input
       type="text"
@@ -35,7 +35,7 @@ function HeadingInput({ value, onChange, dark, placeholder }) {
 function LabelInput({ value, onChange, dark, placeholder }) {
   const cls = dark
     ? "bg-transparent border-0 text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-center outline-none placeholder:text-red/30"
-    : "bg-white/50 border border-navy/15 rounded-lg text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-left outline-none px-2 py-0.5 placeholder:text-red/30 focus:border-navy/30 focus:bg-white/80 transition-colors"
+    : "bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-lg text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-left outline-none px-2 py-0.5 placeholder:text-red/30 focus:border-navy/30 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
   return (
     <input
       type="text"
@@ -84,7 +84,7 @@ const TextField = ({ value, onChange, label, placeholder, type = "text", rows, d
   const Tag = type === "textarea" ? "textarea" : "input"
   const base = dark
     ? "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
-    : "w-full bg-gray-50 border border-border rounded-xl px-4 py-2.5 text-navy text-sm outline-none focus:border-navy/40 transition-colors placeholder:text-muted resize-none"
+    : "w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2.5 text-navy dark:text-white/80 text-sm outline-none focus:border-navy/40 transition-colors placeholder:text-muted dark:placeholder:text-white/30 resize-none"
   return (
     <div>
       {label && <label className={`text-xs font-medium mb-1.5 block ${dark ? "text-white/40" : "text-navy/50"}`}>{label}</label>}
