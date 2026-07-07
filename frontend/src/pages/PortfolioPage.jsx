@@ -25,6 +25,21 @@ function VideoCard({ video, lang }) {
     return () => el.removeEventListener("loadedmetadata", onMeta)
   }, [video.video_url, playing])
 
+  /* pause on fullscreen exit or phone native-player dismissal */
+  useEffect(() => {
+    if (!playing) return
+    const el = previewVidRef.current
+    if (!el) return
+    function stop() { el.pause(); setPlaying(false) }
+    el.addEventListener("pause", stop, { once: true })
+    function onFS() { if (!document.fullscreenElement) stop() }
+    document.addEventListener("fullscreenchange", onFS)
+    return () => {
+      el.removeEventListener("pause", stop)
+      document.removeEventListener("fullscreenchange", onFS)
+    }
+  }, [playing])
+
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
 
   function handlePlay() {
@@ -35,7 +50,6 @@ function VideoCard({ video, lang }) {
       el.addEventListener("canplay", () => {
         el.play().catch(() => {})
       }, { once: true })
-      el.load()
     })
     if (el.requestFullscreen) {
       el.requestFullscreen().catch(() => {})
