@@ -74,6 +74,8 @@ export default function DashboardPage() {
       let portfolioUsedCount = 0
       let totalPortfolioOnCloud = 0
       let totalPortfolioUnused = 0
+      let totalDeleteErrors = 0
+      let sampleDeleteErrors = []
 
       do {
         pageNum++
@@ -98,11 +100,13 @@ export default function DashboardPage() {
         }
         totalPortfolioOnCloud += data.page_portfolio_count || 0
         totalPortfolioUnused += data.page_portfolio_unused || 0
+        totalDeleteErrors += data.delete_error_count || 0
+        if (data.delete_errors_sample?.length) sampleDeleteErrors = data.delete_errors_sample
         totalDeleted = data.total_deleted
         nextCursor = data.next_cursor
       } while (nextCursor)
 
-      setCleanupState({ status: "done", result: { deleted: totalDeleted, totalOnCloudinary, usedInPhotos, usedFromPortfolio, sampleCloudinaryIds, sampleUsedIds, samplePortfolioUsedIds, portfolioUsedCount, totalPortfolioOnCloud, totalPortfolioUnused } })
+      setCleanupState({ status: "done", result: { deleted: totalDeleted, totalOnCloudinary, usedInPhotos, usedFromPortfolio, sampleCloudinaryIds, sampleUsedIds, samplePortfolioUsedIds, portfolioUsedCount, totalPortfolioOnCloud, totalPortfolioUnused, totalDeleteErrors, sampleDeleteErrors } })
     } catch (err) {
       setCleanupState({ status: "error", result: err.message })
     }
@@ -274,6 +278,18 @@ export default function DashboardPage() {
                   <div className="mt-2 text-[10px] font-mono text-emerald-600/50 dark:text-emerald-400/50">
                     <p>Portfolio thumbnails referenced in DB: {cleanupState.result.portfolioUsedCount}</p>
                     <p>Sample portfolio DB public_ids: {cleanupState.result.samplePortfolioUsedIds?.join(", ")}</p>
+                  </div>
+                )}
+                {cleanupState.result.totalDeleteErrors > 0 && (
+                  <div className="mt-2 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                    <p className="text-red-700 dark:text-red-300 font-semibold text-[10px]">
+                      {cleanupState.result.totalDeleteErrors} delete errors
+                    </p>
+                    {cleanupState.result.sampleDeleteErrors?.map((e, i) => (
+                      <p key={i} className="text-red-600 dark:text-red-400 text-[9px] font-mono mt-0.5">
+                        {e.status || ""} {e.error} — {e.publicId?.slice(-20)}
+                      </p>
+                    ))}
                   </div>
                 )}
               </div>

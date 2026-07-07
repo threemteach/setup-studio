@@ -119,31 +119,33 @@ export default async function handler(req, res) {
   const portfolioOnPage = pageIds.filter(id => id.includes("portfolio-thumbnails"))
   const unusedPortfolioOnPage = portfolioOnPage.filter(id => !usedIds.has(id))
 
-  // 4. Delete this page's unused images in batches of 100
-  const BATCH_SIZE = 100
+  // 4. Delete this page's unused images using the same proven endpoint as delete-image.js
   let pageDeleted = 0
+  const deleteErrors = []
 
-  for (let i = 0; i < unusedIds.length; i += BATCH_SIZE) {
-    const batch = unusedIds.slice(i, i + BATCH_SIZE)
+  for (const publicId of unusedIds) {
     try {
       const delRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload/destroy`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/destroy`,
         {
           method: "POST",
           headers: {
             Authorization: `Basic ${auth}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ public_ids: batch }),
+          body: JSON.stringify({ public_id: publicId }),
         }
       )
       if (delRes.ok) {
         const delData = await delRes.json()
-        if (delData.deleted) {
-          pageDeleted += Object.values(delData.deleted).filter(s => s === "deleted").length
-        }
+        if (delData.result === "ok") pageDeleted++
+      } else {
+        const errText = await delRes.text().catch(() => "unknown")
+        deleteErrors.push({ publicId, status: delRes.status, error: errText.slice(0, 100) })
       }
-    } catch { /* skip failed batch */ }
+    } catch (err) {
+      deleteErrors.push({ publicId, error: err.message })
+    }
   }
 
   const totalDeleted = accumulatedDeleted + pageDeleted
@@ -155,6 +157,8 @@ export default async function handler(req, res) {
     done: !nextCursor,
     page_portfolio_count: portfolioOnPage.length,
     page_portfolio_unused: unusedPortfolioOnPage.length,
+    delete_error_count: deleteErrors.length,
+    delete_errors_sample: deleteErrors.slice(0, 3),
     ...(debug ? { debug } : {}),
   })
 }
