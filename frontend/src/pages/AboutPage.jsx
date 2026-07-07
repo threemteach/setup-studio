@@ -81,7 +81,6 @@ export default function AboutPage() {
                     src={optimizeImageUrl(heroPhoto, 800)}
                     alt="Setup Studio production"
                     className="w-full h-[clamp(16rem,28vw,22rem)] object-cover"
-                    loading="eager"
                   />
                 </div>
                 <div className="absolute -bottom-3 -right-3 w-24 h-24 rounded-2xl bg-red/20 -z-10" />
@@ -108,7 +107,6 @@ export default function AboutPage() {
                   src={optimizeImageUrl(storyPhoto, 800)}
                   alt="Setup Studio interior"
                   className="w-full aspect-[4/3] object-cover"
-                  loading="lazy"
                 />
               </div>
             </Reveal>
