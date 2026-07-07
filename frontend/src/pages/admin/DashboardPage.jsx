@@ -4,7 +4,6 @@ import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchAllPhotos, fetchCoverPhoto } from "../../lib/photos"
 import { optimizeImageUrl } from "../../lib/images"
 import { fetchStorageUsage } from "../../lib/portfolio"
-import { getSupabase } from "../../lib/supabase"
 
 const statCards = [
   {
@@ -36,8 +35,7 @@ export default function DashboardPage() {
   const [coverPhotos, setCoverPhotos] = useState({})
   const [storage, setStorage] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [cleanupState, setCleanupState] = useState({ status: "idle", result: null }) // idle | running | done | error
-  const [purgeState, setPurgeState] = useState({ status: "idle", result: null })
+
 
   useEffect(() => {
     Promise.all([
@@ -56,82 +54,6 @@ export default function DashboardPage() {
     fetchStorageUsage().then(setStorage).catch(() => {})
     .finally(() => setLoading(false))
   }, [])
-
-  async function handlePurge() {
-    setPurgeState({ status: "running", result: null })
-    try {
-      const token = (await getSupabase().auth.getSession()).data.session?.access_token
-      const apiUrl = import.meta.env.PROD ? "/api/purge-cloudinary-cache" : "http://localhost:3001/api/purge-cloudinary-cache"
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-        throw new Error(err.error || "Purge failed")
-      }
-      const data = await res.json()
-      setPurgeState({ status: "done", result: data })
-    } catch (err) {
-      setPurgeState({ status: "error", result: err.message })
-    }
-  }
-
-  async function handleCleanup() {
-    setCleanupState({ status: "running", result: null })
-    try {
-      const token = (await getSupabase().auth.getSession()).data.session?.access_token
-      const apiUrl = import.meta.env.PROD ? "/api/cleanup-cloudinary" : "http://localhost:3001/api/cleanup-cloudinary"
-      let nextCursor = null
-      let totalDeleted = 0
-      let pageNum = 0
-
-      let totalOnCloudinary = 0
-      let usedInPhotos = 0
-      let usedFromPortfolio = 0
-      let sampleCloudinaryIds = []
-      let sampleUsedIds = []
-      let samplePortfolioUsedIds = []
-      let portfolioUsedCount = 0
-      let totalPortfolioOnCloud = 0
-      let totalPortfolioUnused = 0
-      let totalDeleteErrors = 0
-      let sampleDeleteErrors = []
-
-      do {
-        pageNum++
-        const res = await fetch(apiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-          body: JSON.stringify({ next_cursor: nextCursor, deleted_so_far: totalDeleted }),
-        })
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
-          throw new Error(err.error || `Cleanup failed on page ${pageNum}`)
-        }
-        const data = await res.json()
-        if (data.debug) {
-          totalOnCloudinary = data.debug.total_on_cloudinary || 0
-          usedInPhotos = data.debug.used_in_photos || 0
-          usedFromPortfolio = data.debug.used_from_portfolio_videos || 0
-          sampleCloudinaryIds = data.debug.sample_cloudinary_ids || []
-          sampleUsedIds = data.debug.sample_used_ids || []
-          samplePortfolioUsedIds = data.debug.sample_portfolio_used_ids || []
-          portfolioUsedCount = data.debug.portfolio_used_count || 0
-        }
-        totalPortfolioOnCloud += data.page_portfolio_count || 0
-        totalPortfolioUnused += data.page_portfolio_unused || 0
-        totalDeleteErrors += data.delete_error_count || 0
-        if (data.delete_errors_sample?.length) sampleDeleteErrors = data.delete_errors_sample
-        totalDeleted = data.total_deleted
-        nextCursor = data.next_cursor
-      } while (nextCursor)
-
-      setCleanupState({ status: "done", result: { deleted: totalDeleted, totalOnCloudinary, usedInPhotos, usedFromPortfolio, sampleCloudinaryIds, sampleUsedIds, samplePortfolioUsedIds, portfolioUsedCount, totalPortfolioOnCloud, totalPortfolioUnused, totalDeleteErrors, sampleDeleteErrors } })
-    } catch (err) {
-      setCleanupState({ status: "error", result: err.message })
-    }
-  }
 
   const categories = ["podcast", "reels", "office", "samples"]
   const categoryCounts = categories.map((slug) => {
@@ -263,108 +185,7 @@ export default function DashboardPage() {
             )
           })()}
 
-          {/* ─── Cloudinary Cleanup ─── */}
-          <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-5 mb-8">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div>
-                <span className="text-navy dark:text-white font-semibold text-sm">
-                  <i className="fa-solid fa-cloud mr-2 text-navy/40 dark:text-white/40" />Cloudinary
-                </span>
-                <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5">Clean up unused images that are no longer referenced in the database</p>
-              </div>
-              <button
-                onClick={handleCleanup}
-                disabled={cleanupState.status === "running"}
-                className="px-5 py-2 rounded-xl bg-red text-white text-sm font-semibold cursor-pointer hover:bg-red/90 transition-colors border-0 disabled:opacity-50"
-              >
-                {cleanupState.status === "running" ? (
-                  <><i className="fa-solid fa-spinner animate-spin mr-2" />Cleaning...</>
-                ) : (
-                  <><i className="fa-solid fa-broom mr-2" />Clean Up Unused</>
-                )}
-              </button>
-            </div>
-            {cleanupState.status === "done" && cleanupState.result && (
-              <div className="mt-4 p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-xs">
-                <p className="text-emerald-700 dark:text-emerald-300 font-semibold mb-1">
-                  <i className="fa-solid fa-circle-check mr-1" /> Cleanup Complete
-                </p>
-                <p className="text-emerald-600 dark:text-emerald-400">
-                  {cleanupState.result.deleted} unused images deleted from Cloudinary.
-                </p>
-                <p className="text-emerald-600/70 dark:text-emerald-400/70 mt-1 text-[11px]">
-                  Portfolio thumbnails on Cloudinary: {cleanupState.result.totalPortfolioOnCloud}, unused on this run: {cleanupState.result.totalPortfolioUnused}
-                </p>
-                {cleanupState.result.portfolioUsedCount > 0 && (
-                  <div className="mt-2 text-[10px] font-mono text-emerald-600/50 dark:text-emerald-400/50">
-                    <p>Portfolio thumbnails referenced in DB: {cleanupState.result.portfolioUsedCount}</p>
-                    <p>Sample portfolio DB public_ids: {cleanupState.result.samplePortfolioUsedIds?.join(", ")}</p>
-                  </div>
-                )}
-                {cleanupState.result.totalDeleteErrors > 0 && (
-                  <div className="mt-2 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
-                    <p className="text-red-700 dark:text-red-300 font-semibold text-[10px]">
-                      {cleanupState.result.totalDeleteErrors} delete errors
-                    </p>
-                    {cleanupState.result.sampleDeleteErrors?.map((e, i) => (
-                      <p key={i} className="text-red-600 dark:text-red-400 text-[9px] font-mono mt-0.5">
-                        {e.status || ""} {e.error} — {e.publicId?.slice(-20)}
-                      </p>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            {cleanupState.status === "error" && (
-              <div className="mt-4 p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-xs">
-                <p className="text-red-700 dark:text-red-300 font-semibold">
-                  <i className="fa-solid fa-circle-exclamation mr-1" /> Cleanup Failed
-                </p>
-                <p className="text-red-600 dark:text-red-400">{cleanupState.result}</p>
-              </div>
-            )}
-          </div>
 
-          {/* ─── Purge CDN Cache ─── */}
-          <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-5 mb-8">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div>
-                <span className="text-navy dark:text-white font-semibold text-sm">
-                  <i className="fa-solid fa-bolt mr-2 text-amber-500" />CDN Cache
-                </span>
-                <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5">Purge Cloudinary CDN cache for updated assets to appear immediately</p>
-              </div>
-              <button
-                onClick={handlePurge}
-                disabled={purgeState.status === "running"}
-                className="px-5 py-2 rounded-xl bg-amber-500 text-white text-sm font-semibold cursor-pointer hover:bg-amber-600 transition-colors border-0 disabled:opacity-50"
-              >
-                {purgeState.status === "running" ? (
-                  <><i className="fa-solid fa-spinner animate-spin mr-2" />Purging...</>
-                ) : (
-                  <><i className="fa-solid fa-trash-can mr-2" />Purge CDN Cache</>
-                )}
-              </button>
-            </div>
-            {purgeState.status === "done" && purgeState.result && (
-              <div className="mt-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-xs">
-                <p className="text-amber-700 dark:text-amber-300 font-semibold mb-1">
-                  <i className="fa-solid fa-circle-check mr-1" /> Cache Purge Requested
-                </p>
-                <p className="text-amber-600 dark:text-amber-400">
-                  {purgeState.result.purged} URLs purged. May take up to 30 minutes to propagate globally.
-                </p>
-              </div>
-            )}
-            {purgeState.status === "error" && (
-              <div className="mt-4 p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-xs">
-                <p className="text-red-700 dark:text-red-300 font-semibold">
-                  <i className="fa-solid fa-circle-exclamation mr-1" /> Purge Failed
-                </p>
-                <p className="text-red-600 dark:text-red-400">{purgeState.result}</p>
-              </div>
-            )}
-          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6.5 mb-8">
             {/* ─── Column 1 & 2: Dynamic Category Progress & Quick Actions ─── */}
