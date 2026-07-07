@@ -483,7 +483,7 @@ export default function PortfolioPageEdit() {
                     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4">
                       {/* Video Preview */}
                       <div className="aspect-video md:aspect-[4/3] rounded-xl overflow-hidden bg-black/50">
-                        <video src={video.video_url} className="w-full h-full object-cover" controls poster={video.thumbnail_url || undefined}
+                        <video src={video.video_url} className="w-full h-full object-contain" controls poster={video.thumbnail_url || undefined}
                           onPlay={(e) => {
                             if (currentVideoRef.current && currentVideoRef.current !== e.target) {
                               currentVideoRef.current.pause()
