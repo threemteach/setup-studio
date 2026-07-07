@@ -70,6 +70,10 @@ export default function DashboardPage() {
       let usedFromPortfolio = 0
       let sampleCloudinaryIds = []
       let sampleUsedIds = []
+      let samplePortfolioUsedIds = []
+      let portfolioUsedCount = 0
+      let totalPortfolioOnCloud = 0
+      let totalPortfolioUnused = 0
 
       do {
         pageNum++
@@ -89,12 +93,16 @@ export default function DashboardPage() {
           usedFromPortfolio = data.debug.used_from_portfolio_videos || 0
           sampleCloudinaryIds = data.debug.sample_cloudinary_ids || []
           sampleUsedIds = data.debug.sample_used_ids || []
+          samplePortfolioUsedIds = data.debug.sample_portfolio_used_ids || []
+          portfolioUsedCount = data.debug.portfolio_used_count || 0
         }
+        totalPortfolioOnCloud += data.page_portfolio_count || 0
+        totalPortfolioUnused += data.page_portfolio_unused || 0
         totalDeleted = data.total_deleted
         nextCursor = data.next_cursor
       } while (nextCursor)
 
-      setCleanupState({ status: "done", result: { deleted: totalDeleted, totalOnCloudinary, usedInPhotos, usedFromPortfolio, sampleCloudinaryIds, sampleUsedIds } })
+      setCleanupState({ status: "done", result: { deleted: totalDeleted, totalOnCloudinary, usedInPhotos, usedFromPortfolio, sampleCloudinaryIds, sampleUsedIds, samplePortfolioUsedIds, portfolioUsedCount, totalPortfolioOnCloud, totalPortfolioUnused } })
     } catch (err) {
       setCleanupState({ status: "error", result: err.message })
     }
@@ -259,15 +267,13 @@ export default function DashboardPage() {
                 <p className="text-emerald-600 dark:text-emerald-400">
                   {cleanupState.result.deleted} unused images deleted from Cloudinary.
                 </p>
-                {cleanupState.result.totalOnCloudinary > 0 && (
-                  <p className="text-emerald-600/70 dark:text-emerald-400/70 mt-1">
-                    Found {cleanupState.result.totalOnCloudinary} total on Cloudinary, {cleanupState.result.usedInPhotos} used in photos table, {cleanupState.result.usedFromPortfolio} from portfolio videos
-                  </p>
-                )}
-                {cleanupState.result.sampleCloudinaryIds?.length > 0 && (
+                <p className="text-emerald-600/70 dark:text-emerald-400/70 mt-1 text-[11px]">
+                  Portfolio thumbnails on Cloudinary: {cleanupState.result.totalPortfolioOnCloud}, unused on this run: {cleanupState.result.totalPortfolioUnused}
+                </p>
+                {cleanupState.result.portfolioUsedCount > 0 && (
                   <div className="mt-2 text-[10px] font-mono text-emerald-600/50 dark:text-emerald-400/50">
-                    <p>Sample Cloudinary public_ids: {cleanupState.result.sampleCloudinaryIds.join(", ")}</p>
-                    <p>Sample used public_ids: {cleanupState.result.sampleUsedIds.join(", ")}</p>
+                    <p>Portfolio thumbnails referenced in DB: {cleanupState.result.portfolioUsedCount}</p>
+                    <p>Sample portfolio DB public_ids: {cleanupState.result.samplePortfolioUsedIds?.join(", ")}</p>
                   </div>
                 )}
               </div>

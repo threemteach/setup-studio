@@ -101,16 +101,23 @@ export default async function handler(req, res) {
   const nextCursor = listData.next_cursor || null
 
   // Debug: show sample IDs on first page to understand format mismatch
+  const extactedPortfolioIds = [...usedIds].filter(id => id.includes("portfolio-thumbnails"))
   const debug = !incomingCursor ? {
     total_on_cloudinary: totalOnCloudinary,
     used_in_photos: usedIds.size,
     used_from_portfolio_videos: portfolioVideos?.length || 0,
     sample_cloudinary_ids: pageIds.slice(0, 3),
     sample_used_ids: [...usedIds].slice(0, 3),
+    sample_portfolio_used_ids: extactedPortfolioIds.slice(0, 5),
+    portfolio_used_count: extactedPortfolioIds.length,
   } : undefined
 
   // 3. Find unused IDs on this page
   const unusedIds = pageIds.filter(id => !usedIds.has(id))
+
+  // Debug portfolio thumbnails on this page
+  const portfolioOnPage = pageIds.filter(id => id.includes("portfolio-thumbnails"))
+  const unusedPortfolioOnPage = portfolioOnPage.filter(id => !usedIds.has(id))
 
   // 4. Delete this page's unused images in batches of 100
   const BATCH_SIZE = 100
@@ -146,6 +153,8 @@ export default async function handler(req, res) {
     total_deleted: totalDeleted,
     next_cursor: nextCursor,
     done: !nextCursor,
+    page_portfolio_count: portfolioOnPage.length,
+    page_portfolio_unused: unusedPortfolioOnPage.length,
     ...(debug ? { debug } : {}),
   })
 }
