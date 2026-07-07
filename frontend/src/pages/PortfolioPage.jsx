@@ -6,79 +6,12 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
-/* ─── Canvas thumbnail generator (no <video> in DOM) ───────────────────────── */
-function generateThumbFromVideo(videoUrl) {
-  return new Promise((resolve) => {
-    const vid = document.createElement("video")
-    vid.crossOrigin = "anonymous"
-    vid.preload = "metadata"
-    vid.muted = true
-    vid.playsInline = true
-
-    let settled = false
-    function done(result) {
-      if (settled) return
-      settled = true
-      vid.src = ""
-      vid.load()
-      resolve(result)
-    }
-
-    const timer = setTimeout(() => done(null), 12000)
-
-    function capture() {
-      clearTimeout(timer)
-      try {
-        const canvas = document.createElement("canvas")
-        canvas.width = vid.videoWidth || 320
-        canvas.height = vid.videoHeight || 180
-        canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
-        done(canvas.toDataURL("image/jpeg", 0.75))
-      } catch { done(null) }
-    }
-
-    vid.addEventListener("seeked", capture, { once: true })
-    vid.addEventListener("loadeddata", () => { vid.currentTime = 0.001 }, { once: true })
-    vid.addEventListener("error", () => { clearTimeout(timer); done(null) }, { once: true })
-
-    vid.src = videoUrl
-    vid.load()
-  })
-}
-
 /* ─────────────────────────────────────────────────────────────────────────────
-   VideoCard — lazy-loaded thumbnail only, no <video> element for previews
+   VideoCard — native <video> element, preload=metadata (first frame as poster)
 ───────────────────────────────────────────────────────────────────────────── */
 function VideoCard({ video, lang, onPlay }) {
-  const cardRef = useRef(null)
-  const [thumb, setThumb] = useState(video.thumbnail_url || null)
-  const [thumbLoading, setThumbLoading] = useState(!video.thumbnail_url)
-
-  // Generate canvas thumbnail lazily (only when card enters viewport)
-  useEffect(() => {
-    if (video.thumbnail_url) return
-    const el = cardRef.current
-    if (!el) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          observer.disconnect()
-          generateThumbFromVideo(video.video_url).then((dataUrl) => {
-            setThumb(dataUrl)
-            setThumbLoading(false)
-          })
-        }
-      },
-      { rootMargin: "200px" }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [video.thumbnail_url, video.video_url])
-
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
 
-  // ── Shared play-button overlay ────────────────────────────────────────────
   const PlayOverlay = (
     <div
       style={{
@@ -106,49 +39,23 @@ function VideoCard({ video, lang, onPlay }) {
   )
 
   return (
-    <div ref={cardRef} className="group mb-5">
+    <div className="group mb-5">
       <div
         className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-border/50 dark:border-[#1e2d3d]/50"
         style={{ transform: "translateZ(0)" }}
       >
-        {/* ── Preview area ──────────────────────────────────────────── */}
         <div
           className="relative cursor-pointer select-none overflow-hidden"
           onClick={() => onPlay(video)}
         >
-          {thumb ? (
-            <div style={{ position: "relative" }}>
-              <img
-                src={thumb}
-                alt={title}
-                draggable={false}
-                decoding="async"
-                loading="lazy"
-                style={{ display: "block", width: "100%", height: "auto" }}
-              />
-              {PlayOverlay}
-            </div>
-          ) : (
-            <div
-              style={{
-                position: "relative",
-                paddingTop: "56.25%",
-                background: "linear-gradient(135deg,#0c1e2e 0%,#162840 100%)",
-              }}
-            >
-              {thumbLoading && (
-                <div
-                  style={{
-                    position: "absolute", inset: 0,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                  }}
-                >
-                  <div className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
-                </div>
-              )}
-              {PlayOverlay}
-            </div>
-          )}
+          <video
+            src={video.video_url}
+            preload="metadata"
+            muted
+            playsInline
+            className="w-full h-auto block"
+          />
+          {PlayOverlay}
         </div>
 
         {/* ── Card info ───────────────────────────────────────────── */}
