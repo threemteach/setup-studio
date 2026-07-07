@@ -6,31 +6,36 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
-/* ─── Video Card — <video> with generated poster (Safari blank without poster) ── */
+/* ─── Video Card — <video> with generated poster (seek + rAF for Safari) ────── */
 function VideoCard({ video, lang, onPlay }) {
   const [poster, setPoster] = useState(null)
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
 
   useEffect(() => {
     if (video.thumbnail_url) { setPoster(video.thumbnail_url); return }
+    let done = false
     const vid = document.createElement("video")
     vid.crossOrigin = "anonymous"
     vid.preload = "metadata"
     vid.muted = true
     vid.playsInline = true
-    vid.onloadeddata = () => {
-      try {
-        const canvas = document.createElement("canvas")
-        canvas.width = vid.videoWidth || 320
-        canvas.height = vid.videoHeight || 180
-        canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
-        setPoster(canvas.toDataURL("image/jpeg", 0.75))
-      } catch { /* ignore */ }
-      vid.remove()
+    vid.onloadeddata = () => { vid.currentTime = 0.5 }
+    vid.onseeked = () => {
+      requestAnimationFrame(() => {
+        if (done) return; done = true
+        try {
+          const canvas = document.createElement("canvas")
+          canvas.width = vid.videoWidth || 320
+          canvas.height = vid.videoHeight || 180
+          canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
+          setPoster(canvas.toDataURL("image/jpeg", 0.75))
+        } catch { /* ignore */ }
+        vid.remove()
+      })
     }
-    vid.onerror = () => { vid.remove() }
+    vid.onerror = () => { if (!done) { done = true; vid.remove() } }
     vid.src = video.video_url
-    return () => { vid.remove() }
+    return () => { if (!done) { done = true; vid.remove() } }
   }, [video.video_url, video.thumbnail_url])
 
   return (
