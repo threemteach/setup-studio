@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase"
-import { uploadToCloudinary } from "./cloudinary"
+import { uploadToCloudinary, deleteCloudinaryImage } from "./cloudinary"
 
 const CHUNK_SIZE = 10 * 1024 * 1024
 const MULTIPART_THRESHOLD = 50 * 1024 * 1024
@@ -47,7 +47,14 @@ export async function upsertVideo(video) {
   return data
 }
 
-export async function deleteVideo(id, videoKey) {
+export async function deleteVideo(id, videoKey, thumbnailUrl) {
+  // Delete thumbnail from Cloudinary
+  if (thumbnailUrl) {
+    try {
+      await deleteCloudinaryImage(thumbnailUrl)
+    } catch { /* ignore Cloudinary delete errors */ }
+  }
+  // Delete video from R2
   if (videoKey) {
     try {
       const token = (await getSupabase().auth.getSession()).data.session?.access_token

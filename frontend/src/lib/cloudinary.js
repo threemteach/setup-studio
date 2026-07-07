@@ -23,3 +23,18 @@ export async function uploadToCloudinary(file, category) {
 
   return res.json()
 }
+
+export async function deleteCloudinaryImage(thumbnailUrl) {
+  const match = thumbnailUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-z]+$/i)
+  if (!match) return
+
+  const { getSupabase } = await import("./supabase")
+  const token = (await getSupabase().auth.getSession()).data.session?.access_token
+  const apiUrl = import.meta.env.PROD ? "/api/delete-image" : "http://localhost:3001/api/delete-image"
+
+  await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify({ public_id: match[1] }),
+  })
+}

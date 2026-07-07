@@ -6,39 +6,74 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   VideoCard
+/* ─── Canvas thumbnail generator (no <video> in DOM) ───────────────────────── */
+function generateThumbFromVideo(videoUrl) {
+  return new Promise((resolve) => {
+    const vid = document.createElement("video")
+    vid.crossOrigin = "anonymous"
+    vid.preload = "metadata"
+    vid.muted = true
+    vid.playsInline = true
 
-   ALL cards use the same rendering approach:
-   • thumbnail_url stored → <img> renders immediately, natural size
-   • no thumbnail_url   → <video> element renders natively in-place,
-     browser seeks to first frame after metadata loads.
-     No canvas, no CORS, works on every browser & device.
-───────────────────────────────────────────────────────────────────────────── */
-function VideoCard({ video, lang, onPlay }) {
-  const previewVidRef = useRef(null)
-  // Real video aspect ratio once metadata arrives (for the wrapper box)
-  const [vidRatio, setVidRatio] = useState(null) // height/width as %
-
-  // For videos without a stored thumbnail: seek native <video> to first frame
-  useEffect(() => {
-    if (video.thumbnail_url) return
-    const el = previewVidRef.current
-    if (!el) return
-
-    function onMeta() {
-      if (el.videoWidth && el.videoHeight) {
-        setVidRatio((el.videoHeight / el.videoWidth) * 100)
-      }
-      // Seek to first frame so the browser paints it
-      el.currentTime = 0.001
+    let settled = false
+    function done(result) {
+      if (settled) return
+      settled = true
+      vid.src = ""
+      vid.load()
+      resolve(result)
     }
 
-    el.addEventListener("loadedmetadata", onMeta, { once: true })
-    // Kick off metadata load
-    el.load()
+    const timer = setTimeout(() => done(null), 12000)
 
-    return () => el.removeEventListener("loadedmetadata", onMeta)
+    function capture() {
+      clearTimeout(timer)
+      try {
+        const canvas = document.createElement("canvas")
+        canvas.width = vid.videoWidth || 320
+        canvas.height = vid.videoHeight || 180
+        canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
+        done(canvas.toDataURL("image/jpeg", 0.75))
+      } catch { done(null) }
+    }
+
+    vid.addEventListener("seeked", capture, { once: true })
+    vid.addEventListener("loadeddata", () => { vid.currentTime = 0.001 }, { once: true })
+    vid.addEventListener("error", () => { clearTimeout(timer); done(null) }, { once: true })
+
+    vid.src = videoUrl
+    vid.load()
+  })
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   VideoCard — lazy-loaded thumbnail only, no <video> element for previews
+───────────────────────────────────────────────────────────────────────────── */
+function VideoCard({ video, lang, onPlay }) {
+  const cardRef = useRef(null)
+  const [thumb, setThumb] = useState(video.thumbnail_url || null)
+  const [thumbLoading, setThumbLoading] = useState(!video.thumbnail_url)
+
+  // Generate canvas thumbnail lazily (only when card enters viewport)
+  useEffect(() => {
+    if (video.thumbnail_url) return
+    const el = cardRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observer.disconnect()
+          generateThumbFromVideo(video.video_url).then((dataUrl) => {
+            setThumb(dataUrl)
+            setThumbLoading(false)
+          })
+        }
+      },
+      { rootMargin: "200px" }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [video.thumbnail_url, video.video_url])
 
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
@@ -71,7 +106,7 @@ function VideoCard({ video, lang, onPlay }) {
   )
 
   return (
-    <div className="group mb-5">
+    <div ref={cardRef} className="group mb-5">
       <div
         className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-border/50 dark:border-[#1e2d3d]/50"
         style={{ transform: "translateZ(0)" }}
@@ -81,47 +116,36 @@ function VideoCard({ video, lang, onPlay }) {
           className="relative cursor-pointer select-none overflow-hidden"
           onClick={() => onPlay(video)}
         >
-          {video.thumbnail_url ? (
-            /* ── PATH A: stored thumbnail → instant <img> ──────────── */
+          {thumb ? (
             <div style={{ position: "relative" }}>
               <img
-                src={video.thumbnail_url}
+                src={thumb}
                 alt={title}
                 draggable={false}
                 decoding="async"
+                loading="lazy"
                 style={{ display: "block", width: "100%", height: "auto" }}
               />
               {PlayOverlay}
             </div>
           ) : (
-            /* ── PATH B: no thumbnail → native <video> preview ─────── */
-            /*
-              Wrapper uses paddingTop to hold the correct aspect ratio.
-              Default 56.25% (16:9) until metadata tells us the real ratio.
-              The <video> is absolutely positioned inside to fill the box.
-            */
             <div
               style={{
                 position: "relative",
-                paddingTop: vidRatio ? `${vidRatio}%` : "56.25%",
+                paddingTop: "56.25%",
                 background: "linear-gradient(135deg,#0c1e2e 0%,#162840 100%)",
               }}
             >
-              <video
-                ref={previewVidRef}
-                src={video.video_url}
-                muted
-                playsInline
-                preload="metadata"
-                tabIndex={-1}
-                style={{
-                  position: "absolute", inset: 0,
-                  width: "100%", height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                  pointerEvents: "none",
-                }}
-              />
+              {thumbLoading && (
+                <div
+                  style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  <div className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
+                </div>
+              )}
               {PlayOverlay}
             </div>
           )}
@@ -291,6 +315,7 @@ function VideoModal({ video, onClose }) {
         ref={videoRef}
         src={video.video_url}
         controls
+        preload="none"
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
