@@ -99,7 +99,7 @@ export default function PortfolioPageEdit() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [translating, setTranslating] = useState(false)
   const [storage, setStorage] = useState(null)
-  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [confirmAction, setConfirmAction] = useState(null)
   const fileInputRef = useRef(null)
 
   function showToast(message, type = "success") {
@@ -178,12 +178,19 @@ export default function PortfolioPageEdit() {
   }
 
   function removeCategory(index) {
+    const heading = form?.categories?.[index]?.heading_en || ""
+    setConfirmAction({ type: "category", index, heading })
+  }
+  function confirmRemoveCategory() {
+    if (!confirmAction) return
+    const i = confirmAction.index
     const cats = [...(form?.categories || [])]
-    const removed = cats[index]
-    cats.splice(index, 1)
+    const removed = cats[i]
+    cats.splice(i, 1)
     setVal("categories", cats)
-    if (activeCategory === removed.slug && cats.length > 0) setActiveCategory(cats[0].slug)
+    if (activeCategory === removed?.slug && cats.length > 0) setActiveCategory(cats[0].slug)
     else if (cats.length === 0) setActiveCategory("")
+    setConfirmAction(null)
   }
 
   async function handleSave() {
@@ -241,17 +248,19 @@ export default function PortfolioPageEdit() {
   }
 
   async function handleDeleteVideo(video) {
-    setConfirmDelete(video)
+    setConfirmAction({ type: "video", item: video })
   }
   async function confirmDeleteVideo() {
-    if (!confirmDelete) return
+    const video = confirmAction?.item
+    if (!video) return
     try {
-      await deleteVideo(confirmDelete.id, confirmDelete.video_key)
-      setVideos(prev => prev.filter(v => v.id !== confirmDelete.id))
+      await deleteVideo(video.id, video.video_key)
+      setVideos(prev => prev.filter(v => v.id !== video.id))
       showToast("Video deleted")
     } catch (err) {
       showToast("Delete failed: " + err.message, "error")
     }
+    setConfirmAction(null)
   }
 
   async function handleVideoFieldChange(videoId, field, value) {
@@ -523,11 +532,18 @@ export default function PortfolioPageEdit() {
         )}
       </DarkSection>
 
-      {confirmDelete && (
+      {confirmAction?.type === "video" && (
         <ConfirmModal
-          message={`Delete video "${confirmDelete.title_en || confirmDelete.title_ar || ""}"?`}
+          message={`Delete video "${confirmAction.item.title_en || confirmAction.item.title_ar || ""}"?`}
           onConfirm={confirmDeleteVideo}
-          onCancel={() => setConfirmDelete(null)}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction?.type === "category" && (
+        <ConfirmModal
+          message={`Delete category "${confirmAction.heading}"?`}
+          onConfirm={confirmRemoveCategory}
+          onCancel={() => setConfirmAction(null)}
         />
       )}
       <Toast toast={toast} onClose={() => setToast(null)} />
