@@ -11,7 +11,7 @@ import ImageCropperModal from "../../components/admin/ImageCropper"
 
 // ─── Shared SVG diamond ───
 const Diamond = () => (
-  <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+  <svg className="hidden sm:block w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
     <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
   </svg>
 )
@@ -479,9 +479,9 @@ export default function AcademyPageEdit() {
           <div className="space-y-5">
             <div className="flex items-center w-full">
               <Diamond />
-              <span className="block flex-1 h-[2px] bg-red" />
+              <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <span className="text-white font-bold text-[clamp(2rem,5vw,3.25rem)] px-4 leading-tight shrink-0">Setup Academy</span>
-              <span className="block flex-1 h-[2px] bg-red" />
+              <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <Diamond />
             </div>
             <TextField value={val("hero_subtitle")} onChange={(v) => handleChange("hero_subtitle", v)} label="Subtitle" placeholder="Learn Content Creation Inside a Real Production Studio" dark
@@ -503,19 +503,19 @@ export default function AcademyPageEdit() {
       <LightSection id="why" title="Why Setup Academy" icon="fa-solid fa-question-circle" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="w-5 h-[2px] bg-red rounded-full" />
+            <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
             <LabelInput value={val("why_label")} onChange={(v) => handleChange("why_label", v)} placeholder="Why Setup Academy?"
               onTranslate={() => translateField("why_label", val("why_label"))}
               translating={translatingField === "why_label"} />
-            <span className="w-5 h-[2px] bg-red rounded-full" />
+            <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
           <div className="flex items-center w-full mb-1">
             <Diamond />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <HeadingInput value={val("why_heading")} onChange={(v) => handleChange("why_heading", v)} placeholder="What Makes Us Different?"
               onTranslate={() => translateField("why_heading", val("why_heading"))}
               translating={translatingField === "why_heading"} />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
           <p className="text-[10px] text-muted dark:text-white/40 text-center mb-3">
@@ -586,11 +586,11 @@ export default function AcademyPageEdit() {
       <LightSection id="audiences" title="Who Is It For" icon="fa-solid fa-users" bg="bg-[#f8f9fb]" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="flex items-center w-full mb-6 justify-center">
           <Diamond />
-          <span className="block flex-1 h-[2px] bg-red" />
+          <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <HeadingInput value={val("audience_heading")} onChange={(v) => handleChange("audience_heading", v)} placeholder="Who Is Setup Academy For?"
             onTranslate={() => translateField("audience_heading", val("audience_heading"))}
             translating={translatingField === "audience_heading"} />
-          <span className="block flex-1 h-[2px] bg-red" />
+          <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
         <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
@@ -655,11 +655,11 @@ export default function AcademyPageEdit() {
       <DarkSection id="firstCourse" title="First Course" icon="fa-solid fa-graduation-cap" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="w-5 h-[2px] bg-red rounded-full" />
+            <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
             <LabelInput value={val("first_course_label")} onChange={(v) => handleChange("first_course_label", v)} dark placeholder="Our First Course"
               onTranslate={() => translateField("first_course_label", val("first_course_label"))}
               translating={translatingField === "first_course_label"} />
-            <span className="w-5 h-[2px] bg-red rounded-full" />
+            <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -738,11 +738,11 @@ export default function AcademyPageEdit() {
             <PhotoField url={form?.instructor_photo_url} urlId={form?.instructor_photo_id} prefix="instructor" label="Instructor Photo" aspect="aspect-[16/7]" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-2">
-                <span className="w-5 h-[2px] bg-red rounded-full" />
+                <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
                 <LabelInput value={val("instructor_label")} onChange={(v) => handleChange("instructor_label", v)} placeholder="Instructor"
                   onTranslate={() => translateField("instructor_label", val("instructor_label"))}
                   translating={translatingField === "instructor_label"} />
-                <span className="block flex-1 h-[2px] bg-red" />
+                <span className="hidden sm:block flex-1 h-[2px] bg-red" />
                 <Diamond />
               </div>
               <div className="flex items-center gap-1">
@@ -793,11 +793,11 @@ export default function AcademyPageEdit() {
       <DarkSection id="expectations" title="What Students Can Expect" icon="fa-solid fa-star" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="flex items-center w-full mb-6 justify-center">
           <Diamond />
-          <span className="block flex-1 h-[2px] bg-red" />
+          <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <HeadingInput value={val("expectations_heading")} onChange={(v) => handleChange("expectations_heading", v)} dark placeholder="What Students Can Expect"
             onTranslate={() => translateField("expectations_heading", val("expectations_heading"))}
             translating={translatingField === "expectations_heading"} />
-          <span className="block flex-1 h-[2px] bg-red" />
+          <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
         <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
@@ -841,19 +841,19 @@ export default function AcademyPageEdit() {
       <LightSection id="production" title="Full Production Experience" icon="fa-solid fa-film" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="w-5 h-[2px] bg-red rounded-full" />
+            <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
             <LabelInput value={val("production_label")} onChange={(v) => handleChange("production_label", v)} placeholder="Full Production"
               onTranslate={() => translateField("production_label", val("production_label"))}
               translating={translatingField === "production_label"} />
-            <span className="w-5 h-[2px] bg-red rounded-full" />
+            <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
           <div className="flex items-center w-full mb-3">
             <Diamond />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <HeadingInput value={val("production_heading")} onChange={(v) => handleChange("production_heading", v)} placeholder="Beyond Just Shooting"
               onTranslate={() => translateField("production_heading", val("production_heading"))}
               translating={translatingField === "production_heading"} />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
           <p className="text-[10px] text-muted dark:text-white/40 -mt-2 mb-3">{ref("production_heading") || "—"}</p>
@@ -945,11 +945,11 @@ export default function AcademyPageEdit() {
               translating={translatingField === "beyond_label"} />
             <div className="flex items-center w-full">
               <Diamond />
-              <span className="block flex-1 h-[2px] bg-red" />
+              <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <HeadingInput value={val("beyond_heading")} onChange={(v) => handleChange("beyond_heading", v)} dark placeholder="More Than Just a Course"
                 onTranslate={() => translateField("beyond_heading", val("beyond_heading"))}
                 translating={translatingField === "beyond_heading"} />
-              <span className="block flex-1 h-[2px] bg-red" />
+              <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <Diamond />
             </div>
             <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("beyond_heading") || "—"}</p>
@@ -966,19 +966,19 @@ export default function AcademyPageEdit() {
       <LightSection id="upcoming" title="Upcoming Courses" icon="fa-solid fa-calendar-plus" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <span className="w-5 h-[2px] bg-red rounded-full" />
+            <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
             <LabelInput value={val("upcoming_label")} onChange={(v) => handleChange("upcoming_label", v)} placeholder="Coming Soon"
               onTranslate={() => translateField("upcoming_label", val("upcoming_label"))}
               translating={translatingField === "upcoming_label"} />
-            <span className="w-5 h-[2px] bg-red rounded-full" />
+            <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
           <div className="flex items-center w-full mb-3">
             <Diamond />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <HeadingInput value={val("upcoming_heading")} onChange={(v) => handleChange("upcoming_heading", v)} placeholder="Upcoming Courses"
               onTranslate={() => translateField("upcoming_heading", val("upcoming_heading"))}
               translating={translatingField === "upcoming_heading"} />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
           <p className="text-[10px] text-muted dark:text-white/40 -mt-2 mb-3">{ref("upcoming_heading") || "—"}</p>
@@ -1047,11 +1047,11 @@ export default function AcademyPageEdit() {
       <LightSection id="faq" title="FAQ" icon="fa-solid fa-circle-question" bg="bg-[#f8f9fb]" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="flex items-center w-full mb-6 justify-center">
           <Diamond />
-          <span className="block flex-1 h-[2px] bg-red" />
+          <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <HeadingInput value={val("faq_heading")} onChange={(v) => handleChange("faq_heading", v)} placeholder="Frequently Asked Questions"
             onTranslate={() => translateField("faq_heading", val("faq_heading"))}
             translating={translatingField === "faq_heading"} />
-          <span className="block flex-1 h-[2px] bg-red" />
+          <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
         <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
@@ -1117,11 +1117,11 @@ export default function AcademyPageEdit() {
           <div className="text-center md:text-left space-y-3 flex-1">
             <div className="flex items-center w-full">
               <Diamond />
-              <span className="block flex-1 h-[2px] bg-red" />
+              <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <HeadingInput value={val("cta_title")} onChange={(v) => handleChange("cta_title", v)} dark placeholder="Start Your Creative Journey"
                 onTranslate={() => translateField("cta_title", val("cta_title"))}
                 translating={translatingField === "cta_title"} />
-              <span className="block flex-1 h-[2px] bg-red" />
+              <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <Diamond />
             </div>
             <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-2">{ref("cta_title") || "—"}</p>

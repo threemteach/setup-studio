@@ -230,10 +230,10 @@ export default function AboutPageEdit() {
             {/* Left: text fields */}
             <div className="space-y-5">
               <div className="flex items-center gap-3 mb-2">
-                <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+                <svg className="hidden sm:block w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
                   <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
                 </svg>
-                <span className="block flex-1 h-[2px] bg-red" />
+                <span className="hidden sm:block flex-1 h-[2px] bg-red" />
                 <input
                   type="text"
                   value={val("hero_heading")}
@@ -246,8 +246,8 @@ export default function AboutPageEdit() {
                   title="Translate">
                   <i className={`fa-solid fa-language text-[9px] ${translatingField === "hero_heading" ? "animate-spin" : ""}`} />
                 </button>
-                <span className="block flex-1 h-[2px] bg-red" />
-                <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+                <span className="hidden sm:block flex-1 h-[2px] bg-red" />
+                <svg className="hidden sm:block w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
                   <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
                 </svg>
               </div>
