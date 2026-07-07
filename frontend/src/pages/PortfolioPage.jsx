@@ -148,10 +148,10 @@ export default function PortfolioPage() {
 
       {/* ═══════════ VIDEO PLAYER MODAL ═══════════ */}
       {activeVideo && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setActiveVideo(null)}>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center overflow-y-auto pt-[5vh] pb-8 px-4" onClick={() => setActiveVideo(null)}>
           <div className="w-full max-w-4xl bg-black rounded-3xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="relative">
-              <video src={activeVideo.video_url} controls autoPlay className="w-full aspect-video object-contain bg-black" poster={activeVideo.thumbnail_url || undefined} />
+              <video src={activeVideo.video_url} controls autoPlay className="w-full max-h-[75vh] object-contain bg-black" poster={activeVideo.thumbnail_url || undefined} />
               <button onClick={() => setActiveVideo(null)}
                 className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white border-0 cursor-pointer hover:bg-black/70 transition-colors flex items-center justify-center text-lg">
                 <i className="fa-solid fa-xmark" />
