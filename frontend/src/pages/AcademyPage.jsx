@@ -134,6 +134,7 @@ export default function AcademyPage() {
                     src={optimizeImageUrl(cmsPhoto("hero", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214841/setup-studio/locations/reels/z3cbr9ijav0r2c111hw4.jpg"), 800)}
                     alt="Setup Studio production"
                     className="w-full h-[clamp(16rem,28vw,22rem)] object-cover" style={{ objectPosition: 'center 70%' }}
+                    loading="eager"
                   />
                 </div>
                 <div className="absolute -bottom-3 ltr:-right-3 rtl:-left-3 w-24 h-24 rounded-2xl bg-red/20 -z-10" />
@@ -183,6 +184,7 @@ export default function AcademyPage() {
                     src={optimizeImageUrl(cmsPhoto("why", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214895/setup-studio/locations/reels/acphlvi0gzn7ag29zstf.jpg"), 800)}
                     alt="Studio production setup"
                     className="w-full aspect-[4/3] object-cover"
+                    loading="lazy"
                   />
                 </div>
                 <div className="absolute -bottom-4 ltr:-left-4 rtl:-right-4 w-20 h-20 rounded-xl bg-red/10 -z-10" />
@@ -296,6 +298,7 @@ export default function AcademyPage() {
                     src={optimizeImageUrl(cmsPhoto("first_course", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214748/setup-studio/locations/podcast/ss5shyhyqpksgpxdfwld.jpg"), 800)}
                     alt="Video production course"
                     className="w-full aspect-[16/9] object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute bottom-4 ltr:left-5 rtl:right-5 ltr:right-5 rtl:left-5 flex items-center justify-between">
@@ -364,6 +367,7 @@ export default function AcademyPage() {
                     src={optimizeImageUrl(cmsPhoto("instructor", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214750/setup-studio/locations/podcast/nazipuzb6ndg6pvzfam7.jpg"), 800)}
                     alt="Instructor"
                     className="w-full aspect-[16/7] object-cover"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                   <div className="absolute bottom-4 ltr:left-5 rtl:right-5">
@@ -479,6 +483,7 @@ export default function AcademyPage() {
                     src={optimizeImageUrl(cmsPhoto("production", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214897/setup-studio/locations/reels/lfe2rvpyltmegs7viffh.jpg"), 800)}
                     alt="Full production setup"
                     className="w-full aspect-[4/3] object-cover"
+                    loading="lazy"
                   />
                 </div>
               </div>
@@ -524,6 +529,7 @@ export default function AcademyPage() {
                     src={optimizeImageUrl(cmsPhoto("beyond", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214898/setup-studio/locations/reels/jigcuog93qjqliqk8ucv.jpg"), 800)}
                     alt="Creative community"
                     className="w-full aspect-[4/3] object-cover"
+                    loading="lazy"
                   />
                 </div>
               </div>

@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useState } from 'react'
 import { AuthProvider } from './contexts/AuthContext'
 import ProtectedRoute from './components/admin/ProtectedRoute'
 import Layout from './components/Layout'
+import SplashScreen from './components/ui/SplashScreen'
 import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import LocationsPage from './pages/LocationsPage'
@@ -18,8 +20,12 @@ import PortfolioPageEdit from './pages/admin/PortfolioPageEdit'
 import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
+  const [splashDone, setSplashDone] = useState(false)
+
   return (
-    <AuthProvider>
+    <>
+      {!splashDone && <SplashScreen onFinish={() => setSplashDone(true)} />}
+      <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -58,8 +64,9 @@ function App() {
           } />
           <Route path="/admin/*" element={<NotFoundPage />} />
         </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+        </BrowserRouter>
+      </AuthProvider>
+    </>
   )
 }
 
