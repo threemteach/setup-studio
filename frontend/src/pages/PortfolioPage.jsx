@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import Reveal from "../components/ui/Reveal"
 import Masonry from "react-masonry-css"
 import { useTranslation } from "../context/LanguageContext"
@@ -6,69 +6,34 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   VideoCard
-
-   ALL cards use the same rendering approach:
-   • thumbnail_url stored → <img> renders immediately, natural size
-   • no thumbnail_url   → <video> element renders natively in-place,
-     browser seeks to first frame after metadata loads.
-     No canvas, no CORS, works on every browser & device.
-───────────────────────────────────────────────────────────────────────────── */
-function VideoCard({ video, lang, onPlay }) {
+/* ─── VideoCard — native <video> preview + inline playback on click ──────────── */
+function VideoCard({ video, lang }) {
   const previewVidRef = useRef(null)
-  // Real video aspect ratio once metadata arrives (for the wrapper box)
-  const [vidRatio, setVidRatio] = useState(null) // height/width as %
+  const [vidRatio, setVidRatio] = useState(null)
+  const [playing, setPlaying] = useState(false)
 
-  // For videos without a stored thumbnail: seek native <video> to first frame
   useEffect(() => {
-    if (video.thumbnail_url) return
+    if (playing) return
     const el = previewVidRef.current
     if (!el) return
-
     function onMeta() {
-      if (el.videoWidth && el.videoHeight) {
-        setVidRatio((el.videoHeight / el.videoWidth) * 100)
-      }
-      // Seek to first frame so the browser paints it
+      if (el.videoWidth && el.videoHeight) setVidRatio((el.videoHeight / el.videoWidth) * 100)
       el.currentTime = 0.001
     }
-
     el.addEventListener("loadedmetadata", onMeta, { once: true })
-    // Kick off metadata load
     el.load()
-
     return () => el.removeEventListener("loadedmetadata", onMeta)
-  }, [video.thumbnail_url, video.video_url])
+  }, [video.video_url, playing])
 
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
 
-  // ── Shared play-button overlay ────────────────────────────────────────────
-  const PlayOverlay = (
-    <div
-      style={{
-        position: "absolute", inset: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        background: "rgba(0,0,0,0)",
-        transition: "background 0.2s",
-        pointerEvents: "none",
-      }}
-      className="group-hover:bg-black/20"
-    >
-      <div
-        style={{
-          width: 52, height: 52, borderRadius: "50%",
-          background: "rgba(231,59,73,0.92)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 8px 24px rgba(231,59,73,0.45)",
-          transition: "transform 0.2s",
-        }}
-        className="group-hover:scale-110"
-      >
-        <i className="fa-solid fa-play text-white" style={{ fontSize: 16, marginLeft: 3 }} />
-      </div>
-    </div>
-  )
+  function handlePlay() {
+    const el = previewVidRef.current
+    if (!el || playing) return
+    setPlaying(true)
+    el.play().catch(() => {})
+    el.load()
+  }
 
   return (
     <div className="group mb-5">
@@ -76,53 +41,51 @@ function VideoCard({ video, lang, onPlay }) {
         className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-border/50 dark:border-[#1e2d3d]/50"
         style={{ transform: "translateZ(0)" }}
       >
-        {/* ── Preview area ──────────────────────────────────────────── */}
         <div
           className="relative cursor-pointer select-none overflow-hidden"
-          onClick={() => onPlay(video)}
+          onClick={handlePlay}
         >
-          {video.thumbnail_url ? (
-            /* ── PATH A: stored thumbnail → instant <img> ──────────── */
-            <div style={{ position: "relative" }}>
-              <img
-                src={video.thumbnail_url}
-                alt={title}
-                draggable={false}
-                decoding="async"
-                style={{ display: "block", width: "100%", height: "auto" }}
-              />
-              {PlayOverlay}
-            </div>
-          ) : (
-            /* ── PATH B: no thumbnail → native <video> preview ─────── */
-            /*
-              Wrapper uses paddingTop to hold the correct aspect ratio.
-              Default 56.25% (16:9) until metadata tells us the real ratio.
-              The <video> is absolutely positioned inside to fill the box.
-            */
-            <div
+          <div
+            style={{
+              position: "relative",
+              paddingTop: vidRatio ? `${vidRatio}%` : "56.25%",
+              background: "linear-gradient(135deg,#0c1e2e 0%,#162840 100%)",
+            }}
+          >
+            <video
+              ref={previewVidRef}
+              src={video.video_url}
+              muted
+              playsInline
+              preload="metadata"
+              controls={playing}
+              poster={video.thumbnail_url || undefined}
+              tabIndex={-1}
               style={{
-                position: "relative",
-                paddingTop: vidRatio ? `${vidRatio}%` : "56.25%",
-                background: "linear-gradient(135deg,#0c1e2e 0%,#162840 100%)",
+                position: "absolute", inset: 0,
+                width: "100%", height: "100%",
+                objectFit: "cover",
+                display: "block",
+                pointerEvents: playing ? "auto" : "none",
               }}
+            />
+          </div>
+          {!playing && (
+            <div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none transition-colors duration-200 group-hover:bg-black/20"
             >
-              <video
-                ref={previewVidRef}
-                src={video.video_url}
-                muted
-                playsInline
-                preload="metadata"
-                tabIndex={-1}
+              <div
                 style={{
-                  position: "absolute", inset: 0,
-                  width: "100%", height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                  pointerEvents: "none",
+                  width: 52, height: 52, borderRadius: "50%",
+                  background: "rgba(231,59,73,0.92)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 8px 24px rgba(231,59,73,0.45)",
+                  transition: "transform 0.2s",
                 }}
-              />
-              {PlayOverlay}
+                className="group-hover:scale-110"
+              >
+                <i className="fa-solid fa-play text-white" style={{ fontSize: 16, marginLeft: 3 }} />
+              </div>
             </div>
           )}
         </div>
@@ -150,166 +113,6 @@ function VideoCard({ video, lang, onPlay }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   VideoModal — fullscreen overlay with native browser controls.
-   Works on: Chrome, Firefox, Edge, Brave, Safari macOS, Safari iOS, Android.
-───────────────────────────────────────────────────────────────────────────── */
-function VideoModal({ video, onClose }) {
-  const videoRef = useRef(null)
-  const overlayRef = useRef(null)
-
-  // Lock body scroll
-  useEffect(() => {
-    const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    return () => { document.body.style.overflow = prev }
-  }, [])
-
-  // Auto-play and request fullscreen
-  useEffect(() => {
-    if (!video) return
-    const el = videoRef.current
-    if (!el) return
-
-    const playVideo = () => el.play().catch(() => {})
-
-    const requestFS = () => {
-      if (el.requestFullscreen) {
-        el.requestFullscreen().catch(() => {})
-      } else if (el.webkitRequestFullscreen) {
-        el.webkitRequestFullscreen()
-      } else if (el.webkitEnterFullscreen) {
-        el.webkitEnterFullscreen()
-      }
-    }
-
-    const onCanPlay = () => {
-      playVideo()
-      requestFS()
-    }
-
-    el.addEventListener("canplay", onCanPlay, { once: true })
-    el.load()
-
-    return () => el.removeEventListener("canplay", onCanPlay)
-  }, [video])
-
-  // Close when fullscreen exits (standard + webkit + moz + ms)
-  useEffect(() => {
-    const handleFSChange = () => {
-      const active =
-        document.fullscreenElement ||
-        document.webkitFullscreenElement ||
-        document.mozFullScreenElement ||
-        document.msFullscreenElement
-      if (!active) {
-        videoRef.current?.pause()
-        onClose()
-      }
-    }
-    document.addEventListener("fullscreenchange", handleFSChange)
-    document.addEventListener("webkitfullscreenchange", handleFSChange)
-    document.addEventListener("mozfullscreenchange", handleFSChange)
-    document.addEventListener("MSFullscreenChange", handleFSChange)
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFSChange)
-      document.removeEventListener("webkitfullscreenchange", handleFSChange)
-      document.removeEventListener("mozfullscreenchange", handleFSChange)
-      document.removeEventListener("MSFullscreenChange", handleFSChange)
-    }
-  }, [onClose])
-
-  // iOS Safari: fullscreen change fires on the video element itself
-  useEffect(() => {
-    const el = videoRef.current
-    if (!el) return
-    const onIOSFS = () => {
-      if (!el.webkitDisplayingFullscreen) {
-        el.pause()
-        onClose()
-      }
-    }
-    el.addEventListener("webkitbeginfullscreen", () => {})
-    el.addEventListener("webkitendfullscreen", onIOSFS)
-    return () => {
-      el.removeEventListener("webkitendfullscreen", onIOSFS)
-    }
-  }, [onClose])
-
-  // Escape key
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") { videoRef.current?.pause(); onClose() }
-    }
-    document.addEventListener("keydown", onKey)
-    return () => document.removeEventListener("keydown", onKey)
-  }, [onClose])
-
-  const close = useCallback(() => {
-    videoRef.current?.pause()
-    onClose()
-  }, [onClose])
-
-  if (!video) return null
-
-  return (
-    <div
-      ref={overlayRef}
-      onClick={(e) => { if (e.target === overlayRef.current) close() }}
-      style={{
-        position: "fixed", inset: 0, zIndex: 9999,
-        background: "#000",
-        display: "flex", alignItems: "center", justifyContent: "center",
-      }}
-    >
-      {/* Close button — always visible above video */}
-      <button
-        onClick={close}
-        aria-label="Close"
-        style={{
-          position: "absolute",
-          top: "max(12px, env(safe-area-inset-top, 12px))",
-          right: "max(12px, env(safe-area-inset-right, 12px))",
-          zIndex: 10001,
-          background: "rgba(255,255,255,0.15)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          borderRadius: "50%",
-          width: 44, height: 44,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", color: "#fff", fontSize: 18,
-          transition: "background 0.2s, transform 0.15s",
-        }}
-        onPointerEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.28)"; e.currentTarget.style.transform = "scale(1.1)" }}
-        onPointerLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.15)"; e.currentTarget.style.transform = "scale(1)" }}
-      >
-        <i className="fa-solid fa-xmark" />
-      </button>
-
-      {/* The video — fills the whole black overlay */}
-      <video
-        ref={videoRef}
-        src={video.video_url}
-        controls
-        playsInline
-        webkit-playsinline="true"
-        x5-playsinline="true"
-        x5-video-player-type="h5"
-        x5-video-player-fullscreen="true"
-        style={{
-          width: "100%", height: "100%",
-          maxWidth: "100%", maxHeight: "100%",
-          objectFit: "contain",
-          background: "#000",
-          outline: "none",
-          display: "block",
-        }}
-      />
-    </div>
-  )
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
    PortfolioPage
 ───────────────────────────────────────────────────────────────────────────── */
 export default function PortfolioPage() {
@@ -318,7 +121,6 @@ export default function PortfolioPage() {
   const [videosByCategory, setVideosByCategory] = useState({})
   const [activeCategory, setActiveCategory] = useState("")
   const [loading, setLoading] = useState(true)
-  const [activeVideo, setActiveVideo] = useState(null)
 
   useEffect(() => {
     fetchPortfolioContent()
@@ -327,7 +129,6 @@ export default function PortfolioPage() {
         const cats = data?.categories || []
         if (cats.length > 0) {
           setActiveCategory(cats[0].slug)
-          // All categories in parallel
           const results = await Promise.all(
             cats.map((cat) => fetchPortfolioVideos(cat.slug).catch(() => []))
           )
@@ -339,9 +140,6 @@ export default function PortfolioPage() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
-
-  const handlePlay = useCallback((video) => setActiveVideo(video), [])
-  const handleClose = useCallback(() => setActiveVideo(null), [])
 
   const cms = (field) => cmsData?.[`${field}_${lang}`] || cmsData?.[`${field}_en`] || ""
   const categories = cmsData?.categories || []
@@ -454,7 +252,6 @@ export default function PortfolioPage() {
                           <VideoCard
                             video={video}
                             lang={lang}
-                            onPlay={handlePlay}
                           />
                         </Reveal>
                       ))}
@@ -468,10 +265,6 @@ export default function PortfolioPage() {
         </div>
       </section>
 
-      {/* ── Fullscreen player ─────────────────────────────────────── */}
-      {activeVideo && (
-        <VideoModal video={activeVideo} onClose={handleClose} />
-      )}
     </div>
   )
 }
