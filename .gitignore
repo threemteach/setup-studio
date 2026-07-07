@@ -3,4 +3,6 @@ dist/
 frontend/dist/
 .DS_Store
 .env
+frontend/env
+frontend/env.example
 

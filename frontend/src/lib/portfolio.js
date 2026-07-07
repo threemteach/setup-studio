@@ -1,23 +1,10 @@
 import { getSupabase } from "./supabase"
-import { S3Client, PutObjectCommand, DeleteObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, AbortMultipartUploadCommand, ListObjectsV2Command, ListMultipartUploadsCommand, ListPartsCommand } from "@aws-sdk/client-s3"
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
-const r2Endpoint = import.meta.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
-const r2Bucket = import.meta.env.VITE_R2_BUCKET_NAME || "setup-studio-videos"
+const CHUNK_SIZE = 10 * 1024 * 1024
+const MULTIPART_THRESHOLD = 50 * 1024 * 1024
+const TOTAL_LIMIT = 100 * 1024 * 1024 * 1024
+
 const r2PublicUrl = import.meta.env.VITE_R2_PUBLIC_URL
-const r2AccessKeyId = import.meta.env.VITE_R2_ACCESS_KEY_ID
-const r2SecretAccessKey = import.meta.env.VITE_R2_SECRET_ACCESS_KEY
-
-const CHUNK_SIZE = 10 * 1024 * 1024 // 10MB per part
-const MULTIPART_THRESHOLD = 50 * 1024 * 1024 // 50MB
-
-function getR2Client() {
-  return new S3Client({
-    region: "auto",
-    endpoint: r2Endpoint,
-    credentials: { accessKeyId: r2AccessKeyId, secretAccessKey: r2SecretAccessKey },
-  })
-}
 
 export async function fetchPortfolioContent() {
   const supabase = getSupabase()
@@ -62,8 +49,13 @@ export async function upsertVideo(video) {
 export async function deleteVideo(id, videoKey) {
   if (videoKey) {
     try {
-      const client = getR2Client()
-      await client.send(new DeleteObjectCommand({ Bucket: r2Bucket, Key: videoKey }))
+      const token = (await getSupabase().auth.getSession()).data.session?.access_token
+      const apiUrl = import.meta.env.PROD ? "/api/delete-video" : "http://localhost:3001/api/delete-video"
+      await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ video_key: videoKey }),
+      })
     } catch { /* ignore R2 delete errors */ }
   }
   const supabase = getSupabase()
@@ -72,15 +64,21 @@ export async function deleteVideo(id, videoKey) {
 }
 
 async function uploadSimple(file, key, contentType, onProgress) {
-  const client = getR2Client()
-  const uploadUrl = await getSignedUrl(
-    client,
-    new PutObjectCommand({ Bucket: r2Bucket, Key: key, ContentType: contentType }),
-    { expiresIn: 3600 }
-  )
+  const token = (await getSupabase().auth.getSession()).data.session?.access_token
+  const apiUrl = import.meta.env.PROD ? "/api/generate-upload-url" : "http://localhost:3001/api/generate-upload-url"
+  const res = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify({ filename: key, contentType, category: key.split("/")[0] }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error || `Failed to get upload URL: HTTP ${res.status}`)
+  }
+  const { upload_url } = await res.json()
   await new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open("PUT", uploadUrl)
+    xhr.open("PUT", upload_url)
     xhr.setRequestHeader("Content-Type", contentType)
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable && onProgress) onProgress(e.loaded, e.total)
@@ -95,21 +93,7 @@ async function uploadSimple(file, key, contentType, onProgress) {
 }
 
 async function uploadMultipart(file, key, contentType, onProgress) {
-  const client = getR2Client()
   const partSize = CHUNK_SIZE
-
-  // 1. Create multipart upload via presigned URL
-  const createUrl = await getSignedUrl(
-    client,
-    new CreateMultipartUploadCommand({ Bucket: r2Bucket, Key: key, ContentType: contentType }),
-    { expiresIn: 3600 }
-  )
-  const createRes = await fetch(createUrl, { method: "POST" })
-  if (!createRes.ok) throw new Error(`CreateMultipartUpload failed: HTTP ${createRes.status}`)
-  const xml = await createRes.text()
-  const uploadId = xml.match(/<UploadId>([^<]+)<\/UploadId>/)?.[1]
-  if (!uploadId) throw new Error("Failed to parse UploadId from CreateMultipartUpload response")
-
   const numParts = Math.ceil(file.size / partSize)
   const done = new Array(numParts).fill(0)
   function reportProgress() {
@@ -123,30 +107,40 @@ async function uploadMultipart(file, key, contentType, onProgress) {
     if (onProgress) onProgress(bytes, file.size)
   }
 
+  const token = (await getSupabase().auth.getSession()).data.session?.access_token
+  const apiUrl = import.meta.env.PROD ? "/api/generate-upload-url" : "http://localhost:3001/api/generate-upload-url"
+
+  // 1. Create multipart upload via server API
+  const createRes = await fetch(apiUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify({ filename: key, contentType, category: key.split("/")[0], multipart: true }),
+  })
+  if (!createRes.ok) throw new Error(`CreateMultipartUpload failed: HTTP ${createRes.status}`)
+  const { uploadId } = await createRes.json()
+
   const CONCURRENCY = 6
   try {
-    const parts_config = Array.from({ length: numParts }, (_, i) => ({
+    const partsConfig = Array.from({ length: numParts }, (_, i) => ({
       start: i * partSize,
       end: Math.min((i + 1) * partSize, file.size),
     }))
 
     for (let batch = 0; batch < numParts; batch += CONCURRENCY) {
       const batchEnd = Math.min(batch + CONCURRENCY, numParts)
-      const batchSlice = parts_config.slice(batch, batchEnd)
+      const batchSlice = partsConfig.slice(batch, batchEnd)
+      const partNumbers = batchSlice.map((_, j) => batch + j + 1)
 
-      // Generate presigned URLs for this batch
-      const partUrls = await Promise.all(
-        batchSlice.map((_, j) => {
-          const i = batch + j
-          return getSignedUrl(
-            client,
-            new UploadPartCommand({ Bucket: r2Bucket, Key: key, UploadId: uploadId, PartNumber: i + 1 }),
-            { expiresIn: 3600 }
-          )
-        })
-      )
+      // Generate presigned URLs for this batch via server
+      const partsApiUrl = import.meta.env.PROD ? "/api/generate-upload-part-urls" : "http://localhost:3001/api/generate-upload-part-urls"
+      const urlsRes = await fetch(partsApiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify({ key, uploadId, partNumbers }),
+      })
+      if (!urlsRes.ok) throw new Error(`Failed to get part URLs: HTTP ${urlsRes.status}`)
+      const { partUrls } = await urlsRes.json()
 
-      // Upload parts in parallel via XHR (same as simple upload)
       await Promise.all(
         batchSlice.map((p, j) => {
           const i = batch + j
@@ -175,9 +169,9 @@ async function uploadMultipart(file, key, contentType, onProgress) {
       )
     }
 
-    // 3. Complete multipart via server API (no CORS)
-    const apiUrl = import.meta.env.PROD ? "/api/complete-multipart" : "http://localhost:3001/api/complete-multipart"
-    const completeRes = await fetch(apiUrl, {
+    // 3. Complete multipart via server API
+    const completeApiUrl = import.meta.env.PROD ? "/api/complete-multipart" : "http://localhost:3001/api/complete-multipart"
+    const completeRes = await fetch(completeApiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key, uploadId }),
@@ -187,22 +181,23 @@ async function uploadMultipart(file, key, contentType, onProgress) {
       throw new Error(`CompleteMultipartUpload failed: ${errData.error || `HTTP ${completeRes.status}`}`)
     }
   } catch (err) {
-    const abortUrl = await getSignedUrl(
-      client,
-      new AbortMultipartUploadCommand({ Bucket: r2Bucket, Key: key, UploadId: uploadId }),
-      { expiresIn: 60 }
-    ).catch(() => null)
-    if (abortUrl) await fetch(abortUrl, { method: "DELETE" }).catch(() => {})
+    // abort multipart
+    try {
+      const abortApiUrl = import.meta.env.PROD ? "/api/abort-multipart" : "http://localhost:3001/api/abort-multipart"
+      await fetch(abortApiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, uploadId }),
+      })
+    } catch {}
     throw err
   }
 }
 
 export async function uploadVideo(file, category, onProgress) {
-  if (!r2AccessKeyId || !r2SecretAccessKey || !r2PublicUrl) {
-    throw new Error("R2 credentials not configured. Add VITE_R2_ACCESS_KEY_ID, VITE_R2_SECRET_ACCESS_KEY, and VITE_R2_PUBLIC_URL to .env")
+  if (!r2PublicUrl) {
+    throw new Error("VITE_R2_PUBLIC_URL not configured")
   }
-
-  const client = getR2Client()
   const key = `${category}/${Date.now()}-${file.name}`
   const contentType = file.type || "video/mp4"
 
@@ -215,51 +210,13 @@ export async function uploadVideo(file, category, onProgress) {
   return { video_url: `${r2PublicUrl}/${key}`, video_key: key }
 }
 
-const TOTAL_LIMIT = 100 * 1024 * 1024 * 1024 // 100 GB
-
 export async function fetchStorageUsage() {
-  // try Cloudflare API first (exact dashboard number)
-  try {
-    const res = await fetch("/api/r2-storage")
-    if (res.ok) {
-      const data = await res.json()
-      if (data.usedBytes != null) return formatStorage(data.usedBytes)
-    }
-  } catch {}
-  // fallback: S3-based calculation
-  const client = getR2Client()
-  let total = 0, isTruncated = true, cursor
-  while (isTruncated) {
-    const result = await client.send(new ListObjectsV2Command({
-      Bucket: r2Bucket,
-      ContinuationToken: cursor,
-    }))
-    if (result.Contents) total += result.Contents.reduce((s, o) => s + (o.Size || 0), 0)
-    cursor = result.NextContinuationToken
-    isTruncated = result.IsTruncated
+  const res = await fetch("/api/r2-storage")
+  if (res.ok) {
+    const data = await res.json()
+    if (data.usedBytes != null) return formatStorage(data.usedBytes)
   }
-  let muTruncated = true, muKey, muUploadId
-  while (muTruncated) {
-    const muResult = await client.send(new ListMultipartUploadsCommand({
-      Bucket: r2Bucket,
-      KeyMarker: muKey,
-      UploadIdMarker: muUploadId,
-    }))
-    if (muResult.Uploads) {
-      for (const upload of muResult.Uploads) {
-        let pt = true, pm
-        while (pt) {
-          const pr = await client.send(new ListPartsCommand({
-            Bucket: r2Bucket, Key: upload.Key, UploadId: upload.UploadId, PartNumberMarker: pm,
-          }))
-          if (pr.Parts) total += pr.Parts.reduce((s, p) => s + (p.Size || 0), 0)
-          pm = pr.NextPartNumberMarker; pt = pr.IsTruncated
-        }
-      }
-    }
-    muKey = muResult.NextKeyMarker; muUploadId = muResult.NextUploadIdMarker; muTruncated = muResult.IsTruncated
-  }
-  return formatStorage(total)
+  return formatStorage(0)
 }
 
 function formatStorage(total) {

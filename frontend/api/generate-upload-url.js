@@ -1,32 +1,23 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
+import { S3Client, PutObjectCommand, CreateMultipartUploadCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 
 export default async function handler(req, res) {
   res.setHeader("Content-Type", "application/json")
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" })
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" })
 
   const authHeader = req.headers.authorization
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
-  if (!token) {
-    return res.status(401).json({ error: "Missing authorization token" })
-  }
+  if (!token) return res.status(401).json({ error: "Missing authorization token" })
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY
   const { createClient } = await import("@supabase/supabase-js")
   const supabase = createClient(supabaseUrl, supabaseKey)
   const { data: { user }, error: authError } = await supabase.auth.getUser(token)
-  if (authError || !user) {
-    return res.status(401).json({ error: "Unauthorized" })
-  }
+  if (authError || !user) return res.status(401).json({ error: "Unauthorized" })
 
-  const { filename, contentType, category } = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {}
-  if (!filename || !category) {
-    return res.status(400).json({ error: "Missing filename or category" })
-  }
+  const { filename, contentType, category, multipart } = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {}
+  if (!filename || !category) return res.status(400).json({ error: "Missing filename or category" })
 
   const endpoint = process.env.R2_ENDPOINT || process.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
   const bucket = process.env.R2_BUCKET_NAME || process.env.VITE_R2_BUCKET_NAME || "setup-studio-videos"
@@ -45,17 +36,27 @@ export default async function handler(req, res) {
   })
 
   const key = `${category}/${Date.now()}-${filename}`
+
+  if (multipart) {
+    const command = new CreateMultipartUploadCommand({
+      Bucket: bucket,
+      Key: key,
+      ContentType: contentType || "video/mp4",
+    })
+    const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 })
+    const createRes = await fetch(uploadUrl, { method: "POST" })
+    if (!createRes.ok) return res.status(502).json({ error: `CreateMultipartUpload failed: HTTP ${createRes.status}` })
+    const xml = await createRes.text()
+    const uploadId = xml.match(/<UploadId>([^<]+)<\/UploadId>/)?.[1]
+    if (!uploadId) return res.status(502).json({ error: "Failed to parse UploadId" })
+    return res.json({ key, uploadId, video_url: `${publicUrl}/${key}`, video_key: key })
+  }
+
   const command = new PutObjectCommand({
     Bucket: bucket,
     Key: key,
     ContentType: contentType || "video/mp4",
   })
-
   const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 })
-
-  return res.status(200).json({
-    upload_url: uploadUrl,
-    video_key: key,
-    video_url: `${publicUrl}/${key}`,
-  })
+  return res.json({ upload_url: uploadUrl, video_key: key, video_url: `${publicUrl}/${key}` })
 }
