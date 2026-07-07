@@ -135,7 +135,7 @@ export default function PortfolioPage() {
                         <div className="group cursor-pointer mb-5" onClick={() => setActiveVideo(video)}>
                           <div className="rounded-2xl overflow-hidden bg-gray-900 relative shadow-md">
                             <video src={video.video_url} className="w-full h-auto block" muted playsInline poster={video.thumbnail_url || undefined} />
-                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-100 transition-opacity">
                               <div className="w-16 h-16 rounded-full bg-red/90 flex items-center justify-center shadow-xl">
                                 <i className="fa-solid fa-play text-white text-xl ml-1" />
                               </div>
