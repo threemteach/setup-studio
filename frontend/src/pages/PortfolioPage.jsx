@@ -6,9 +6,69 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
-/* ─── VideoCard — light placeholder + play button, video loads in modal on click ── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   VideoCard
+
+   ALL cards use the same rendering approach:
+   • thumbnail_url stored → <img> renders immediately, natural size
+   • no thumbnail_url   → <video> element renders natively in-place,
+     browser seeks to first frame after metadata loads.
+     No canvas, no CORS, works on every browser & device.
+───────────────────────────────────────────────────────────────────────────── */
 function VideoCard({ video, lang, onPlay }) {
+  const previewVidRef = useRef(null)
+  // Real video aspect ratio once metadata arrives (for the wrapper box)
+  const [vidRatio, setVidRatio] = useState(null) // height/width as %
+
+  // For videos without a stored thumbnail: seek native <video> to first frame
+  useEffect(() => {
+    if (video.thumbnail_url) return
+    const el = previewVidRef.current
+    if (!el) return
+
+    function onMeta() {
+      if (el.videoWidth && el.videoHeight) {
+        setVidRatio((el.videoHeight / el.videoWidth) * 100)
+      }
+      // Seek to first frame so the browser paints it
+      el.currentTime = 0.001
+    }
+
+    el.addEventListener("loadedmetadata", onMeta, { once: true })
+    // Kick off metadata load
+    el.load()
+
+    return () => el.removeEventListener("loadedmetadata", onMeta)
+  }, [video.thumbnail_url, video.video_url])
+
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
+
+  // ── Shared play-button overlay ────────────────────────────────────────────
+  const PlayOverlay = (
+    <div
+      style={{
+        position: "absolute", inset: 0,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        background: "rgba(0,0,0,0)",
+        transition: "background 0.2s",
+        pointerEvents: "none",
+      }}
+      className="group-hover:bg-black/20"
+    >
+      <div
+        style={{
+          width: 52, height: 52, borderRadius: "50%",
+          background: "rgba(231,59,73,0.92)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: "0 8px 24px rgba(231,59,73,0.45)",
+          transition: "transform 0.2s",
+        }}
+        className="group-hover:scale-110"
+      >
+        <i className="fa-solid fa-play text-white" style={{ fontSize: 16, marginLeft: 3 }} />
+      </div>
+    </div>
+  )
 
   return (
     <div className="group mb-5">
@@ -16,26 +76,58 @@ function VideoCard({ video, lang, onPlay }) {
         className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-border/50 dark:border-[#1e2d3d]/50"
         style={{ transform: "translateZ(0)" }}
       >
+        {/* ── Preview area ──────────────────────────────────────────── */}
         <div
-          className="relative cursor-pointer select-none overflow-hidden bg-gradient-to-br from-[#0c1e2e] to-[#162840]"
+          className="relative cursor-pointer select-none overflow-hidden"
           onClick={() => onPlay(video)}
         >
-          <div className="w-full aspect-video flex items-center justify-center">
+          {video.thumbnail_url ? (
+            /* ── PATH A: stored thumbnail → instant <img> ──────────── */
+            <div style={{ position: "relative" }}>
+              <img
+                src={video.thumbnail_url}
+                alt={title}
+                draggable={false}
+                decoding="async"
+                style={{ display: "block", width: "100%", height: "auto" }}
+              />
+              {PlayOverlay}
+            </div>
+          ) : (
+            /* ── PATH B: no thumbnail → native <video> preview ─────── */
+            /*
+              Wrapper uses paddingTop to hold the correct aspect ratio.
+              Default 56.25% (16:9) until metadata tells us the real ratio.
+              The <video> is absolutely positioned inside to fill the box.
+            */
             <div
               style={{
-                width: 52, height: 52, borderRadius: "50%",
-                background: "rgba(231,59,73,0.92)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 8px 24px rgba(231,59,73,0.45)",
-                transition: "transform 0.2s",
+                position: "relative",
+                paddingTop: vidRatio ? `${vidRatio}%` : "56.25%",
+                background: "linear-gradient(135deg,#0c1e2e 0%,#162840 100%)",
               }}
-              className="group-hover:scale-110"
             >
-              <i className="fa-solid fa-play text-white" style={{ fontSize: 16, marginLeft: 3 }} />
+              <video
+                ref={previewVidRef}
+                src={video.video_url}
+                muted
+                playsInline
+                preload="metadata"
+                tabIndex={-1}
+                style={{
+                  position: "absolute", inset: 0,
+                  width: "100%", height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                  pointerEvents: "none",
+                }}
+              />
+              {PlayOverlay}
             </div>
-          </div>
+          )}
         </div>
 
+        {/* ── Card info ───────────────────────────────────────────── */}
         <div style={{ padding: "14px 16px" }} className={lang === "ar" ? "text-right" : ""}>
           <h3
             style={{ margin: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}
@@ -199,7 +291,6 @@ function VideoModal({ video, onClose }) {
         ref={videoRef}
         src={video.video_url}
         controls
-        preload="none"
         playsInline
         webkit-playsinline="true"
         x5-playsinline="true"
