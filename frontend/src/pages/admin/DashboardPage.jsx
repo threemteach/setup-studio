@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [storage, setStorage] = useState(null)
   const [loading, setLoading] = useState(true)
   const [cleanupState, setCleanupState] = useState({ status: "idle", result: null }) // idle | running | done | error
+  const [purgeState, setPurgeState] = useState({ status: "idle", result: null })
 
   useEffect(() => {
     Promise.all([
@@ -55,6 +56,26 @@ export default function DashboardPage() {
     fetchStorageUsage().then(setStorage).catch(() => {})
     .finally(() => setLoading(false))
   }, [])
+
+  async function handlePurge() {
+    setPurgeState({ status: "running", result: null })
+    try {
+      const token = (await getSupabase().auth.getSession()).data.session?.access_token
+      const apiUrl = import.meta.env.PROD ? "/api/purge-cloudinary-cache" : "http://localhost:3001/api/purge-cloudinary-cache"
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }))
+        throw new Error(err.error || "Purge failed")
+      }
+      const data = await res.json()
+      setPurgeState({ status: "done", result: data })
+    } catch (err) {
+      setPurgeState({ status: "error", result: err.message })
+    }
+  }
 
   async function handleCleanup() {
     setCleanupState({ status: "running", result: null })
@@ -300,6 +321,47 @@ export default function DashboardPage() {
                   <i className="fa-solid fa-circle-exclamation mr-1" /> Cleanup Failed
                 </p>
                 <p className="text-red-600 dark:text-red-400">{cleanupState.result}</p>
+              </div>
+            )}
+          </div>
+
+          {/* ─── Purge CDN Cache ─── */}
+          <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-5 mb-8">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <span className="text-navy dark:text-white font-semibold text-sm">
+                  <i className="fa-solid fa-bolt mr-2 text-amber-500" />CDN Cache
+                </span>
+                <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5">Purge Cloudinary CDN cache for updated assets to appear immediately</p>
+              </div>
+              <button
+                onClick={handlePurge}
+                disabled={purgeState.status === "running"}
+                className="px-5 py-2 rounded-xl bg-amber-500 text-white text-sm font-semibold cursor-pointer hover:bg-amber-600 transition-colors border-0 disabled:opacity-50"
+              >
+                {purgeState.status === "running" ? (
+                  <><i className="fa-solid fa-spinner animate-spin mr-2" />Purging...</>
+                ) : (
+                  <><i className="fa-solid fa-trash-can mr-2" />Purge CDN Cache</>
+                )}
+              </button>
+            </div>
+            {purgeState.status === "done" && purgeState.result && (
+              <div className="mt-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-xs">
+                <p className="text-amber-700 dark:text-amber-300 font-semibold mb-1">
+                  <i className="fa-solid fa-circle-check mr-1" /> Cache Purge Requested
+                </p>
+                <p className="text-amber-600 dark:text-amber-400">
+                  {purgeState.result.purged} URLs purged. May take up to 30 minutes to propagate globally.
+                </p>
+              </div>
+            )}
+            {purgeState.status === "error" && (
+              <div className="mt-4 p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-xs">
+                <p className="text-red-700 dark:text-red-300 font-semibold">
+                  <i className="fa-solid fa-circle-exclamation mr-1" /> Purge Failed
+                </p>
+                <p className="text-red-600 dark:text-red-400">{purgeState.result}</p>
               </div>
             )}
           </div>
