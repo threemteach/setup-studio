@@ -480,10 +480,10 @@ export default function PortfolioPageEdit() {
                       className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center z-10">
                       <i className="fa-solid fa-trash-can" />
                     </button>
-                    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4">
-                      {/* Video Preview */}
-                      <div className="aspect-video md:aspect-[4/3] rounded-xl overflow-hidden bg-black/50">
-                        <video src={video.video_url} className="w-full h-full object-contain" controls poster={video.thumbnail_url || undefined}
+                    <div className="space-y-3">
+                      {/* Video Preview — full width */}
+                      <div className="rounded-xl overflow-hidden bg-black/50 max-h-[500px] flex items-center justify-center">
+                        <video src={video.video_url} className="w-full h-auto max-h-[500px] object-contain" controls poster={video.thumbnail_url || undefined}
                           onPlay={(e) => {
                             if (currentVideoRef.current && currentVideoRef.current !== e.target) {
                               currentVideoRef.current.pause()
