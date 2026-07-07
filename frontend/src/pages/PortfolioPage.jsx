@@ -148,24 +148,22 @@ export default function PortfolioPage() {
 
       {/* ═══════════ VIDEO PLAYER MODAL ═══════════ */}
       {activeVideo && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setActiveVideo(null)}>
-          <div className="w-full max-w-4xl rounded-3xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="relative">
-              <video src={activeVideo.video_url} controls autoPlay className="w-full max-h-[90vh] object-contain bg-black" poster={activeVideo.thumbnail_url || undefined} />
-              <button onClick={() => setActiveVideo(null)}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white border-0 cursor-pointer hover:bg-black/70 transition-colors flex items-center justify-center text-lg z-10">
-                <i className="fa-solid fa-xmark" />
-              </button>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-6 pt-12 pb-4">
-                <h3 className="text-white font-bold text-lg m-0">
-                  {t(activeVideo.title_en, activeVideo.title_ar, lang) || t("Untitled", "بدون عنوان", lang)}
-                </h3>
-                {(activeVideo.description_en || activeVideo.description_ar) && (
-                  <p className="text-white/60 text-sm mt-1 m-0">
-                    {t(activeVideo.description_en, activeVideo.description_ar, lang)}
-                  </p>
-                )}
-              </div>
+        <div className="fixed inset-0 z-50 flex flex-col bg-black" onClick={() => setActiveVideo(null)}>
+          <div className="relative flex-1 min-h-0 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+            <video src={activeVideo.video_url} controls autoPlay className="w-full h-full object-contain" poster={activeVideo.thumbnail_url || undefined} />
+            <button onClick={() => setActiveVideo(null)}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white border-0 cursor-pointer hover:bg-black/70 transition-colors flex items-center justify-center text-lg z-10">
+              <i className="fa-solid fa-xmark" />
+            </button>
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent px-6 pt-12 pb-4 pointer-events-none">
+              <h3 className="text-white font-bold text-lg m-0">
+                {t(activeVideo.title_en, activeVideo.title_ar, lang) || t("Untitled", "بدون عنوان", lang)}
+              </h3>
+              {(activeVideo.description_en || activeVideo.description_ar) && (
+                <p className="text-white/60 text-sm mt-1 m-0">
+                  {t(activeVideo.description_en, activeVideo.description_ar, lang)}
+                </p>
+              )}
             </div>
           </div>
         </div>
