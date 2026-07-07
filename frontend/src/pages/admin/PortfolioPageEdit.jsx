@@ -407,10 +407,10 @@ export default function PortfolioPageEdit() {
           {categories.map((cat, i) => (
             <div key={i} className="p-4 rounded-2xl border border-border bg-white relative group">
               <button onClick={() => removeCategory(i)}
-                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                <i className="fa-solid fa-xmark" />
-              </button>
-              <TextField value={lang === "en" ? cat.heading_en : cat.heading_ar}
+                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center z-10">
+              <i className="fa-solid fa-xmark" />
+            </button>
+            <TextField value={lang === "en" ? cat.heading_en : cat.heading_ar}
                 onChange={(v) => setCatItem(i, lang === "en" ? "heading_en" : "heading_ar", v)}
                 onBlur={() => handleHeadingBlur(i)}
                 label={`Heading (${lang === "en" ? "EN" : "AR"})`}
@@ -477,7 +477,7 @@ export default function PortfolioPageEdit() {
                 videos.map((video) => (
                   <div key={video.id} className="p-4 rounded-2xl border border-white/10 bg-white/5 relative group">
                     <button onClick={() => handleDeleteVideo(video)}
-                      className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center z-10">
                       <i className="fa-solid fa-trash-can" />
                     </button>
                     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4">
