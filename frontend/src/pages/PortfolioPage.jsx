@@ -31,8 +31,12 @@ function VideoCard({ video, lang }) {
     const el = previewVidRef.current
     if (!el || playing) return
     setPlaying(true)
-    el.play().catch(() => {})
-    el.load()
+    el.play().catch(() => {
+      el.addEventListener("canplay", () => {
+        el.play().catch(() => {})
+      }, { once: true })
+      el.load()
+    })
     if (el.requestFullscreen) {
       el.requestFullscreen().catch(() => {})
     }
@@ -58,7 +62,6 @@ function VideoCard({ video, lang }) {
             <video
               ref={previewVidRef}
               src={video.video_url}
-              playsInline
               preload="metadata"
               controls={playing}
               poster={video.thumbnail_url || undefined}
@@ -67,9 +70,9 @@ function VideoCard({ video, lang }) {
                   position: "absolute", inset: 0,
                   width: "100%", height: "100%",
                   objectFit: playing ? "contain" : "cover",
-                display: "block",
-                pointerEvents: playing ? "auto" : "none",
-              }}
+                  display: "block",
+                  pointerEvents: playing ? "auto" : "none",
+                }}
             />
           </div>
           {!playing && (
