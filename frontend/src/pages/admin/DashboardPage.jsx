@@ -161,7 +161,7 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* ─── R2 Storage Bar ─── */}
+          {/* ─── Storage Bar ─── */}
           {storage && (() => {
             const pct = (storage.usedBytes / storage.limitBytes) * 100
             const barColor = pct < 70 ? "bg-green-500" : pct < 90 ? "bg-yellow-500" : "bg-red-500"
@@ -169,7 +169,7 @@ export default function DashboardPage() {
             return (
               <div className="bg-white rounded-3xl border border-border/50 shadow-sm p-5 mb-8">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-navy font-semibold text-sm"><i className="fa-solid fa-database mr-2 text-navy/40" />R2 Storage</span>
+                  <span className="text-navy font-semibold text-sm"><i className="fa-solid fa-database mr-2 text-navy/40" />Database</span>
                   <span className={`text-xs font-bold ${textColor}`}>{storage.usedMB.toFixed(2)} MB / {storage.limitGB} GB</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">

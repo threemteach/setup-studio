@@ -86,9 +86,9 @@ async function uploadSimple(file, key, contentType, onProgress) {
     }
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) resolve()
-      else reject(new Error(`Upload to R2 failed: HTTP ${xhr.status}`))
+      else reject(new Error(`Upload failed: HTTP ${xhr.status}`))
     }
-    xhr.onerror = () => reject(new Error("Upload to R2 failed: network error"))
+    xhr.onerror = () => reject(new Error("Upload failed: network error"))
     xhr.send(file)
   })
 }

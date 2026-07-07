@@ -370,7 +370,7 @@ export default function PortfolioPageEdit() {
         return (
           <div className="bg-white rounded-3xl border border-border/50 shadow-sm p-5 mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-navy font-semibold text-sm"><i className="fa-solid fa-database mr-2 text-navy/40" />R2 Storage</span>
+              <span className="text-navy font-semibold text-sm"><i className="fa-solid fa-database mr-2 text-navy/40" />Database</span>
               <span className={`text-xs font-bold ${textColor}`}>{storage.usedMB.toFixed(2)} MB / {storage.limitGB} GB</span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
@@ -466,7 +466,7 @@ export default function PortfolioPageEdit() {
                   <div className="h-full bg-red rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
                 </div>
               )}
-              <p className="text-white/30 text-xs mt-2">Supports MP4, MOV, WebM — uploaded directly to Cloudflare R2</p>
+              <p className="text-white/30 text-xs mt-2">Supports MP4, MOV, WebM — uploaded directly to database</p>
             </div>
 
             {/* Video List */}
