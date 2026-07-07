@@ -1,5 +1,4 @@
 import { getSupabase } from "./supabase"
-import { uploadToCloudinary, deleteCloudinaryImage } from "./cloudinary"
 
 const CHUNK_SIZE = 10 * 1024 * 1024
 const MULTIPART_THRESHOLD = 50 * 1024 * 1024
@@ -47,15 +46,8 @@ export async function upsertVideo(video) {
   return data
 }
 
-export async function deleteVideo(id, videoKey, thumbnailUrl) {
+export async function deleteVideo(id, videoKey) {
   const token = (await getSupabase().auth.getSession()).data.session?.access_token
-  // Delete thumbnail from Cloudinary
-  if (thumbnailUrl) {
-    try {
-      await deleteCloudinaryImage(thumbnailUrl, token)
-    } catch { /* ignore Cloudinary delete errors */ }
-  }
-  // Delete video from R2
   if (videoKey) {
     try {
       const apiUrl = import.meta.env.PROD ? "/api/delete-video" : "http://localhost:3001/api/delete-video"
@@ -206,78 +198,15 @@ export async function uploadVideo(file, category, onProgress) {
   if (!r2PublicUrl) {
     throw new Error("VITE_R2_PUBLIC_URL not configured")
   }
-
-  // Generate thumbnail from local file FIRST (before R2 upload completes)
-  const thumbnailPromise = captureVideoFrame(file)
-
   const key = `${category}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`
   const contentType = file.type || "video/mp4"
-
   if (file.size < MULTIPART_THRESHOLD) {
     await uploadSimple(file, key, contentType, onProgress)
   } else {
     await uploadMultipart(file, key, contentType, onProgress)
   }
-
   const video_url = `${r2PublicUrl}/${key}`
-
-  // Upload thumbnail to Cloudinary
-  let thumbnail_url = null
-  try {
-    const dataUrl = await thumbnailPromise
-    if (dataUrl) {
-      const blob = dataURItoBlob(dataUrl)
-      const result = await uploadToCloudinary(new File([blob], "thumb.jpg", { type: "image/jpeg" }), "portfolio-thumbnails")
-      thumbnail_url = result.secure_url
-    }
-  } catch { /* thumbnail optional */ }
-
-  return { video_url, video_key: key, thumbnail_url }
-}
-
-function dataURItoBlob(dataUrl) {
-  const parts = dataUrl.split(",")
-  const mime = parts[0].match(/:(.*?);/)?.[1] || "image/jpeg"
-  const binary = atob(parts[1])
-  const array = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i)
-  return new Blob([array], { type: mime })
-}
-
-function captureVideoFrame(file) {
-  return new Promise((resolve) => {
-    const url = URL.createObjectURL(file)
-    const vid = document.createElement("video")
-    vid.muted = true
-    vid.playsInline = true
-
-    let done = false
-    function finish(result) {
-      if (done) return
-      done = true
-      clearTimeout(timer)
-      URL.revokeObjectURL(url)
-      vid.remove()
-      resolve(result)
-    }
-
-    const timer = setTimeout(() => finish(null), 15000)
-
-    vid.onloadeddata = () => {
-      requestAnimationFrame(() => {
-        try {
-          const canvas = document.createElement("canvas")
-          canvas.width = vid.videoWidth || 320
-          canvas.height = vid.videoHeight || 180
-          canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
-          finish(canvas.toDataURL("image/jpeg", 0.75))
-        } catch { finish(null) }
-      })
-    }
-    vid.onerror = () => finish(null)
-
-    vid.src = url
-  })
+  return { video_url, video_key: key }
 }
 
 export async function fetchStorageUsage() {

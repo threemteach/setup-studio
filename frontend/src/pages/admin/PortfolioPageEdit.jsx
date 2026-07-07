@@ -281,7 +281,6 @@ export default function PortfolioPageEdit() {
           category: activeCategory,
           video_url: result.video_url,
           video_key: result.video_key,
-          thumbnail_url: result.thumbnail_url || "",
           sort_order: videos.length + i,
         })
       ))
@@ -304,7 +303,7 @@ export default function PortfolioPageEdit() {
     const video = confirmAction?.item
     if (!video) return
     try {
-      await deleteVideo(video.id, video.video_key, video.thumbnail_url)
+      await deleteVideo(video.id, video.video_key)
       setVideos(prev => prev.filter(v => v.id !== video.id))
       showToast("Video deleted")
     } catch (err) {
