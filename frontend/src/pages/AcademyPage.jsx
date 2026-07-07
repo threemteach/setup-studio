@@ -6,53 +6,58 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
-/* ─── Video Card — <video> with generated poster (seek + rAF for Safari) ────── */
+/* ─── Video Card — canvas thumbnail (dataURL, no upload), lazy via IntersectionObserver ── */
 function VideoCard({ video, lang, onPlay }) {
-  const [poster, setPoster] = useState(null)
+  const cardRef = useRef(null)
+  const [thumb, setThumb] = useState(video.thumbnail_url || null)
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
 
   useEffect(() => {
-    if (video.thumbnail_url) { setPoster(video.thumbnail_url); return }
+    if (video.thumbnail_url) return
+    const el = cardRef.current
+    if (!el) return
     let done = false
-    const vid = document.createElement("video")
-    vid.crossOrigin = "anonymous"
-    vid.preload = "metadata"
-    vid.muted = true
-    vid.playsInline = true
-    vid.onloadeddata = () => { vid.currentTime = 0.5 }
-    vid.onseeked = () => {
-      requestAnimationFrame(() => {
-        if (done) return; done = true
-        try {
-          const canvas = document.createElement("canvas")
-          canvas.width = vid.videoWidth || 320
-          canvas.height = vid.videoHeight || 180
-          canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
-          setPoster(canvas.toDataURL("image/jpeg", 0.75))
-        } catch { /* ignore */ }
-        vid.remove()
-      })
-    }
-    vid.onerror = () => { if (!done) { done = true; vid.remove() } }
-    vid.src = video.video_url
-    return () => { if (!done) { done = true; vid.remove() } }
-  }, [video.video_url, video.thumbnail_url])
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting || done) return
+      done = true
+      observer.disconnect()
+      const vid = document.createElement("video")
+      vid.crossOrigin = "anonymous"
+      vid.preload = "metadata"
+      vid.muted = true
+      vid.playsInline = true
+      vid.onloadeddata = () => { vid.currentTime = 0.001 }
+      vid.onseeked = () => {
+        requestAnimationFrame(() => {
+          try {
+            const canvas = document.createElement("canvas")
+            canvas.width = vid.videoWidth || 320
+            canvas.height = vid.videoHeight || 180
+            canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
+            setThumb(canvas.toDataURL("image/jpeg", 0.75))
+          } catch { /* ignore */ }
+          vid.remove()
+        })
+      }
+      vid.onerror = () => { vid.remove() }
+      vid.src = video.video_url
+    }, { rootMargin: "200px" })
+    observer.observe(el)
+    return () => { observer.disconnect() }
+  }, [video.thumbnail_url, video.video_url])
 
   return (
-    <div className="group mb-5">
+    <div ref={cardRef} className="group mb-5">
       <div className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border/50 dark:border-[#1e2d3d]/50">
         <div
           className="relative cursor-pointer select-none"
           onClick={() => onPlay(video)}
         >
-          <video
-            src={video.video_url}
-            preload="metadata"
-            muted
-            playsInline
-            poster={poster || undefined}
-            className="w-full h-auto block"
-          />
+          {thumb ? (
+            <img src={thumb} alt={title} className="w-full h-auto block" draggable={false} />
+          ) : (
+            <div className="w-full aspect-video bg-gradient-to-br from-[#0c1e2e] to-[#162840]" />
+          )}
 
           {/* Play overlay */}
           <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center pointer-events-none">
