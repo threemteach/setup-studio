@@ -48,8 +48,8 @@ export default function ImageCropperModal({ src, aspect, onConfirm, onCancel }) 
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
-            objectFit="contain"
-            restrictPosition={false}
+            objectFit="cover"
+            restrictPosition={true}
             style={{
               containerStyle: { background: "#0A1216" },
               cropAreaStyle: { border: "2px solid #e74c4c", color: "#e74c4c" },
