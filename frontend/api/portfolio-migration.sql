@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS portfolio_content (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
-ALTER TABLE portfolio_content DISABLE ROW LEVEL SECURITY;
+-- RLS will be enabled via rls-policies.sql
 
 INSERT INTO portfolio_content (id, hero_heading_en, hero_heading_ar, hero_subtitle_en, hero_subtitle_ar)
 VALUES (1, 'Our Work', 'أعمالنا', 'Explore our video production portfolio across different categories', 'تصفح أعمالنا في إنتاج الفيديو عبر مختلف الفئات')
@@ -32,6 +32,6 @@ CREATE TABLE IF NOT EXISTS portfolio_videos (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
-ALTER TABLE portfolio_videos DISABLE ROW LEVEL SECURITY;
+-- RLS will be enabled via rls-policies.sql
 
 CREATE INDEX IF NOT EXISTS idx_portfolio_videos_category ON portfolio_videos(category);
