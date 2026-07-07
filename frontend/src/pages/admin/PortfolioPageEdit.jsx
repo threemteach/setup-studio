@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, upsertVideo, deleteVideo, uploadVideo, fetchStorageUsage } from "../../lib/portfolio"
 import { autoTranslateSection } from "../../lib/homepage"
+import Toast from "../../components/ui/Toast"
 
 const Diamond = () => (
   <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
@@ -517,23 +518,7 @@ export default function PortfolioPageEdit() {
         )}
       </DarkSection>
 
-      {/* Toast */}
-      {toast && (
-        <div className={`fixed bottom-6 right-6 z-[300] px-5 py-3 rounded-2xl shadow-2xl text-sm font-semibold text-white transition-all duration-300 ${toast.type === "error" ? "bg-red" : "bg-green-600"}`}
-          style={{ animation: "slideUp 0.3s ease-out" }}>
-          <div className="flex items-center gap-2.5">
-            <i className={`fa-solid ${toast.type === "error" ? "fa-circle-exclamation" : "fa-check-circle"}`} />
-            {toast.message}
-          </div>
-        </div>
-      )}
-
-      <style>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </AdminLayout>
   )
 }
