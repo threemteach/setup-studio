@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import Toast from "../../components/ui/Toast"
+import ConfirmModal from "../../components/admin/ConfirmModal"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, copyImageToHomepage, autoTranslateSection } from "../../lib/homepage"
 import { optimizeImageUrl } from "../../lib/images"
@@ -26,6 +27,7 @@ export default function HomepageEdit() {
   const [allPhotos, setAllPhotos] = useState([])
   const [photoPicker, setPhotoPicker] = useState(null)
   const [toast, setToast] = useState(null)
+  const [confirmAction, setConfirmAction] = useState(null)
   const fileInputRef = useRef(null)
 
   const showToast = useCallback((message, type = "success") => {
@@ -121,10 +123,23 @@ export default function HomepageEdit() {
   }
 
   function removePhoto(sectionName, index) {
-    const localized = getLocalized(sectionName)
+    setConfirmAction({ type: "photo", sectionName, index })
+  }
+  function confirmRemovePhoto() {
+    if (!confirmAction) return
+    const localized = getLocalized(confirmAction.sectionName)
     const photos = [...(localized.photos || [])]
-    photos[index] = null
-    setPhotos(sectionName, photos)
+    photos[confirmAction.index] = null
+    setPhotos(confirmAction.sectionName, photos)
+    setConfirmAction(null)
+  }
+  function confirmRemoveFeature() {
+    if (!confirmAction) return
+    const { planIndex: i, featureIndex: j } = confirmAction
+    const plans = [...getLocalized("quotes").plans]
+    plans[i].features = plans[i].features.filter((_, k) => k !== j)
+    setLocalized("quotes", { ...getLocalized("quotes"), plans })
+    setConfirmAction(null)
   }
 
   async function handleAutoTranslate() {
@@ -433,11 +448,7 @@ export default function HomepageEdit() {
                           className="flex-1 bg-transparent border-0 border-b border-dotted border-gray-200 text-navy/70 text-xs outline-none focus:border-navy/40 pb-0.5"
                         />
                         <button
-                          onClick={() => {
-                            const plans = [...getLocalized("quotes").plans]
-                            plans[i].features = plans[i].features.filter((_, k) => k !== j)
-                            setLocalized("quotes", { ...getLocalized("quotes"), plans })
-                          }}
+                          onClick={() => setConfirmAction({ type: "feature", planIndex: i, featureIndex: j })}
                           className="text-red/50 hover:text-red text-xs bg-transparent border-0 cursor-pointer p-0 leading-none"
                         >
                           <i className="fa-solid fa-xmark" />
@@ -508,6 +519,20 @@ export default function HomepageEdit() {
         </div>
       )}
 
+      {confirmAction?.type === "photo" && (
+        <ConfirmModal
+          message="Remove this photo?"
+          onConfirm={confirmRemovePhoto}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction?.type === "feature" && (
+        <ConfirmModal
+          message="Remove this feature?"
+          onConfirm={confirmRemoveFeature}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
       <Toast toast={toast} onClose={closeToast} />
     </AdminLayout>
   )

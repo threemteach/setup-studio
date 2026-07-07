@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import Toast from "../../components/ui/Toast"
+import ConfirmModal from "../../components/admin/ConfirmModal"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchAcademyContent, updateAcademyContent, uploadAcademyImage, copyImageToAcademy } from "../../lib/academy"
 import { optimizeImageUrl } from "../../lib/images"
@@ -240,6 +241,7 @@ export default function AcademyPageEdit() {
   const [allPhotos, setAllPhotos] = useState([])
   const [photoPicker, setPhotoPicker] = useState(null)
   const [toast, setToast] = useState(null)
+  const [confirmAction, setConfirmAction] = useState(null)
   const fileInputRef = useRef(null)
   const [collapsed, setCollapsed] = useState({})
 
@@ -292,9 +294,20 @@ export default function AcademyPageEdit() {
   }
 
   function removeArrayItem(field, index) {
-    const arr = [...(form?.[field] || [])]
-    arr.splice(index, 1)
-    setVal(field, arr)
+    setConfirmAction({ type: "array", field, index })
+  }
+  function confirmRemoveArrayItem() {
+    if (!confirmAction) return
+    const arr = [...(form?.[confirmAction.field] || [])]
+    arr.splice(confirmAction.index, 1)
+    setVal(confirmAction.field, arr)
+    setConfirmAction(null)
+  }
+  function confirmClearPhoto() {
+    const p = confirmAction.prefix
+    setVal(p + "_photo_url", null)
+    setVal(p + "_photo_id", null)
+    setConfirmAction(null)
   }
 
   async function handleSave() {
@@ -509,7 +522,7 @@ export default function AcademyPageEdit() {
             <TextField value={val("hero_subtitle")} onChange={(v) => handleChange("hero_subtitle", v)} label="Subtitle" placeholder="Learn Content Creation Inside a Real Production Studio" dark />
             <TextField value={val("hero_body")} onChange={(v) => handleChange("hero_body", v)} label="Body Text" type="textarea" rows={4} placeholder="Setup Academy is the educational arm of Setup Studio..." dark />
           </div>
-          <PhotoField url={form?.hero_photo_url} urlId={form?.hero_photo_id} prefix="hero" label="Hero Photo" dark onPick={setPhotoPicker} onClear={(p) => { setVal(p+"_photo_url", null); setVal(p+"_photo_id", null) }} />
+          <PhotoField url={form?.hero_photo_url} urlId={form?.hero_photo_id} prefix="hero" label="Hero Photo" dark onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
         </div>
       </DarkSection>
 
@@ -535,7 +548,7 @@ export default function AcademyPageEdit() {
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
-          <PhotoField url={form?.why_photo_url} urlId={form?.why_photo_id} prefix="why" label="Photo" onPick={setPhotoPicker} onClear={(p) => { setVal(p+"_photo_url", null); setVal(p+"_photo_id", null) }} />
+          <PhotoField url={form?.why_photo_url} urlId={form?.why_photo_id} prefix="why" label="Photo" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
           <TextField value={val("why_body")} onChange={(v) => handleChange("why_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Instead of traditional theory-heavy courses..." />
         </div>
         <div>
@@ -614,7 +627,7 @@ export default function AcademyPageEdit() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="rounded-3xl border border-white/10 bg-white overflow-hidden">
-            <PhotoField url={form?.first_course_photo_url} urlId={form?.first_course_photo_id} prefix="first_course" label="Course Card Photo" aspect="aspect-video" onPick={setPhotoPicker} onClear={(p) => { setVal(p+"_photo_url", null); setVal(p+"_photo_id", null) }} />
+            <PhotoField url={form?.first_course_photo_url} urlId={form?.first_course_photo_id} prefix="first_course" label="Course Card Photo" aspect="aspect-video" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-navy/10 flex items-center justify-center shrink-0">
@@ -655,7 +668,7 @@ export default function AcademyPageEdit() {
             </div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white overflow-hidden">
-            <PhotoField url={form?.instructor_photo_url} urlId={form?.instructor_photo_id} prefix="instructor" label="Instructor Photo" aspect="aspect-[16/7]" onPick={setPhotoPicker} onClear={(p) => { setVal(p+"_photo_url", null); setVal(p+"_photo_id", null) }} />
+            <PhotoField url={form?.instructor_photo_url} urlId={form?.instructor_photo_id} prefix="instructor" label="Instructor Photo" aspect="aspect-[16/7]" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <span className="w-5 h-[2px] bg-red rounded-full" />
@@ -728,7 +741,7 @@ export default function AcademyPageEdit() {
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
-          <PhotoField url={form?.production_photo_url} urlId={form?.production_photo_id} prefix="production" label="Photo" onPick={setPhotoPicker} onClear={(p) => { setVal(p+"_photo_url", null); setVal(p+"_photo_id", null) }} />
+          <PhotoField url={form?.production_photo_url} urlId={form?.production_photo_id} prefix="production" label="Photo" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
           <TextField value={val("production_body")} onChange={(v) => handleChange("production_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Setup Academy teaches the complete production workflow..." />
         </div>
         <span className="text-navy/50 text-xs font-medium mb-3 block">Production Stages</span>
@@ -768,7 +781,7 @@ export default function AcademyPageEdit() {
          ══════════════════════════════════════════ */}
       <DarkSection id="beyond" title="Beyond the Course" icon="fa-solid fa-rocket" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <PhotoField url={form?.beyond_photo_url} urlId={form?.beyond_photo_id} prefix="beyond" label="Photo" dark onPick={setPhotoPicker} onClear={(p) => { setVal(p+"_photo_url", null); setVal(p+"_photo_id", null) }} />
+          <PhotoField url={form?.beyond_photo_url} urlId={form?.beyond_photo_id} prefix="beyond" label="Photo" dark onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
           <div className="space-y-4">
             <LabelInput value={val("beyond_label")} onChange={(v) => handleChange("beyond_label", v)} dark placeholder="Beyond the Course" />
             <div className="flex items-center w-full">
@@ -917,6 +930,20 @@ export default function AcademyPageEdit() {
         </div>
       )}
 
+      {confirmAction?.type === "array" && (
+        <ConfirmModal
+          message={`Remove this item?`}
+          onConfirm={confirmRemoveArrayItem}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction?.type === "photo" && (
+        <ConfirmModal
+          message={`Remove this photo?`}
+          onConfirm={confirmClearPhoto}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
       <Toast toast={toast} onClose={closeToast} />
     </AdminLayout>
   )

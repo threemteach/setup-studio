@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import AdminLayout from "../../components/admin/AdminLayout"
 import Toast from "../../components/ui/Toast"
+import ConfirmModal from "../../components/admin/ConfirmModal"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchAboutContent, updateAboutContent, uploadAboutImage, copyImageToAbout, defaultServices, defaultValues } from "../../lib/about"
 import { optimizeImageUrl } from "../../lib/images"
@@ -20,10 +21,16 @@ export default function AboutPageEdit() {
   const [allPhotos, setAllPhotos] = useState([])
   const [photoPicker, setPhotoPicker] = useState(null)
   const [toast, setToast] = useState(null)
+  const [confirmAction, setConfirmAction] = useState(null)
   const fileInputRef = useRef(null)
 
   const showToast = useCallback((message, type = "success") => setToast({ message, type }), [])
   const closeToast = useCallback(() => setToast(null), [])
+  function confirmClearPhoto() {
+    setVal(confirmAction + "_photo_url", null)
+    setVal(confirmAction + "_photo_id", null)
+    setConfirmAction(null)
+  }
 
   useEffect(() => {
     Promise.all([
@@ -293,7 +300,7 @@ export default function AboutPageEdit() {
                 )}
                 {form?.hero_photo_url && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); setVal("hero_photo_url", null); setVal("hero_photo_id", null) }}
+                    onClick={(e) => { e.stopPropagation(); setConfirmAction("hero") }}
                     className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center"
                   >
                     <i className="fa-solid fa-xmark" />
@@ -332,7 +339,7 @@ export default function AboutPageEdit() {
                 )}
                 {form?.story_photo_url && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); setVal("story_photo_url", null); setVal("story_photo_id", null) }}
+                    onClick={(e) => { e.stopPropagation(); setConfirmAction("story") }}
                     className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center"
                   >
                     <i className="fa-solid fa-xmark" />
@@ -497,6 +504,13 @@ export default function AboutPageEdit() {
         </div>
       )}
 
+      {confirmAction && (
+        <ConfirmModal
+          message={`Remove this ${confirmAction === "hero" ? "hero" : "story"} photo?`}
+          onConfirm={confirmClearPhoto}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
       <Toast toast={toast} onClose={closeToast} />
     </AdminLayout>
   )
