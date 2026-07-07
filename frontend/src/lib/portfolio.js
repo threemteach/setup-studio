@@ -198,7 +198,7 @@ export async function uploadVideo(file, category, onProgress) {
   if (!r2PublicUrl) {
     throw new Error("VITE_R2_PUBLIC_URL not configured")
   }
-  const key = `${category}/${Date.now()}-${file.name}`
+  const key = `${category}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`
   const contentType = file.type || "video/mp4"
 
   if (file.size < MULTIPART_THRESHOLD) {

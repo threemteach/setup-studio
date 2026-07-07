@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     credentials: { accessKeyId, secretAccessKey },
   })
 
-  const key = `${category}/${Date.now()}-${filename}`
+  const key = filename.includes("/") ? filename : `${category}/${Date.now()}-${filename}`
 
   if (multipart) {
     const command = new CreateMultipartUploadCommand({
