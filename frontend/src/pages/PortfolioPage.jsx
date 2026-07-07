@@ -33,6 +33,9 @@ function VideoCard({ video, lang }) {
     setPlaying(true)
     el.play().catch(() => {})
     el.load()
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {})
+    }
   }
 
   return (
@@ -55,7 +58,6 @@ function VideoCard({ video, lang }) {
             <video
               ref={previewVidRef}
               src={video.video_url}
-              muted
               playsInline
               preload="metadata"
               controls={playing}
