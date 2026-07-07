@@ -4,9 +4,10 @@ import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
-import { fetchAcademyContent, updateAcademyContent, uploadAcademyImage, copyImageToAcademy } from "../../lib/academy"
+import { fetchAcademyContent, updateAcademyContent, uploadAcademyImage } from "../../lib/academy"
 import { optimizeImageUrl } from "../../lib/images"
 import { translateObject } from "../../lib/homepage"
+import ImageCropperModal from "../../components/admin/ImageCropper"
 
 // ─── Shared SVG diamond ───
 const Diamond = () => (
@@ -262,6 +263,16 @@ export default function AcademyPageEdit() {
   const [confirmAction, setConfirmAction] = useState(null)
   const fileInputRef = useRef(null)
   const [collapsed, setCollapsed] = useState({})
+  const [cropModal, setCropModal] = useState(null)
+
+  const CROP_ASPECTS = {
+    hero: 16 / 9,
+    why: 4 / 3,
+    first_course: 16 / 9,
+    instructor: 16 / 7,
+    production: 4 / 3,
+    beyond: 4 / 3,
+  }
 
   const showToast = useCallback((message, type = "success") => setToast({ message, type }), [])
   const closeToast = useCallback(() => setToast(null), [])
@@ -402,28 +413,31 @@ export default function AcademyPageEdit() {
 
   async function handlePickPhoto(photo) {
     if (!photoPicker) return
-    try {
-      const result = await copyImageToAcademy(photo.cloudinary_url, photoPicker)
-      setVal(`${photoPicker}_photo_url`, result.secure_url)
-      setVal(`${photoPicker}_photo_id`, result.public_id)
-    } catch (err) {
-      showToast("Failed to copy photo: " + sanitizeError(err.message), "error")
-    }
+    setCropModal({ src: photo.cloudinary_url, prefix: photoPicker })
     setPhotoPicker(null)
   }
 
   async function handleUploadNew(e) {
     const file = e.target.files?.[0]
     if (!file || !photoPicker) return
+    const objectUrl = URL.createObjectURL(file)
+    setCropModal({ src: objectUrl, prefix: photoPicker, isBlob: true })
+    setPhotoPicker(null)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  async function handleCropConfirm(blob) {
+    if (!cropModal) return
+    const prefix = cropModal.prefix
     try {
-      const result = await uploadAcademyImage(file, photoPicker)
-      setVal(`${photoPicker}_photo_url`, result.secure_url)
-      setVal(`${photoPicker}_photo_id`, result.public_id)
+      const result = await uploadAcademyImage(new File([blob], "cropped.jpg", { type: "image/jpeg" }), prefix)
+      setVal(`${prefix}_photo_url`, result.secure_url)
+      setVal(`${prefix}_photo_id`, result.public_id)
     } catch (err) {
       showToast("Upload failed: " + sanitizeError(err.message), "error")
     }
-    setPhotoPicker(null)
-    if (fileInputRef.current) fileInputRef.current.value = ""
+    if (cropModal.isBlob) URL.revokeObjectURL(cropModal.src)
+    setCropModal(null)
   }
 
   if (loading) {
@@ -1160,6 +1174,14 @@ export default function AcademyPageEdit() {
         </div>
       )}
 
+      {cropModal && (
+        <ImageCropperModal
+          src={cropModal.src}
+          aspect={CROP_ASPECTS[cropModal.prefix] || 4 / 3}
+          onConfirm={handleCropConfirm}
+          onCancel={() => { if (cropModal.isBlob) URL.revokeObjectURL(cropModal.src); setCropModal(null) }}
+        />
+      )}
       {confirmAction?.type === "array" && (
         <ConfirmModal
           message={`Remove this item?`}

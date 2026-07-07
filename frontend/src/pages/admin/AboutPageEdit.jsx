@@ -4,9 +4,10 @@ import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
-import { fetchAboutContent, updateAboutContent, uploadAboutImage, copyImageToAbout, defaultServices, defaultValues } from "../../lib/about"
+import { fetchAboutContent, updateAboutContent, uploadAboutImage, defaultServices, defaultValues } from "../../lib/about"
 import { optimizeImageUrl } from "../../lib/images"
 import { translateObject } from "../../lib/homepage"
+import ImageCropperModal from "../../components/admin/ImageCropper"
 
 const FIELDS = {
   hero: ["hero_heading", "hero_subtitle", "hero_description"],
@@ -20,6 +21,12 @@ export default function AboutPageEdit() {
   const [saving, setSaving] = useState(false)
   const [translatingField, setTranslatingField] = useState(null)
   const [allPhotos, setAllPhotos] = useState([])
+  const [cropModal, setCropModal] = useState(null)
+
+  const CROP_ASPECTS = {
+    hero: 16 / 9,
+    story: 4 / 3,
+  }
 
   function ref(field) {
     const other = lang === "en" ? "ar" : "en"
@@ -120,32 +127,31 @@ export default function AboutPageEdit() {
 
   async function handlePickPhoto(photo) {
     if (!photoPicker) return
-    const prefix = photoPicker
-    const field = prefix === "hero" ? "hero" : "story"
-    try {
-      const result = await copyImageToAbout(photo.cloudinary_url, field)
-      setVal(`${prefix}_photo_url`, result.secure_url)
-      setVal(`${prefix}_photo_id`, result.public_id)
-    } catch (err) {
-      showToast("Failed to copy photo: " + sanitizeError(err.message), "error")
-    }
+    setCropModal({ src: photo.cloudinary_url, prefix: photoPicker })
     setPhotoPicker(null)
   }
 
   async function handleUploadNew(e) {
     const file = e.target.files?.[0]
     if (!file || !photoPicker) return
-    const prefix = photoPicker
-    const field = prefix === "hero" ? "hero" : "story"
+    const objectUrl = URL.createObjectURL(file)
+    setCropModal({ src: objectUrl, prefix: photoPicker, isBlob: true })
+    setPhotoPicker(null)
+    if (fileInputRef.current) fileInputRef.current.value = ""
+  }
+
+  async function handleCropConfirm(blob) {
+    if (!cropModal) return
+    const prefix = cropModal.prefix
     try {
-      const result = await uploadAboutImage(file, field)
+      const result = await uploadAboutImage(new File([blob], "cropped.jpg", { type: "image/jpeg" }), prefix)
       setVal(`${prefix}_photo_url`, result.secure_url)
       setVal(`${prefix}_photo_id`, result.public_id)
     } catch (err) {
       showToast("Upload failed: " + sanitizeError(err.message), "error")
     }
-    setPhotoPicker(null)
-    if (fileInputRef.current) fileInputRef.current.value = ""
+    if (cropModal.isBlob) URL.revokeObjectURL(cropModal.src)
+    setCropModal(null)
   }
 
   function setArrayField(field, index, value) {
@@ -600,6 +606,14 @@ export default function AboutPageEdit() {
         </div>
       )}
 
+      {cropModal && (
+        <ImageCropperModal
+          src={cropModal.src}
+          aspect={CROP_ASPECTS[cropModal.prefix] || 4 / 3}
+          onConfirm={handleCropConfirm}
+          onCancel={() => { if (cropModal.isBlob) URL.revokeObjectURL(cropModal.src); setCropModal(null) }}
+        />
+      )}
       {confirmAction && (
         <ConfirmModal
           message={`Remove this ${confirmAction === "hero" ? "hero" : "story"} photo?`}
