@@ -6,7 +6,7 @@ import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchAboutContent, updateAboutContent, uploadAboutImage, copyImageToAbout, defaultServices, defaultValues } from "../../lib/about"
 import { optimizeImageUrl } from "../../lib/images"
-import { autoTranslateSection } from "../../lib/homepage"
+import { translateObject } from "../../lib/homepage"
 
 const FIELDS = {
   hero: ["hero_heading", "hero_subtitle", "hero_description"],
@@ -18,8 +18,25 @@ export default function AboutPageEdit() {
   const [form, setForm] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [translating, setTranslating] = useState(false)
+  const [translatingField, setTranslatingField] = useState(null)
   const [allPhotos, setAllPhotos] = useState([])
+
+  function ref(field) {
+    const other = lang === "en" ? "ar" : "en"
+    return form?.[`${field}_${other}`] ?? ""
+  }
+
+  async function translateField(field, src) {
+    if (!src?.trim) return
+    setTranslatingField(field)
+    try {
+      const r = await translateObject(src, lang, lang === "en" ? "ar" : "en")
+      setVal(`${field}_${lang === "en" ? "ar" : "en"}`, r)
+    } catch (e) {
+      showToast("Translate failed: " + sanitizeError(e.message), "error")
+    }
+    setTranslatingField(null)
+  }
   const [photoPicker, setPhotoPicker] = useState(null)
   const [toast, setToast] = useState(null)
   const [confirmAction, setConfirmAction] = useState(null)
@@ -101,43 +118,6 @@ export default function AboutPageEdit() {
     setSaving(false)
   }
 
-  async function handleAutoTranslate() {
-    setTranslating(true)
-    try {
-      const en = {
-        hero_heading: form.hero_heading_en,
-        hero_subtitle: form.hero_subtitle_en,
-        hero_description: form.hero_description_en,
-        story_paragraphs: form.story_paragraphs_en,
-        story_quote: form.story_quote_en,
-      }
-      const ar = {
-        hero_heading: form.hero_heading_ar,
-        hero_subtitle: form.hero_subtitle_ar,
-        hero_description: form.hero_description_ar,
-        story_paragraphs: form.story_paragraphs_ar,
-        story_quote: form.story_quote_ar,
-      }
-      const result = await autoTranslateSection(en, ar, lang)
-      setForm((prev) => ({
-        ...prev,
-        hero_heading_en: result.content_en.hero_heading,
-        hero_subtitle_en: result.content_en.hero_subtitle,
-        hero_description_en: result.content_en.hero_description,
-        story_paragraphs_en: result.content_en.story_paragraphs,
-        story_quote_en: result.content_en.story_quote,
-        hero_heading_ar: result.content_ar.hero_heading,
-        hero_subtitle_ar: result.content_ar.hero_subtitle,
-        hero_description_ar: result.content_ar.hero_description,
-        story_paragraphs_ar: result.content_ar.story_paragraphs,
-        story_quote_ar: result.content_ar.story_quote,
-      }))
-    } catch (err) {
-      showToast("Translation failed: " + sanitizeError(err.message), "error")
-    }
-    setTranslating(false)
-  }
-
   async function handlePickPhoto(photo) {
     if (!photoPicker) return
     const prefix = photoPicker
@@ -188,7 +168,7 @@ export default function AboutPageEdit() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout lang={lang}>
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
         </div>
@@ -197,7 +177,7 @@ export default function AboutPageEdit() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout lang={lang}>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="text-navy dark:text-white font-bold text-2xl m-0">About Page Editor</h1>
@@ -210,13 +190,7 @@ export default function AboutPageEdit() {
           >
             {lang === "en" ? "Edit العربية" : "Edit English"}
           </button>
-          <button
-            onClick={handleAutoTranslate}
-            disabled={translating}
-            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
-          >
-            {translating ? "Translating..." : "Auto-translate"}
-          </button>
+
           <div className="flex items-center gap-3">
             {photosMissing && (
               <span className="text-red text-xs font-medium">Upload both photos before saving</span>
@@ -261,27 +235,48 @@ export default function AboutPageEdit() {
                   className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white text-lg font-bold text-center outline-none focus:border-red/50 transition-colors placeholder:text-white/30"
                   placeholder={lang === "en" ? "About Setup" : "عن سيت أب"}
                 />
+                <button onClick={() => translateField("hero_heading", val("hero_heading"))}
+                  className="shrink-0 w-7 h-7 rounded-md bg-white/10 hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-white/40"
+                  title="Translate">
+                  <i className={`fa-solid fa-language text-[9px] ${translatingField === "hero_heading" ? "animate-spin" : ""}`} />
+                </button>
                 <span className="block flex-1 h-[2px] bg-red" />
                 <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
                   <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
                 </svg>
               </div>
+              <p className="text-[10px] text-white/40 text-center -mt-2 mb-2">{ref("hero_heading") || "—"}</p>
 
-              <input
-                type="text"
-                value={val("hero_subtitle")}
-                onChange={(e) => handleChange("hero_subtitle", e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white/80 font-semibold text-base outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
-                placeholder={lang === "en" ? "Full-Service Production Studio" : "استوديو إنتاج متكامل الخدمات"}
-              />
-
-              <textarea
-                value={val("hero_description")}
-                onChange={(e) => handleChange("hero_description", e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white/60 text-sm outline-none focus:border-white/30 transition-colors resize-none placeholder:text-white/20"
-                rows={4}
-                placeholder={lang === "en" ? "Description..." : "الوصف..."}
-              />
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    value={val("hero_subtitle")}
+                    onChange={(e) => handleChange("hero_subtitle", e.target.value)}
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white/80 font-semibold text-base outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
+                    placeholder={lang === "en" ? "Full-Service Production Studio" : "استوديو إنتاج متكامل الخدمات"}
+                  />
+                  <button onClick={() => translateField("hero_subtitle", val("hero_subtitle"))}
+                    className="shrink-0 w-7 h-7 rounded-md bg-white/10 hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-white/40"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[9px] ${translatingField === "hero_subtitle" ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-[10px] text-white/40 -mt-2">{ref("hero_subtitle") || "—"}</p>
+                <div className="flex items-start gap-1">
+                  <textarea
+                    value={val("hero_description")}
+                    onChange={(e) => handleChange("hero_description", e.target.value)}
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white/60 text-sm outline-none focus:border-white/30 transition-colors resize-none placeholder:text-white/20"
+                    rows={4}
+                    placeholder={lang === "en" ? "Description..." : "الوصف..."}
+                  />
+                  <button onClick={() => translateField("hero_description", val("hero_description"))}
+                    className="shrink-0 w-7 h-7 rounded-md bg-white/10 hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-white/40 mt-0.5"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[9px] ${translatingField === "hero_description" ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-[10px] text-white/40 -mt-2">{ref("hero_description") || "—"}</p>
             </div>
 
             {/* Right: photo */}
@@ -354,17 +349,39 @@ export default function AboutPageEdit() {
               {[0, 1].map((i) => (
                 <div key={i}>
                   <label className="text-navy/50 dark:text-white/50 text-xs font-medium mb-1.5 block">Paragraph {i + 1}</label>
-                  <textarea
-                    value={(form?.[`story_paragraphs_${lang}`] || [])[i] || ""}
-                    onChange={(e) => {
-                      const arr = [...(form?.[`story_paragraphs_${lang}`] || ["", ""])]
-                      arr[i] = e.target.value
-                      setVal(`story_paragraphs_${lang}`, arr)
+                  <div className="flex items-start gap-1">
+                    <textarea
+                      value={(form?.[`story_paragraphs_${lang}`] || [])[i] || ""}
+                      onChange={(e) => {
+                        const arr = [...(form?.[`story_paragraphs_${lang}`] || ["", ""])]
+                        arr[i] = e.target.value
+                        setVal(`story_paragraphs_${lang}`, arr)
+                      }}
+                      className="flex-1 bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-3 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                      rows={3}
+                      placeholder={lang === "en" ? `Paragraph ${i + 1}...` : `الفقرة ${i + 1}...`}
+                    />
+                    <button onClick={async () => {
+                      const src = (form?.[`story_paragraphs_${lang}`] || [])[i] || ""
+                      if (!src?.trim) return
+                      const k = `story_p_${i}`; setTranslatingField(k)
+                      try {
+                        const r = await translateObject(src, lang, lang === "en" ? "ar" : "en")
+                        const other = lang === "en" ? "ar" : "en"
+                        const arr = [...(form?.[`story_paragraphs_${other}`] || ["", ""])]
+                        arr[i] = r
+                        setVal(`story_paragraphs_${other}`, arr)
+                      } catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                      setTranslatingField(null)
                     }}
-                    className="w-full bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-3 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
-                    rows={3}
-                    placeholder={lang === "en" ? `Paragraph ${i + 1}...` : `الفقرة ${i + 1}...`}
-                  />
+                      className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
+                      title="Translate">
+                      <i className={`fa-solid fa-language text-[9px] ${translatingField === `story_p_${i}` ? "animate-spin" : ""}`} />
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-muted dark:text-white/40 mt-0.5">
+                    {lang === "en" ? ((form?.story_paragraphs_ar || [])[i] || "—") : ((form?.story_paragraphs_en || [])[i] || "—")}
+                  </p>
                 </div>
               ))}
 
@@ -372,13 +389,23 @@ export default function AboutPageEdit() {
                 <label className="text-navy/50 dark:text-white/50 text-xs font-medium mb-1.5 block">Quote</label>
                 <div className="flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d]">
                   <i className="fa-solid fa-quote-left text-red text-lg mt-0.5 shrink-0" />
-                  <textarea
-                    value={val("story_quote")}
-                    onChange={(e) => handleChange("story_quote", e.target.value)}
-                    className="flex-1 bg-transparent border-0 text-navy/60 dark:text-white/50 text-sm italic outline-none resize-none p-0"
-                    rows={2}
-                    placeholder={lang === "en" ? "Quote text..." : "نص الاقتباس..."}
-                  />
+                  <div className="flex-1">
+                    <div className="flex items-start gap-1">
+                      <textarea
+                        value={val("story_quote")}
+                        onChange={(e) => handleChange("story_quote", e.target.value)}
+                        className="flex-1 bg-transparent border-0 text-navy/60 dark:text-white/50 text-sm italic outline-none resize-none p-0"
+                        rows={2}
+                        placeholder={lang === "en" ? "Quote text..." : "نص الاقتباس..."}
+                      />
+                      <button onClick={() => translateField("story_quote", val("story_quote"))}
+                        className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
+                        title="Translate">
+                        <i className={`fa-solid fa-language text-[8px] ${translatingField === "story_quote" ? "animate-spin" : ""}`} />
+                      </button>
+                    </div>
+                    <p className="text-[9px] text-muted dark:text-white/40 mt-0.5">{ref("story_quote") || "—"}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -403,20 +430,54 @@ export default function AboutPageEdit() {
                 <div className="flex items-center gap-2 text-navy/40 dark:text-white/40 text-xs font-medium">
                   <span>Service {i + 1}</span>
                 </div>
-                <input
-                  type="text"
-                  value={service[`title_${lang}`] || ""}
-                  onChange={(e) => setServiceField(i, `title_${lang}`, e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors"
-                  placeholder={lang === "en" ? "Title..." : "العنوان..."}
-                />
-                <textarea
-                  value={service[`desc_${lang}`] || ""}
-                  onChange={(e) => setServiceField(i, `desc_${lang}`, e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
-                  rows={2}
-                  placeholder={lang === "en" ? "Description..." : "الوصف..."}
-                />
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    value={service[`title_${lang}`] || ""}
+                    onChange={(e) => setServiceField(i, `title_${lang}`, e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors"
+                    placeholder={lang === "en" ? "Title..." : "العنوان..."}
+                  />
+                  <button onClick={async () => {
+                    const src = service[`title_${lang}`] || ""
+                    if (!src?.trim) return
+                    const k = `svc_t_${i}`; setTranslatingField(k)
+                    try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setServiceField(i, `title_${lang === "en" ? "ar" : "en"}`, r) }
+                    catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                    setTranslatingField(null)
+                  }}
+                    className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[9px] ${translatingField === `svc_t_${i}` ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2 ml-1">
+                  {lang === "en" ? (service[`title_ar`] || "—") : (service[`title_en`] || "—")}
+                </p>
+                <div className="flex items-start gap-1">
+                  <textarea
+                    value={service[`desc_${lang}`] || ""}
+                    onChange={(e) => setServiceField(i, `desc_${lang}`, e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                    rows={2}
+                    placeholder={lang === "en" ? "Description..." : "الوصف..."}
+                  />
+                  <button onClick={async () => {
+                    const src = service[`desc_${lang}`] || ""
+                    if (!src?.trim) return
+                    const k = `svc_d_${i}`; setTranslatingField(k)
+                    try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setServiceField(i, `desc_${lang === "en" ? "ar" : "en"}`, r) }
+                    catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                    setTranslatingField(null)
+                  }}
+                    className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[9px] ${translatingField === `svc_d_${i}` ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1">
+                  {lang === "en" ? (service[`desc_ar`] || "—") : (service[`desc_en`] || "—")}
+                </p>
               </div>
             </div>
           ))}
@@ -437,20 +498,54 @@ export default function AboutPageEdit() {
                 <i className={`${v.icon} text-navy dark:text-white text-base`} />
               </div>
               <div className="w-full space-y-2">
-                <input
-                  type="text"
-                  value={v[`title_${lang}`] || ""}
-                  onChange={(e) => setValueField(i, `title_${lang}`, e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-semibold text-sm text-center outline-none focus:border-navy/40 transition-colors"
-                  placeholder={lang === "en" ? "Title..." : "العنوان..."}
-                />
-                <textarea
-                  value={v[`desc_${lang}`] || ""}
-                  onChange={(e) => setValueField(i, `desc_${lang}`, e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-xs text-center outline-none focus:border-navy/40 transition-colors resize-none"
-                  rows={4}
-                  placeholder={lang === "en" ? "Description..." : "الوصف..."}
-                />
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    value={v[`title_${lang}`] || ""}
+                    onChange={(e) => setValueField(i, `title_${lang}`, e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-semibold text-sm text-center outline-none focus:border-navy/40 transition-colors"
+                    placeholder={lang === "en" ? "Title..." : "العنوان..."}
+                  />
+                  <button onClick={async () => {
+                    const src = v[`title_${lang}`] || ""
+                    if (!src?.trim) return
+                    const k = `val_t_${i}`; setTranslatingField(k)
+                    try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setValueField(i, `title_${lang === "en" ? "ar" : "en"}`, r) }
+                    catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                    setTranslatingField(null)
+                  }}
+                    className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[8px] ${translatingField === `val_t_${i}` ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2">
+                  {lang === "en" ? (v[`title_ar`] || "—") : (v[`title_en`] || "—")}
+                </p>
+                <div className="flex items-start gap-1">
+                  <textarea
+                    value={v[`desc_${lang}`] || ""}
+                    onChange={(e) => setValueField(i, `desc_${lang}`, e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-xs text-center outline-none focus:border-navy/40 transition-colors resize-none"
+                    rows={4}
+                    placeholder={lang === "en" ? "Description..." : "الوصف..."}
+                  />
+                  <button onClick={async () => {
+                    const src = v[`desc_${lang}`] || ""
+                    if (!src?.trim) return
+                    const k = `val_d_${i}`; setTranslatingField(k)
+                    try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setValueField(i, `desc_${lang === "en" ? "ar" : "en"}`, r) }
+                    catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                    setTranslatingField(null)
+                  }}
+                    className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[8px] ${translatingField === `val_d_${i}` ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-[9px] text-muted dark:text-white/40 mt-0.5">
+                  {lang === "en" ? (v[`desc_ar`] || "—") : (v[`desc_en`] || "—")}
+                </p>
               </div>
             </div>
           ))}

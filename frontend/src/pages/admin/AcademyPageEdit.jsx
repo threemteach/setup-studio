@@ -6,7 +6,7 @@ import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchAcademyContent, updateAcademyContent, uploadAcademyImage, copyImageToAcademy } from "../../lib/academy"
 import { optimizeImageUrl } from "../../lib/images"
-import { autoTranslateSection } from "../../lib/homepage"
+import { translateObject } from "../../lib/homepage"
 
 // ─── Shared SVG diamond ───
 const Diamond = () => (
@@ -16,34 +16,40 @@ const Diamond = () => (
 )
 
 // ─── Inline input for headings placed between diamonds ───
-function HeadingInput({ value, onChange, dark, placeholder }) {
+function HeadingInput({ value, onChange, dark, placeholder, onTranslate, translating }) {
   const cls = dark
     ? "flex-1 bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
     : "flex-1 bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-xl text-navy dark:text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 dark:placeholder:text-white/30 focus:border-navy/40 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
   return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={cls}
-      placeholder={placeholder || ""}
-    />
+    <div className="flex items-center gap-1 flex-1">
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
+      {onTranslate && (
+        <button onClick={onTranslate} disabled={translating}
+          className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 disabled:opacity-40"
+          title="Translate">
+          <i className={`fa-solid fa-language text-[9px] ${translating ? "animate-spin" : ""}`} />
+        </button>
+      )}
+    </div>
   )
 }
 
 // ─── Inline input for section labels (small badge text) ───
-function LabelInput({ value, onChange, dark, placeholder }) {
+function LabelInput({ value, onChange, dark, placeholder, onTranslate, translating }) {
   const cls = dark
     ? "bg-transparent border-0 text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-center outline-none placeholder:text-red/30"
     : "bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-lg text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-left outline-none px-2 py-0.5 placeholder:text-red/30 focus:border-navy/30 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
   return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={cls}
-      placeholder={placeholder || ""}
-    />
+    <div className="flex items-center gap-1">
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
+      {onTranslate && (
+        <button onClick={onTranslate} disabled={translating}
+          className="shrink-0 w-5 h-5 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 disabled:opacity-40"
+          title="Translate">
+          <i className={`fa-solid fa-language text-[8px] ${translating ? "animate-spin" : ""}`} />
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -80,7 +86,7 @@ const PhotoField = ({ url, urlId, prefix, label, aspect = "aspect-[4/3]", dark =
 }
 
 // ─── Standard text input (not for inline headings) ───
-const TextField = ({ value, onChange, label, placeholder, type = "text", rows, dark = false }) => {
+const TextField = ({ value, onChange, label, placeholder, type = "text", rows, dark = false, onTranslate, translating, reference }) => {
   const Tag = type === "textarea" ? "textarea" : "input"
   const base = dark
     ? "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
@@ -88,13 +94,21 @@ const TextField = ({ value, onChange, label, placeholder, type = "text", rows, d
   return (
     <div>
       {label && <label className={`text-xs font-medium mb-1.5 block ${dark ? "text-white/40" : "text-navy/50"}`}>{label}</label>}
-      <Tag
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={base}
-        rows={rows}
-        placeholder={placeholder || ""}
-      />
+      <div className="flex items-start gap-2">
+        <Tag value={value} onChange={(e) => onChange(e.target.value)} className={`${base} ${onTranslate ? "flex-1" : "w-full"}`} rows={rows} placeholder={placeholder || ""} />
+        {onTranslate && (
+          <button onClick={onTranslate} disabled={translating}
+            className="shrink-0 w-8 h-8 rounded-lg bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/50 dark:text-white/50 disabled:opacity-40 mt-0.5"
+            title="Translate">
+            <i className={`fa-solid fa-language text-xs ${translating ? "animate-spin" : ""}`} />
+          </button>
+        )}
+      </div>
+      {reference !== undefined && (
+        <p className="text-[10px] text-muted dark:text-white/40 mt-1 leading-tight ltr:pr-2 rtl:pl-2">
+          {reference || "—"}
+        </p>
+      )}
     </div>
   )
 }
@@ -241,7 +255,7 @@ export default function AcademyPageEdit() {
   const [form, setForm] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [translating, setTranslating] = useState(false)
+  const [translatingField, setTranslatingField] = useState(null)
   const [allPhotos, setAllPhotos] = useState([])
   const [photoPicker, setPhotoPicker] = useState(null)
   const [toast, setToast] = useState(null)
@@ -254,6 +268,23 @@ export default function AcademyPageEdit() {
 
   function toggleCollapse(key) {
     setCollapsed(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  function ref(field) {
+    return form?.[`${field}_${lang === "en" ? "ar" : "en"}`]
+  }
+
+  async function translateField(fieldName, sourceText) {
+    if (!sourceText?.trim()) { showToast("Nothing to translate", "error"); return }
+    setTranslatingField(fieldName)
+    try {
+      const target = lang === "en" ? "ar" : "en"
+      const result = await translateObject(sourceText, lang, target)
+      setVal(`${fieldName}_${target}`, result)
+    } catch (err) {
+      showToast("Translate failed: " + sanitizeError(err.message), "error")
+    }
+    setTranslatingField(null)
   }
 
   useEffect(() => {
@@ -367,89 +398,7 @@ export default function AcademyPageEdit() {
     setSaving(false)
   }
 
-  async function handleAutoTranslate() {
-    setTranslating(true)
-    try {
-      const en = {}, ar = {}
-      const fields = [
-        "hero_subtitle","hero_body","why_label","why_heading","why_intro","why_body",
-        "audience_heading",
-        "first_course_label","first_course_heading","first_course_desc",
-        "instructor_label","instructor_heading","instructor_body","instructor_info",
-        "expectations_heading","production_label","production_heading","production_intro","production_body",
-        "beyond_label","beyond_heading","beyond_body",
-        "upcoming_label","upcoming_heading","upcoming_intro",
-        "faq_heading","cta_title","cta_body","cta_button",
-      ]
-      for (const f of fields) { en[f] = form[`${f}_en`]; ar[f] = form[`${f}_ar`] }
-      ;(form?.differences || []).forEach((d, i) => { en[`diff_${i}`] = d.en; ar[`diff_${i}`] = d.ar })
-      ;(form?.focus_items || []).forEach((d, i) => { en[`focus_${i}`] = d.en; ar[`focus_${i}`] = d.ar })
-      ;(form?.expectations || []).forEach((d, i) => { en[`expect_text_${i}`] = d.textEn; ar[`expect_text_${i}`] = d.textAr })
-      ;(form?.production_stages || []).forEach((d, i) => { en[`prod_title_${i}`] = d.titleEn; ar[`prod_title_${i}`] = d.titleAr; en[`prod_desc_${i}`] = d.descEn; ar[`prod_desc_${i}`] = d.descAr })
-      ;(form?.upcoming_courses || []).forEach((d, i) => { en[`up_title_${i}`] = d.titleEn; ar[`up_title_${i}`] = d.titleAr; en[`up_desc_${i}`] = d.descEn; ar[`up_desc_${i}`] = d.descAr })
-      ;(form?.audiences || []).forEach((d, i) => { en[`aud_title_${i}`] = d.titleEn; ar[`aud_title_${i}`] = d.titleAr; en[`aud_desc_${i}`] = d.descEn; ar[`aud_desc_${i}`] = d.descAr })
-      ;(form?.faqs || []).forEach((d, i) => { en[`faq_q_${i}`] = d.qEn; ar[`faq_q_${i}`] = d.qAr; en[`faq_a_${i}`] = d.aEn; ar[`faq_a_${i}`] = d.aAr })
-      const result = await autoTranslateSection(en, ar, lang)
-      const updates = {}
-      const diffs = [...(form?.differences || [])]
-      const focusItems = [...(form?.focus_items || [])]
-      const expectations = [...(form?.expectations || [])]
-      const prodStages = [...(form?.production_stages || [])]
-      const upCourses = [...(form?.upcoming_courses || [])]
-      const audiences = [...(form?.audiences || [])]
-      const faqs = [...(form?.faqs || [])]
-      for (const key of Object.keys(result.content_en)) {
-        if (key.startsWith("diff_")) {
-          const idx = parseInt(key.replace("diff_", ""), 10)
-          diffs[idx] = { ...diffs[idx], en: result.content_en[key], ar: result.content_ar[key] }
-        } else if (key.startsWith("focus_")) {
-          const idx = parseInt(key.replace("focus_", ""), 10)
-          focusItems[idx] = { ...focusItems[idx], en: result.content_en[key], ar: result.content_ar[key] }
-        } else if (key.startsWith("expect_text_")) {
-          const idx = parseInt(key.replace("expect_text_", ""), 10)
-          expectations[idx] = { ...expectations[idx], textEn: result.content_en[key], textAr: result.content_ar[key] }
-        } else if (key.startsWith("prod_title_")) {
-          const idx = parseInt(key.replace("prod_title_", ""), 10)
-          prodStages[idx] = { ...prodStages[idx], titleEn: result.content_en[key], titleAr: result.content_ar[key] }
-        } else if (key.startsWith("prod_desc_")) {
-          const idx = parseInt(key.replace("prod_desc_", ""), 10)
-          prodStages[idx] = { ...prodStages[idx], descEn: result.content_en[key], descAr: result.content_ar[key] }
-        } else if (key.startsWith("up_title_")) {
-          const idx = parseInt(key.replace("up_title_", ""), 10)
-          upCourses[idx] = { ...upCourses[idx], titleEn: result.content_en[key], titleAr: result.content_ar[key] }
-        } else if (key.startsWith("up_desc_")) {
-          const idx = parseInt(key.replace("up_desc_", ""), 10)
-          upCourses[idx] = { ...upCourses[idx], descEn: result.content_en[key], descAr: result.content_ar[key] }
-        } else if (key.startsWith("aud_title_")) {
-          const idx = parseInt(key.replace("aud_title_", ""), 10)
-          audiences[idx] = { ...audiences[idx], titleEn: result.content_en[key], titleAr: result.content_ar[key] }
-        } else if (key.startsWith("aud_desc_")) {
-          const idx = parseInt(key.replace("aud_desc_", ""), 10)
-          audiences[idx] = { ...audiences[idx], descEn: result.content_en[key], descAr: result.content_ar[key] }
-        } else if (key.startsWith("faq_q_")) {
-          const idx = parseInt(key.replace("faq_q_", ""), 10)
-          faqs[idx] = { ...faqs[idx], qEn: result.content_en[key], qAr: result.content_ar[key] }
-        } else if (key.startsWith("faq_a_")) {
-          const idx = parseInt(key.replace("faq_a_", ""), 10)
-          faqs[idx] = { ...faqs[idx], aEn: result.content_en[key], aAr: result.content_ar[key] }
-        } else {
-          updates[`${key}_en`] = result.content_en[key]
-          updates[`${key}_ar`] = result.content_ar[key]
-        }
-      }
-      updates.differences = diffs
-      updates.focus_items = focusItems
-      updates.audiences = audiences
-      updates.expectations = expectations
-      updates.production_stages = prodStages
-      updates.upcoming_courses = upCourses
-      updates.faqs = faqs
-      setForm((prev) => ({ ...prev, ...updates }))
-    } catch (err) {
-      showToast("Translation failed: " + sanitizeError(err.message), "error")
-    }
-    setTranslating(false)
-  }
+
 
   async function handlePickPhoto(photo) {
     if (!photoPicker) return
@@ -479,7 +428,7 @@ export default function AcademyPageEdit() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout lang={lang}>
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
         </div>
@@ -488,7 +437,7 @@ export default function AcademyPageEdit() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout lang={lang}>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="text-navy dark:text-white font-bold text-2xl m-0">Academy Page Editor</h1>
@@ -501,9 +450,7 @@ export default function AcademyPageEdit() {
           >
             {lang === "en" ? "Edit العربية" : "Edit English"}
           </button>
-          <button onClick={handleAutoTranslate} disabled={translating}
-            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
-          >{translating ? "Translating..." : "Auto-translate"}</button>
+
           <button onClick={handleSave} disabled={saving}
             className="px-6 py-2 rounded-xl bg-navy text-white font-semibold text-sm cursor-pointer hover:bg-navy/90 transition-colors disabled:opacity-50"
           >{saving ? "Saving..." : "Save All"}</button>
@@ -523,8 +470,14 @@ export default function AcademyPageEdit() {
               <span className="block flex-1 h-[2px] bg-red" />
               <Diamond />
             </div>
-            <TextField value={val("hero_subtitle")} onChange={(v) => handleChange("hero_subtitle", v)} label="Subtitle" placeholder="Learn Content Creation Inside a Real Production Studio" dark />
-            <TextField value={val("hero_body")} onChange={(v) => handleChange("hero_body", v)} label="Body Text" type="textarea" rows={4} placeholder="Setup Academy is the educational arm of Setup Studio..." dark />
+            <TextField value={val("hero_subtitle")} onChange={(v) => handleChange("hero_subtitle", v)} label="Subtitle" placeholder="Learn Content Creation Inside a Real Production Studio" dark
+              onTranslate={() => translateField("hero_subtitle", val("hero_subtitle"))}
+              translating={translatingField === "hero_subtitle"}
+              reference={ref("hero_subtitle")} />
+            <TextField value={val("hero_body")} onChange={(v) => handleChange("hero_body", v)} label="Body Text" type="textarea" rows={4} placeholder="Setup Academy is the educational arm of Setup Studio..." dark
+              onTranslate={() => translateField("hero_body", val("hero_body"))}
+              translating={translatingField === "hero_body"}
+              reference={ref("hero_body")} />
           </div>
           <PhotoField url={form?.hero_photo_url} urlId={form?.hero_photo_id} prefix="hero" label="Hero Photo" dark onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
         </div>
@@ -537,40 +490,73 @@ export default function AcademyPageEdit() {
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-5 h-[2px] bg-red rounded-full" />
-            <LabelInput value={val("why_label")} onChange={(v) => handleChange("why_label", v)} placeholder="Why Setup Academy?" />
+            <LabelInput value={val("why_label")} onChange={(v) => handleChange("why_label", v)} placeholder="Why Setup Academy?"
+              onTranslate={() => translateField("why_label", val("why_label"))}
+              translating={translatingField === "why_label"} />
             <span className="w-5 h-[2px] bg-red rounded-full" />
           </div>
-          <div className="flex items-center w-full mb-3">
+          <div className="flex items-center w-full mb-1">
             <Diamond />
             <span className="block flex-1 h-[2px] bg-red" />
-            <HeadingInput value={val("why_heading")} onChange={(v) => handleChange("why_heading", v)} placeholder="What Makes Us Different?" />
+            <HeadingInput value={val("why_heading")} onChange={(v) => handleChange("why_heading", v)} placeholder="What Makes Us Different?"
+              onTranslate={() => translateField("why_heading", val("why_heading"))}
+              translating={translatingField === "why_heading"} />
             <span className="block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
+          <p className="text-[10px] text-muted dark:text-white/40 text-center mb-3">
+            {ref("why_heading") || "—"}
+          </p>
           <div className="max-w-[600px] mx-auto w-full">
-            <TextField value={val("why_intro")} onChange={(v) => handleChange("why_intro", v)} label="" placeholder="Learning happens where real production happens." />
+            <TextField value={val("why_intro")} onChange={(v) => handleChange("why_intro", v)} label="" placeholder="Learning happens where real production happens."
+              onTranslate={() => translateField("why_intro", val("why_intro"))}
+              translating={translatingField === "why_intro"}
+              reference={ref("why_intro")} />
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
           <PhotoField url={form?.why_photo_url} urlId={form?.why_photo_id} prefix="why" label="Photo" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
-          <TextField value={val("why_body")} onChange={(v) => handleChange("why_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Instead of traditional theory-heavy courses..." />
+          <TextField value={val("why_body")} onChange={(v) => handleChange("why_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Instead of traditional theory-heavy courses..."
+            onTranslate={() => translateField("why_body", val("why_body"))}
+            translating={translatingField === "why_body"}
+            reference={ref("why_body")} />
         </div>
         <div>
             <span className="text-navy/50 dark:text-white/50 text-xs font-medium mb-2 block">Differences</span>
           {(form?.differences || defaultDifferences).map((item, i) => (
-            <div key={i} className="flex items-center gap-2 mb-1.5">
-              <svg className="w-[0.7rem] h-[0.7rem] text-red shrink-0" viewBox="0 0 12 12" fill="currentColor">
-                <path d="M4.5 8.5L2 6l-.7.7L4.5 10l6-6-.7-.7z" />
-              </svg>
-              <input type="text"
-                value={lang === "en" ? item.en : item.ar}
-                onChange={(e) => setArrayItem("differences", i, lang === "en" ? "en" : "ar", e.target.value)}
-                className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors"
-                placeholder={lang === "en" ? "Difference text..." : "نص الفرق..."} />
-              <button onClick={() => removeArrayItem("differences", i)}
-                className="w-6 h-6 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center shrink-0">
-                <i className="fa-solid fa-xmark" />
-              </button>
+            <div key={i} className="mb-2">
+              <div className="flex items-center gap-2">
+                <svg className="w-[0.7rem] h-[0.7rem] text-red shrink-0" viewBox="0 0 12 12" fill="currentColor">
+                  <path d="M4.5 8.5L2 6l-.7.7L4.5 10l6-6-.7-.7z" />
+                </svg>
+                <div className="flex-1 flex items-center gap-1">
+                  <input type="text"
+                    value={lang === "en" ? item.en : item.ar}
+                    onChange={(e) => setArrayItem("differences", i, lang === "en" ? "en" : "ar", e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors"
+                    placeholder={lang === "en" ? "Difference text..." : "نص الفرق..."} />
+                  <button onClick={async () => {
+                    const src = lang === "en" ? item.en : item.ar
+                    if (!src?.trim) return
+                    const key = `diff_${i}`; setTranslatingField(key)
+                    try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("differences", i, lang === "en" ? "ar" : "en", r) }
+                    catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                    setTranslatingField(null)
+                  }}
+                    disabled={translatingField === `diff_${i}`}
+                    className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 disabled:opacity-40"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[9px] ${translatingField === `diff_${i}` ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <button onClick={() => removeArrayItem("differences", i)}
+                  className="w-6 h-6 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center shrink-0">
+                  <i className="fa-solid fa-xmark" />
+                </button>
+              </div>
+              <p className="text-[10px] text-muted dark:text-white/40 mt-0.5 ml-5">
+                {lang === "en" ? (item.ar || "—") : (item.en || "—")}
+              </p>
             </div>
           ))}
           <button onClick={() => addArrayItem("differences", { en: "", ar: "" })}
@@ -587,28 +573,59 @@ export default function AcademyPageEdit() {
         <div className="flex items-center w-full mb-6 justify-center">
           <Diamond />
           <span className="block flex-1 h-[2px] bg-red" />
-          <HeadingInput value={val("audience_heading")} onChange={(v) => handleChange("audience_heading", v)} placeholder="Who Is Setup Academy For?" />
+          <HeadingInput value={val("audience_heading")} onChange={(v) => handleChange("audience_heading", v)} placeholder="Who Is Setup Academy For?"
+            onTranslate={() => translateField("audience_heading", val("audience_heading"))}
+            translating={translatingField === "audience_heading"} />
           <span className="block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
+        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
+          {ref("audience_heading") || "—"}
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(form?.audiences || defaultAudiences).map((item, i) => (
             <div key={i} className="p-5 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] relative group">
               <button onClick={() => removeArrayItem("audiences", i)}
-                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center z-10">
                 <i className="fa-solid fa-xmark" />
               </button>
               <span className="w-10 h-10 rounded-full bg-navy text-white font-bold flex items-center justify-center mb-3">{i + 1}</span>
-              <input type="text"
-                value={lang === "en" ? item.titleEn : item.titleAr}
-                onChange={(e) => setArrayItem("audiences", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-2"
-                placeholder={lang === "en" ? "Title..." : "العنوان..."} />
-              <textarea
-                value={lang === "en" ? item.descEn : item.descAr}
-                onChange={(e) => setArrayItem("audiences", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
-                rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
+              <div className="flex items-center gap-1 mb-2">
+                <input type="text"
+                  value={lang === "en" ? item.titleEn : item.titleAr}
+                  onChange={(e) => setArrayItem("audiences", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors"
+                  placeholder={lang === "en" ? "Title..." : "العنوان..."} />
+                <button onClick={async () => {
+                  const src = lang === "en" ? item.titleEn : item.titleAr
+                  if (!src?.trim) return
+                  const k = `aud_title_${i}`; setTranslatingField(k)
+                  try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("audiences", i, lang === "en" ? "titleAr" : "titleEn", r) }
+                  catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                  setTranslatingField(null)
+                }}
+                  className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40">
+                  <i className="fa-solid fa-language text-[9px]" />
+                </button>
+              </div>
+              <div className="flex items-start gap-1">
+                <textarea
+                  value={lang === "en" ? item.descEn : item.descAr}
+                  onChange={(e) => setArrayItem("audiences", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                  rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
+                <button onClick={async () => {
+                  const src = lang === "en" ? item.descEn : item.descAr
+                  if (!src?.trim) return
+                  const k = `aud_desc_${i}`; setTranslatingField(k)
+                  try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("audiences", i, lang === "en" ? "descAr" : "descEn", r) }
+                  catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                  setTranslatingField(null)
+                }}
+                  className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5">
+                  <i className="fa-solid fa-language text-[9px]" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -625,7 +642,9 @@ export default function AcademyPageEdit() {
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-5 h-[2px] bg-red rounded-full" />
-            <LabelInput value={val("first_course_label")} onChange={(v) => handleChange("first_course_label", v)} dark placeholder="Our First Course" />
+            <LabelInput value={val("first_course_label")} onChange={(v) => handleChange("first_course_label", v)} dark placeholder="Our First Course"
+              onTranslate={() => translateField("first_course_label", val("first_course_label"))}
+              translating={translatingField === "first_course_label"} />
             <span className="w-5 h-[2px] bg-red rounded-full" />
           </div>
         </div>
@@ -639,9 +658,23 @@ export default function AcademyPageEdit() {
                   </div>
                   <input type="text" value={val("first_course_heading")} onChange={(e) => handleChange("first_course_heading", e.target.value)}
                     className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Video Content Foundation Course" : "دورة أساسيات إنتاج المحتوى المرئي"} />
+                  <button onClick={() => translateField("first_course_heading", val("first_course_heading"))}
+                    className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[9px] ${translatingField === "first_course_heading" ? "animate-spin" : ""}`} />
+                  </button>
                 </div>
-                <textarea value={val("first_course_desc")} onChange={(e) => handleChange("first_course_desc", e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Designed for beginners who want to understand video production..." : "مصممة للمبتدئين الذين يرغبون في فهم إنتاج الفيديو..."} />
+                <p className="text-[10px] text-muted dark:text-white/40 -mt-3 mb-2">{ref("first_course_heading") || "—"}</p>
+                <div className="flex items-start gap-1">
+                  <textarea value={val("first_course_desc")} onChange={(e) => handleChange("first_course_desc", e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Designed for beginners who want to understand video production..." : "مصممة للمبتدئين الذين يرغبون في فهم إنتاج الفيديو..."} />
+                  <button onClick={() => translateField("first_course_desc", val("first_course_desc"))}
+                    className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[9px] ${translatingField === "first_course_desc" ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("first_course_desc") || "—"}</p>
                 <div className="bg-[#f8f9fb] dark:bg-[#15202b] rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-navy dark:text-white font-semibold text-sm flex items-center gap-2">
@@ -654,17 +687,33 @@ export default function AcademyPageEdit() {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {(form?.focus_items || defaultFocusItems).map((item, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red shrink-0" />
-                      <input type="text"
-                        value={lang === "en" ? item.en : item.ar}
-                        onChange={(e) => setArrayItem("focus_items", i, lang === "en" ? "en" : "ar", e.target.value)}
-                        className="flex-1 bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-lg px-2 py-1 text-navy/60 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors"
-                        placeholder={lang === "en" ? "Focus item..." : "عنصر التركيز..."} />
-                      <button onClick={() => removeArrayItem("focus_items", i)}
-                        className="w-5 h-5 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center shrink-0">
-                        <i className="fa-solid fa-xmark" />
-                      </button>
+                    <div key={i}>
+                      <div className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red shrink-0" />
+                        <input type="text"
+                          value={lang === "en" ? item.en : item.ar}
+                          onChange={(e) => setArrayItem("focus_items", i, lang === "en" ? "en" : "ar", e.target.value)}
+                          className="flex-1 bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-lg px-2 py-1 text-navy/60 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors"
+                          placeholder={lang === "en" ? "Focus item..." : "عنصر التركيز..."} />
+                        <button onClick={async () => {
+                          const src = lang === "en" ? item.en : item.ar
+                          if (!src?.trim) return
+                          const k = `focus_${i}`; setTranslatingField(k)
+                          try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("focus_items", i, lang === "en" ? "ar" : "en", r) }
+                          catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                          setTranslatingField(null)
+                        }}
+                          className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40">
+                          <i className="fa-solid fa-language text-[8px]" />
+                        </button>
+                        <button onClick={() => removeArrayItem("focus_items", i)}
+                          className="w-5 h-5 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center shrink-0">
+                          <i className="fa-solid fa-xmark" />
+                        </button>
+                      </div>
+                      <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-3">
+                        {lang === "en" ? (item.ar || "—") : (item.en || "—")}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -676,20 +725,48 @@ export default function AcademyPageEdit() {
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <span className="w-5 h-[2px] bg-red rounded-full" />
-                <LabelInput value={val("instructor_label")} onChange={(v) => handleChange("instructor_label", v)} placeholder="Instructor" />
+                <LabelInput value={val("instructor_label")} onChange={(v) => handleChange("instructor_label", v)} placeholder="Instructor"
+                  onTranslate={() => translateField("instructor_label", val("instructor_label"))}
+                  translating={translatingField === "instructor_label"} />
                 <span className="block flex-1 h-[2px] bg-red" />
                 <Diamond />
               </div>
-              <input type="text" value={val("instructor_heading")} onChange={(e) => handleChange("instructor_heading", e.target.value)}
-                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-lg outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Meet Your Instructor" : "تعرف على مدربك"} />
-              <textarea value={val("instructor_body")} onChange={(e) => handleChange("instructor_body", e.target.value)}
-                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Our instructors are selected for their practical experience..." : "يتم اختيار مدربينا بناءً على خبرتهم العملية..."} />
+              <div className="flex items-center gap-1">
+                <input type="text" value={val("instructor_heading")} onChange={(e) => handleChange("instructor_heading", e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-lg outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Meet Your Instructor" : "تعرف على مدربك"} />
+                <button onClick={() => translateField("instructor_heading", val("instructor_heading"))}
+                  className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
+                  title="Translate">
+                  <i className={`fa-solid fa-language text-[9px] ${translatingField === "instructor_heading" ? "animate-spin" : ""}`} />
+                </button>
+              </div>
+              <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("instructor_heading") || "—"}</p>
+              <div className="flex items-start gap-1">
+                <textarea value={val("instructor_body")} onChange={(e) => handleChange("instructor_body", e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Our instructors are selected for their practical experience..." : "يتم اختيار مدربينا بناءً على خبرتهم العملية..."} />
+                <button onClick={() => translateField("instructor_body", val("instructor_body"))}
+                  className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
+                  title="Translate">
+                  <i className={`fa-solid fa-language text-[9px] ${translatingField === "instructor_body" ? "animate-spin" : ""}`} />
+                </button>
+              </div>
+              <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("instructor_body") || "—"}</p>
               <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] dark:bg-[#15202b] border border-dashed border-navy/10 dark:border-white/10">
                 <div className="w-10 h-10 rounded-full bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0">
                   <i className="fa-solid fa-user-tie text-navy/30 dark:text-white/30 text-lg" />
                 </div>
-                <textarea value={val("instructor_info")} onChange={(e) => handleChange("instructor_info", e.target.value)}
-                  className="flex-1 bg-transparent border-0 text-navy/45 dark:text-white/40 text-xs outline-none resize-none" rows={2} placeholder={lang === "en" ? "Full instructor details will be announced..." : "سيتم الإعلان عن تفاصيل المدرب لاحقاً..."} />
+                <div className="flex-1">
+                  <div className="flex items-start gap-1">
+                    <textarea value={val("instructor_info")} onChange={(e) => handleChange("instructor_info", e.target.value)}
+                      className="flex-1 bg-transparent border-0 text-navy/45 dark:text-white/40 text-xs outline-none resize-none" rows={2} placeholder={lang === "en" ? "Full instructor details will be announced..." : "سيتم الإعلان عن تفاصيل المدرب لاحقاً..."} />
+                    <button onClick={() => translateField("instructor_info", val("instructor_info"))}
+                      className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
+                      title="Translate">
+                      <i className={`fa-solid fa-language text-[8px] ${translatingField === "instructor_info" ? "animate-spin" : ""}`} />
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-navy/30 dark:text-white/30 mt-0.5">{ref("instructor_info") || "—"}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -703,21 +780,42 @@ export default function AcademyPageEdit() {
         <div className="flex items-center w-full mb-6 justify-center">
           <Diamond />
           <span className="block flex-1 h-[2px] bg-red" />
-          <HeadingInput value={val("expectations_heading")} onChange={(v) => handleChange("expectations_heading", v)} dark placeholder="What Students Can Expect" />
+          <HeadingInput value={val("expectations_heading")} onChange={(v) => handleChange("expectations_heading", v)} dark placeholder="What Students Can Expect"
+            onTranslate={() => translateField("expectations_heading", val("expectations_heading"))}
+            translating={translatingField === "expectations_heading"} />
           <span className="block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
+        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
+          {ref("expectations_heading") || "—"}
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(form?.expectations || defaultExpectations).map((item, i) => (
             <div key={i} className="flex flex-col items-center text-center gap-3 p-5 rounded-2xl border border-white/10 bg-white/5">
               <div className="w-14 h-14 rounded-full bg-red/20 flex items-center justify-center">
                 <i className={`${item.icon || "fa-solid fa-star"} text-red text-lg`} />
               </div>
-              <input type="text"
-                value={lang === "en" ? item.textEn : item.textAr}
-                onChange={(e) => setArrayItem("expectations", i, lang === "en" ? "textEn" : "textAr", e.target.value)}
-                className="w-full bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white/70 text-xs outline-none focus:border-white/30 transition-colors text-center"
-                placeholder={lang === "en" ? "Text..." : "النص..."} />
+              <div className="flex items-center gap-1 w-full">
+                <input type="text"
+                  value={lang === "en" ? item.textEn : item.textAr}
+                  onChange={(e) => setArrayItem("expectations", i, lang === "en" ? "textEn" : "textAr", e.target.value)}
+                  className="flex-1 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white/70 text-xs outline-none focus:border-white/30 transition-colors text-center"
+                  placeholder={lang === "en" ? "Text..." : "النص..."} />
+                <button onClick={async () => {
+                  const src = lang === "en" ? item.textEn : item.textAr
+                  if (!src?.trim) return
+                  const k = `expect_${i}`; setTranslatingField(k)
+                  try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("expectations", i, lang === "en" ? "textAr" : "textEn", r) }
+                  catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                  setTranslatingField(null)
+                }}
+                  className="shrink-0 w-5 h-5 rounded bg-white/10 hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-white/40">
+                  <i className="fa-solid fa-language text-[8px]" />
+                </button>
+              </div>
+              <p className="text-[9px] text-white/40 -mt-2">
+                {lang === "en" ? (item.textAr || "—") : (item.textEn || "—")}
+              </p>
             </div>
           ))}
         </div>
@@ -730,23 +828,32 @@ export default function AcademyPageEdit() {
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-5 h-[2px] bg-red rounded-full" />
-            <LabelInput value={val("production_label")} onChange={(v) => handleChange("production_label", v)} placeholder="Full Production" />
+            <LabelInput value={val("production_label")} onChange={(v) => handleChange("production_label", v)} placeholder="Full Production"
+              onTranslate={() => translateField("production_label", val("production_label"))}
+              translating={translatingField === "production_label"} />
             <span className="w-5 h-[2px] bg-red rounded-full" />
           </div>
           <div className="flex items-center w-full mb-3">
             <Diamond />
             <span className="block flex-1 h-[2px] bg-red" />
-            <HeadingInput value={val("production_heading")} onChange={(v) => handleChange("production_heading", v)} placeholder="Beyond Just Shooting" />
+            <HeadingInput value={val("production_heading")} onChange={(v) => handleChange("production_heading", v)} placeholder="Beyond Just Shooting"
+              onTranslate={() => translateField("production_heading", val("production_heading"))}
+              translating={translatingField === "production_heading"} />
             <span className="block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
+          <p className="text-[10px] text-muted dark:text-white/40 -mt-2 mb-3">{ref("production_heading") || "—"}</p>
           <div className="max-w-[600px] mx-auto w-full">
-            <TextField value={val("production_intro")} onChange={(v) => handleChange("production_intro", v)} label="" placeholder="We teach the complete production journey..." />
+            <TextField value={val("production_intro")} onChange={(v) => handleChange("production_intro", v)} label="" placeholder="We teach the complete production journey..."
+              onTranslate={() => translateField("production_intro", val("production_intro"))}
+              translating={translatingField === "production_intro"} reference={ref("production_intro")} />
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
           <PhotoField url={form?.production_photo_url} urlId={form?.production_photo_id} prefix="production" label="Photo" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
-          <TextField value={val("production_body")} onChange={(v) => handleChange("production_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Setup Academy teaches the complete production workflow..." />
+          <TextField value={val("production_body")} onChange={(v) => handleChange("production_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Setup Academy teaches the complete production workflow..."
+            onTranslate={() => translateField("production_body", val("production_body"))}
+            translating={translatingField === "production_body"} reference={ref("production_body")} />
         </div>
             <span className="text-navy/50 dark:text-white/50 text-xs font-medium mb-3 block">Production Stages</span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -756,16 +863,48 @@ export default function AcademyPageEdit() {
                 <i className={`${item.icon || "fa-solid fa-video"} text-navy dark:text-white text-sm`} />
               </div>
               <div className="flex-1 space-y-2">
-                <input type="text"
-                  value={lang === "en" ? item.titleEn : item.titleAr}
-                  onChange={(e) => setArrayItem("production_stages", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors mb-2"
-                  placeholder={lang === "en" ? "Title..." : "العنوان..."} />
-                <textarea
-                  value={lang === "en" ? item.descEn : item.descAr}
-                  onChange={(e) => setArrayItem("production_stages", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/50 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors resize-none"
-                  rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
+                <div className="flex items-center gap-1">
+                  <input type="text"
+                    value={lang === "en" ? item.titleEn : item.titleAr}
+                    onChange={(e) => setArrayItem("production_stages", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors mb-2"
+                    placeholder={lang === "en" ? "Title..." : "العنوان..."} />
+                  <button onClick={async () => {
+                    const src = lang === "en" ? item.titleEn : item.titleAr
+                    if (!src?.trim) return
+                    const k = `prod_title_${i}`; setTranslatingField(k)
+                    try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("production_stages", i, lang === "en" ? "titleAr" : "titleEn", r) }
+                    catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                    setTranslatingField(null)
+                  }}
+                    className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mb-2">
+                    <i className="fa-solid fa-language text-[8px]" />
+                  </button>
+                </div>
+                <p className="text-[9px] text-muted dark:text-white/40 -mt-2 mb-1 ml-1">
+                  {lang === "en" ? (item.titleAr || "—") : (item.titleEn || "—")}
+                </p>
+                <div className="flex items-start gap-1">
+                  <textarea
+                    value={lang === "en" ? item.descEn : item.descAr}
+                    onChange={(e) => setArrayItem("production_stages", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/50 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors resize-none"
+                    rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
+                  <button onClick={async () => {
+                    const src = lang === "en" ? item.descEn : item.descAr
+                    if (!src?.trim) return
+                    const k = `prod_desc_${i}`; setTranslatingField(k)
+                    try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("production_stages", i, lang === "en" ? "descAr" : "descEn", r) }
+                    catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                    setTranslatingField(null)
+                  }}
+                    className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5">
+                    <i className="fa-solid fa-language text-[8px]" />
+                  </button>
+                </div>
+                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 ml-1">
+                  {lang === "en" ? (item.descAr || "—") : (item.descEn || "—")}
+                </p>
               </div>
               <button onClick={() => removeArrayItem("production_stages", i)}
                 className="w-6 h-6 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center shrink-0">
@@ -787,15 +926,22 @@ export default function AcademyPageEdit() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <PhotoField url={form?.beyond_photo_url} urlId={form?.beyond_photo_id} prefix="beyond" label="Photo" dark onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
           <div className="space-y-4">
-            <LabelInput value={val("beyond_label")} onChange={(v) => handleChange("beyond_label", v)} dark placeholder="Beyond the Course" />
+            <LabelInput value={val("beyond_label")} onChange={(v) => handleChange("beyond_label", v)} dark placeholder="Beyond the Course"
+              onTranslate={() => translateField("beyond_label", val("beyond_label"))}
+              translating={translatingField === "beyond_label"} />
             <div className="flex items-center w-full">
               <Diamond />
               <span className="block flex-1 h-[2px] bg-red" />
-              <HeadingInput value={val("beyond_heading")} onChange={(v) => handleChange("beyond_heading", v)} dark placeholder="More Than Just a Course" />
+              <HeadingInput value={val("beyond_heading")} onChange={(v) => handleChange("beyond_heading", v)} dark placeholder="More Than Just a Course"
+                onTranslate={() => translateField("beyond_heading", val("beyond_heading"))}
+                translating={translatingField === "beyond_heading"} />
               <span className="block flex-1 h-[2px] bg-red" />
               <Diamond />
             </div>
-            <TextField value={val("beyond_body")} onChange={(v) => handleChange("beyond_body", v)} label="" type="textarea" rows={5} placeholder="Setup Academy is about helping learners..." dark />
+            <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("beyond_heading") || "—"}</p>
+            <TextField value={val("beyond_body")} onChange={(v) => handleChange("beyond_body", v)} label="" type="textarea" rows={5} placeholder="Setup Academy is about helping learners..." dark
+              onTranslate={() => translateField("beyond_body", val("beyond_body"))}
+              translating={translatingField === "beyond_body"} reference={ref("beyond_body")} />
           </div>
         </div>
       </DarkSection>
@@ -807,18 +953,25 @@ export default function AcademyPageEdit() {
         <div className="flex flex-col items-center text-center mb-6">
           <div className="flex items-center gap-2 mb-3">
             <span className="w-5 h-[2px] bg-red rounded-full" />
-            <LabelInput value={val("upcoming_label")} onChange={(v) => handleChange("upcoming_label", v)} placeholder="Coming Soon" />
+            <LabelInput value={val("upcoming_label")} onChange={(v) => handleChange("upcoming_label", v)} placeholder="Coming Soon"
+              onTranslate={() => translateField("upcoming_label", val("upcoming_label"))}
+              translating={translatingField === "upcoming_label"} />
             <span className="w-5 h-[2px] bg-red rounded-full" />
           </div>
           <div className="flex items-center w-full mb-3">
             <Diamond />
             <span className="block flex-1 h-[2px] bg-red" />
-            <HeadingInput value={val("upcoming_heading")} onChange={(v) => handleChange("upcoming_heading", v)} placeholder="Upcoming Courses" />
+            <HeadingInput value={val("upcoming_heading")} onChange={(v) => handleChange("upcoming_heading", v)} placeholder="Upcoming Courses"
+              onTranslate={() => translateField("upcoming_heading", val("upcoming_heading"))}
+              translating={translatingField === "upcoming_heading"} />
             <span className="block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
+          <p className="text-[10px] text-muted dark:text-white/40 -mt-2 mb-3">{ref("upcoming_heading") || "—"}</p>
           <div className="max-w-[600px] mx-auto w-full">
-            <TextField value={val("upcoming_intro")} onChange={(v) => handleChange("upcoming_intro", v)} label="" placeholder="We're building a full catalog..." />
+            <TextField value={val("upcoming_intro")} onChange={(v) => handleChange("upcoming_intro", v)} label="" placeholder="We're building a full catalog..."
+              onTranslate={() => translateField("upcoming_intro", val("upcoming_intro"))}
+              translating={translatingField === "upcoming_intro"} reference={ref("upcoming_intro")} />
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -827,16 +980,48 @@ export default function AcademyPageEdit() {
               <div className="w-10 h-10 rounded-full bg-navy/10 dark:bg-white/10 flex items-center justify-center mb-3">
                 <i className={`${item.icon || "fa-solid fa-"} text-navy dark:text-white text-sm`} />
               </div>
-              <input type="text"
-                value={lang === "en" ? item.titleEn : item.titleAr}
-                onChange={(e) => setArrayItem("upcoming_courses", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-1"
-                placeholder={lang === "en" ? "Title..." : "العنوان..."} />
-              <textarea
-                value={lang === "en" ? item.descEn : item.descAr}
-                onChange={(e) => setArrayItem("upcoming_courses", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/50 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
-                rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
+              <div className="flex items-center gap-1">
+                <input type="text"
+                  value={lang === "en" ? item.titleEn : item.titleAr}
+                  onChange={(e) => setArrayItem("upcoming_courses", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-1"
+                  placeholder={lang === "en" ? "Title..." : "العنوان..."} />
+                <button onClick={async () => {
+                  const src = lang === "en" ? item.titleEn : item.titleAr
+                  if (!src?.trim) return
+                  const k = `up_title_${i}`; setTranslatingField(k)
+                  try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("upcoming_courses", i, lang === "en" ? "titleAr" : "titleEn", r) }
+                  catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                  setTranslatingField(null)
+                }}
+                  className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mb-1">
+                  <i className="fa-solid fa-language text-[8px]" />
+                </button>
+              </div>
+              <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2 ml-1">
+                {lang === "en" ? (item.titleAr || "—") : (item.titleEn || "—")}
+              </p>
+              <div className="flex items-start gap-1">
+                <textarea
+                  value={lang === "en" ? item.descEn : item.descAr}
+                  onChange={(e) => setArrayItem("upcoming_courses", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/50 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                  rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
+                <button onClick={async () => {
+                  const src = lang === "en" ? item.descEn : item.descAr
+                  if (!src?.trim) return
+                  const k = `up_desc_${i}`; setTranslatingField(k)
+                  try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("upcoming_courses", i, lang === "en" ? "descAr" : "descEn", r) }
+                  catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                  setTranslatingField(null)
+                }}
+                  className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5">
+                  <i className="fa-solid fa-language text-[8px]" />
+                </button>
+              </div>
+              <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1">
+                {lang === "en" ? (item.descAr || "—") : (item.descEn || "—")}
+              </p>
             </div>
           ))}
         </div>
@@ -849,28 +1034,62 @@ export default function AcademyPageEdit() {
         <div className="flex items-center w-full mb-6 justify-center">
           <Diamond />
           <span className="block flex-1 h-[2px] bg-red" />
-          <HeadingInput value={val("faq_heading")} onChange={(v) => handleChange("faq_heading", v)} placeholder="Frequently Asked Questions" />
+          <HeadingInput value={val("faq_heading")} onChange={(v) => handleChange("faq_heading", v)} placeholder="Frequently Asked Questions"
+            onTranslate={() => translateField("faq_heading", val("faq_heading"))}
+            translating={translatingField === "faq_heading"} />
           <span className="block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
+        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
+          {ref("faq_heading") || "—"}
+        </p>
         <div className="max-w-[800px] mx-auto space-y-3">
           {(form?.faqs || defaultFaqs).map((item, i) => (
             <div key={i} className="rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] p-4">
               <div className="flex items-center justify-between mb-2">
-                <input type="text"
-                  value={lang === "en" ? item.qEn : item.qAr}
-                  onChange={(e) => setArrayItem("faqs", i, lang === "en" ? "qEn" : "qAr", e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors mr-2"
-                  placeholder={lang === "en" ? "Question..." : "السؤال..."} />
-                <span className="shrink-0 w-7 h-7 rounded-full bg-navy/5 dark:bg-white/10 flex items-center justify-center text-navy/50 dark:text-white/50 text-sm">
-                  <i className="fa-solid fa-plus" />
-                </span>
+                <div className="flex items-center gap-1 flex-1">
+                  <input type="text"
+                    value={lang === "en" ? item.qEn : item.qAr}
+                    onChange={(e) => setArrayItem("faqs", i, lang === "en" ? "qEn" : "qAr", e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors"
+                    placeholder={lang === "en" ? "Question..." : "السؤال..."} />
+                  <button onClick={async () => {
+                    const src = lang === "en" ? item.qEn : item.qAr
+                    if (!src?.trim) return
+                    const k = `faq_q_${i}`; setTranslatingField(k)
+                    try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("faqs", i, lang === "en" ? "qAr" : "qEn", r) }
+                    catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                    setTranslatingField(null)
+                  }}
+                    className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40">
+                    <i className="fa-solid fa-language text-[9px]" />
+                  </button>
+                </div>
               </div>
-              <textarea
-                value={lang === "en" ? item.aEn : item.aAr}
-                onChange={(e) => setArrayItem("faqs", i, lang === "en" ? "aEn" : "aAr", e.target.value)}
-                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
-                rows={2} placeholder={lang === "en" ? "Answer..." : "الإجابة..."} />
+              <p className="text-[9px] text-muted dark:text-white/40 mb-2 ml-1">
+                {lang === "en" ? (item.qAr || "—") : (item.qEn || "—")}
+              </p>
+              <div className="flex items-start gap-1">
+                <textarea
+                  value={lang === "en" ? item.aEn : item.aAr}
+                  onChange={(e) => setArrayItem("faqs", i, lang === "en" ? "aEn" : "aAr", e.target.value)}
+                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                  rows={2} placeholder={lang === "en" ? "Answer..." : "الإجابة..."} />
+                <button onClick={async () => {
+                  const src = lang === "en" ? item.aEn : item.aAr
+                  if (!src?.trim) return
+                  const k = `faq_a_${i}`; setTranslatingField(k)
+                  try { const r = await translateObject(src, lang, lang === "en" ? "ar" : "en"); setArrayItem("faqs", i, lang === "en" ? "aAr" : "aEn", r) }
+                  catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                  setTranslatingField(null)
+                }}
+                  className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5">
+                  <i className="fa-solid fa-language text-[9px]" />
+                </button>
+              </div>
+              <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1">
+                {lang === "en" ? (item.aAr || "—") : (item.aEn || "—")}
+              </p>
             </div>
           ))}
         </div>
@@ -885,13 +1104,20 @@ export default function AcademyPageEdit() {
             <div className="flex items-center w-full">
               <Diamond />
               <span className="block flex-1 h-[2px] bg-red" />
-              <HeadingInput value={val("cta_title")} onChange={(v) => handleChange("cta_title", v)} dark placeholder="Start Your Creative Journey" />
+              <HeadingInput value={val("cta_title")} onChange={(v) => handleChange("cta_title", v)} dark placeholder="Start Your Creative Journey"
+                onTranslate={() => translateField("cta_title", val("cta_title"))}
+                translating={translatingField === "cta_title"} />
               <span className="block flex-1 h-[2px] bg-red" />
               <Diamond />
             </div>
-            <TextField value={val("cta_body")} onChange={(v) => handleChange("cta_body", v)} label="" dark placeholder="Join our first Video Content Foundation Course..." />
+            <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-2">{ref("cta_title") || "—"}</p>
+            <TextField value={val("cta_body")} onChange={(v) => handleChange("cta_body", v)} label="" dark placeholder="Join our first Video Content Foundation Course..."
+              onTranslate={() => translateField("cta_body", val("cta_body"))}
+              translating={translatingField === "cta_body"} reference={ref("cta_body")} />
           </div>
-          <TextField value={val("cta_button")} onChange={(v) => handleChange("cta_button", v)} label="Button Text" dark placeholder="Join the Waiting List" />
+          <TextField value={val("cta_button")} onChange={(v) => handleChange("cta_button", v)} label="Button Text" dark placeholder="Join the Waiting List"
+            onTranslate={() => translateField("cta_button", val("cta_button"))}
+            translating={translatingField === "cta_button"} reference={ref("cta_button")} />
         </div>
       </DarkSection>
 

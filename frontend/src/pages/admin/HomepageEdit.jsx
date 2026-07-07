@@ -4,7 +4,7 @@ import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
-import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, copyImageToHomepage, autoTranslateSection } from "../../lib/homepage"
+import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, copyImageToHomepage, translateObject } from "../../lib/homepage"
 import { optimizeImageUrl } from "../../lib/images"
 
 const sections = ["hero", "about", "process", "quotes"]
@@ -24,8 +24,45 @@ export default function HomepageEdit() {
   const [content, setContent] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [translating, setTranslating] = useState(false)
+  const [translatingField, setTranslatingField] = useState(null)
   const [allPhotos, setAllPhotos] = useState([])
+
+  function ref(key) {
+    const other = lang === "en" ? "ar" : "en"
+    return content[activeSection]?.[`content_${other}`]?.[key]
+  }
+
+  function getOtherLocalized(key) {
+    const other = lang === "en" ? "ar" : "en"
+    const row = content[key]
+    if (!row) return defaultContent[key]
+    return row[`content_${other}`] || row.content_en || defaultContent[key]
+  }
+
+  function setOtherLocalized(key, value) {
+    const other = lang === "en" ? "ar" : "en"
+    setContent((prev) => {
+      const row = { ...prev[key] }
+      row[`content_${other}`] = value
+      return { ...prev, [key]: row }
+    })
+  }
+
+  async function translateField(key, src) {
+    if (!src?.trim) return
+    setTranslatingField(key)
+    try {
+      const r = await translateObject(src, lang, lang === "en" ? "ar" : "en")
+      const other = lang === "en" ? "ar" : "en"
+      const otherVal = getOtherLocalized(activeSection)
+      if (key === "hero") otherVal.description = r
+      else otherVal[key] = r
+      setOtherLocalized(activeSection, otherVal)
+    } catch (e) {
+      showToast("Translate failed: " + sanitizeError(e.message), "error")
+    }
+    setTranslatingField(null)
+  }
   const [photoPicker, setPhotoPicker] = useState(null)
   const [toast, setToast] = useState(null)
   const [confirmAction, setConfirmAction] = useState(null)
@@ -143,27 +180,9 @@ export default function HomepageEdit() {
     setConfirmAction(null)
   }
 
-  async function handleAutoTranslate() {
-    setTranslating(true)
-    try {
-      const key = activeSection
-      const row = content[key]
-      const en = row.content_en || defaultContent[key]
-      const ar = row.content_ar || defaultContent[key]
-      const result = await autoTranslateSection(en, ar, lang)
-      setContent((prev) => ({
-        ...prev,
-        [key]: { ...prev[key], content_en: result.content_en, content_ar: result.content_ar },
-      }))
-    } catch (err) {
-      showToast("Translation failed: " + sanitizeError(err.message), "error")
-    }
-    setTranslating(false)
-  }
-
   if (loading) {
     return (
-      <AdminLayout>
+      <AdminLayout lang={lang}>
         <div className="flex items-center justify-center py-20">
           <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
         </div>
@@ -172,7 +191,7 @@ export default function HomepageEdit() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout lang={lang}>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="text-navy dark:text-white font-bold text-2xl m-0">Home Page Editor</h1>
@@ -185,14 +204,7 @@ export default function HomepageEdit() {
           >
             {lang === "en" ? "Edit العربية" : "Edit English"}
           </button>
-          <button
-            onClick={handleAutoTranslate}
-            disabled={translating}
-            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
-            title="Auto-translate this section to the other language"
-          >
-            {translating ? "Translating..." : "Auto-translate"}
-          </button>
+
           <button
             onClick={handleSave}
             disabled={saving}
@@ -272,13 +284,23 @@ export default function HomepageEdit() {
 
               {/* Description editor - inline in hero style */}
               <div className="w-full max-w-xl">
-                <textarea
-                  value={getLocalized("hero").description || ""}
-                  onChange={(e) => setLocalized("hero", { ...getLocalized("hero"), description: e.target.value })}
-                  className="w-full text-center bg-white/80 dark:bg-white/10 border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-4 text-navy dark:text-white text-sm outline-none focus:border-navy/40 resize-none shadow-sm"
-                  rows={3}
-                  placeholder={lang === "en" ? "Hero description text..." : "نص وصف الهيرو..."}
-                />
+                <div className="flex items-start gap-1">
+                  <textarea
+                    value={getLocalized("hero").description || ""}
+                    onChange={(e) => setLocalized("hero", { ...getLocalized("hero"), description: e.target.value })}
+                    className="flex-1 text-center bg-white/80 dark:bg-white/10 border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-4 text-navy dark:text-white text-sm outline-none focus:border-navy/40 resize-none shadow-sm"
+                    rows={3}
+                    placeholder={lang === "en" ? "Hero description text..." : "نص وصف الهيرو..."}
+                  />
+                  <button onClick={() => translateField("hero", getLocalized("hero").description || "")}
+                    className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-1"
+                    title="Translate">
+                    <i className={`fa-solid fa-language text-[9px] ${translatingField === "hero" ? "animate-spin" : ""}`} />
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted dark:text-white/40 text-center mt-1">
+                  {ref("description") || "—"}
+                </p>
               </div>
             </div>
           </div>
@@ -302,21 +324,37 @@ export default function HomepageEdit() {
               </svg>
             </div>
 
-            <input
-              type="text"
-              value={getLocalized("about").heading || ""}
-              onChange={(e) => setLocalized("about", { ...getLocalized("about"), heading: e.target.value })}
-              className="w-full text-center border-0 border-b-2 border-border dark:border-[#1e2d3d] bg-transparent text-navy dark:text-white font-bold text-xl outline-none focus:border-navy/40 px-2 py-1"
-              placeholder={lang === "en" ? "Heading text..." : "نص العنوان..."}
-            />
+            <div className="flex items-center gap-1">
+              <input
+                type="text"
+                value={getLocalized("about").heading || ""}
+                onChange={(e) => setLocalized("about", { ...getLocalized("about"), heading: e.target.value })}
+                className="flex-1 text-center border-0 border-b-2 border-border dark:border-[#1e2d3d] bg-transparent text-navy dark:text-white font-bold text-xl outline-none focus:border-navy/40 px-2 py-1"
+                placeholder={lang === "en" ? "Heading text..." : "نص العنوان..."}
+              />
+              <button onClick={() => translateField("heading", getLocalized("about").heading || "")}
+                className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
+                title="Translate">
+                <i className={`fa-solid fa-language text-[9px] ${translatingField === "heading" ? "animate-spin" : ""}`} />
+              </button>
+            </div>
+            <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4">{ref("heading") || "—"}</p>
 
-            <textarea
-              value={getLocalized("about").body || ""}
-              onChange={(e) => setLocalized("about", { ...getLocalized("about"), body: e.target.value })}
-              className="w-full text-center bg-gray-50 dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-4 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 resize-none leading-relaxed"
-              rows={5}
-              placeholder={lang === "en" ? "Body text..." : "نص المحتوى..."}
-            />
+            <div className="flex items-start gap-1">
+              <textarea
+                value={getLocalized("about").body || ""}
+                onChange={(e) => setLocalized("about", { ...getLocalized("about"), body: e.target.value })}
+                className="flex-1 text-center bg-gray-50 dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-4 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 resize-none leading-relaxed"
+                rows={5}
+                placeholder={lang === "en" ? "Body text..." : "نص المحتوى..."}
+              />
+              <button onClick={() => translateField("body", getLocalized("about").body || "")}
+                className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
+                title="Translate">
+                <i className={`fa-solid fa-language text-[9px] ${translatingField === "body" ? "animate-spin" : ""}`} />
+              </button>
+            </div>
+            <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-2">{ref("body") || "—"}</p>
           </div>
         </div>
       )}
@@ -340,28 +378,72 @@ export default function HomepageEdit() {
                     <span className="block w-3.5 h-3.5 rounded-full bg-navy dark:bg-white ring-4 ring-white dark:ring-[#15202b]" />
                   </div>
                   <div className="flex-1 bg-gray-50 dark:bg-[#0f1a24] rounded-2xl p-4 border border-border/60 dark:border-[#1e2d3d]/60">
-                    <input
-                      type="text"
-                      value={step.title || ""}
-                      onChange={(e) => {
-                        const steps = [...getLocalized("process").steps]
-                        steps[i] = { ...steps[i], title: e.target.value }
-                        setLocalized("process", { ...getLocalized("process"), steps })
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="text"
+                        value={step.title || ""}
+                        onChange={(e) => {
+                          const steps = [...getLocalized("process").steps]
+                          steps[i] = { ...steps[i], title: e.target.value }
+                          setLocalized("process", { ...getLocalized("process"), steps })
+                        }}
+                        className="flex-1 bg-transparent border-0 border-b border-border dark:border-[#1e2d3d] pb-1 text-navy dark:text-white font-bold text-base outline-none focus:border-navy/40 mb-2"
+                        placeholder={lang === "en" ? `Step ${step.number} title...` : `عنوان الخطوة ${step.number}...`}
+                      />
+                      <button onClick={async () => {
+                        if (!step.title?.trim) return
+                        const k = `proc_t_${i}`; setTranslatingField(k)
+                        try {
+                          const r = await translateObject(step.title, lang, lang === "en" ? "ar" : "en")
+                          const otherSteps = [...getOtherLocalized("process").steps]
+                          otherSteps[i] = { ...otherSteps[i], title: r }
+                          const other = getOtherLocalized("process")
+                          other.steps = otherSteps
+                          setOtherLocalized("process", other)
+                        } catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                        setTranslatingField(null)
                       }}
-                      className="w-full bg-transparent border-0 border-b border-border dark:border-[#1e2d3d] pb-1 text-navy dark:text-white font-bold text-base outline-none focus:border-navy/40 mb-2"
-                      placeholder={lang === "en" ? `Step ${step.number} title...` : `عنوان الخطوة ${step.number}...`}
-                    />
-                    <textarea
-                      value={step.desc || ""}
-                      onChange={(e) => {
-                        const steps = [...getLocalized("process").steps]
-                        steps[i] = { ...steps[i], desc: e.target.value }
-                        setLocalized("process", { ...getLocalized("process"), steps })
+                        className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mb-2"
+                        title="Translate">
+                        <i className={`fa-solid fa-language text-[9px] ${translatingField === `proc_t_${i}` ? "animate-spin" : ""}`} />
+                      </button>
+                    </div>
+                    <p className="text-[9px] text-muted dark:text-white/40 -mt-3 mb-2 ml-1">
+                      {lang === "en" ? (getOtherLocalized("process").steps?.[i]?.title || "—") : (getOtherLocalized("process").steps?.[i]?.title || "—")}
+                    </p>
+                    <div className="flex items-start gap-1">
+                      <textarea
+                        value={step.desc || ""}
+                        onChange={(e) => {
+                          const steps = [...getLocalized("process").steps]
+                          steps[i] = { ...steps[i], desc: e.target.value }
+                          setLocalized("process", { ...getLocalized("process"), steps })
+                        }}
+                        className="flex-1 bg-transparent border-0 text-navy/60 dark:text-white/40 text-sm outline-none resize-none leading-relaxed"
+                        rows={2}
+                        placeholder={lang === "en" ? `Step ${step.number} description...` : `وصف الخطوة ${step.number}...`}
+                      />
+                      <button onClick={async () => {
+                        if (!step.desc?.trim) return
+                        const k = `proc_d_${i}`; setTranslatingField(k)
+                        try {
+                          const r = await translateObject(step.desc, lang, lang === "en" ? "ar" : "en")
+                          const otherSteps = [...getOtherLocalized("process").steps]
+                          otherSteps[i] = { ...otherSteps[i], desc: r }
+                          const other = getOtherLocalized("process")
+                          other.steps = otherSteps
+                          setOtherLocalized("process", other)
+                        } catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                        setTranslatingField(null)
                       }}
-                      className="w-full bg-transparent border-0 text-navy/60 dark:text-white/40 text-sm outline-none resize-none leading-relaxed"
-                      rows={2}
-                      placeholder={lang === "en" ? `Step ${step.number} description...` : `وصف الخطوة ${step.number}...`}
-                    />
+                        className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
+                        title="Translate">
+                        <i className={`fa-solid fa-language text-[9px] ${translatingField === `proc_d_${i}` ? "animate-spin" : ""}`} />
+                      </button>
+                    </div>
+                    <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1">
+                      {lang === "en" ? (getOtherLocalized("process").steps?.[i]?.desc || "—") : (getOtherLocalized("process").steps?.[i]?.desc || "—")}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -393,17 +475,36 @@ export default function HomepageEdit() {
               {(getLocalized("quotes").plans || []).map((plan, i) => (
                 <div key={i} className="bg-white dark:bg-[#0f1a24] rounded-2xl p-5 flex flex-col shadow-lg relative min-h-[380px]">
                   <div className="flex items-center justify-between mb-3">
-                    <input
-                      type="text"
-                      value={plan.name || ""}
-                      onChange={(e) => {
-                        const plans = [...getLocalized("quotes").plans]
-                        plans[i] = { ...plans[i], name: e.target.value }
-                        setLocalized("quotes", { ...getLocalized("quotes"), plans })
+                    <div className="flex items-center gap-1 flex-1">
+                      <input
+                        type="text"
+                        value={plan.name || ""}
+                        onChange={(e) => {
+                          const plans = [...getLocalized("quotes").plans]
+                          plans[i] = { ...plans[i], name: e.target.value }
+                          setLocalized("quotes", { ...getLocalized("quotes"), plans })
+                        }}
+                        className="flex-1 bg-transparent border-0 text-navy dark:text-white font-extrabold text-base outline-none"
+                        placeholder={lang === "en" ? "Plan name..." : "اسم الباقة..."}
+                      />
+                      <button onClick={async () => {
+                        if (!plan.name?.trim) return
+                        const k = `q_name_${i}`; setTranslatingField(k)
+                        try {
+                          const r = await translateObject(plan.name, lang, lang === "en" ? "ar" : "en")
+                          const otherPlans = [...getOtherLocalized("quotes").plans]
+                          otherPlans[i] = { ...otherPlans[i], name: r }
+                          const other = getOtherLocalized("quotes")
+                          other.plans = otherPlans
+                          setOtherLocalized("quotes", other)
+                        } catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                        setTranslatingField(null)
                       }}
-                      className="w-full bg-transparent border-0 text-navy dark:text-white font-extrabold text-base outline-none mr-2"
-                      placeholder={lang === "en" ? "Plan name..." : "اسم الباقة..."}
-                    />
+                        className="shrink-0 w-5 h-5 rounded bg-navy/5 hover:bg-navy/10 border-0 cursor-pointer flex items-center justify-center text-navy/40"
+                        title="Translate">
+                        <i className="fa-solid fa-language text-[8px]" />
+                      </button>
+                    </div>
                     <label className="flex items-center gap-1.5 text-[10px] text-navy dark:text-white font-semibold whitespace-nowrap cursor-pointer shrink-0">
                       <input
                         type="checkbox"
@@ -418,17 +519,42 @@ export default function HomepageEdit() {
                       Popular
                     </label>
                   </div>
-                  <textarea
-                    value={plan.desc || ""}
-                    onChange={(e) => {
-                      const plans = [...getLocalized("quotes").plans]
-                      plans[i] = { ...plans[i], desc: e.target.value }
-                      setLocalized("quotes", { ...getLocalized("quotes"), plans })
+                  <p className="text-[9px] text-navy/40 dark:text-white/40 -mt-2 mb-2 ml-1">
+                    {lang === "en" ? (getOtherLocalized("quotes").plans?.[i]?.name || "—") : (getOtherLocalized("quotes").plans?.[i]?.name || "—")}
+                  </p>
+                  <div className="flex items-start gap-1">
+                    <textarea
+                      value={plan.desc || ""}
+                      onChange={(e) => {
+                        const plans = [...getLocalized("quotes").plans]
+                        plans[i] = { ...plans[i], desc: e.target.value }
+                        setLocalized("quotes", { ...getLocalized("quotes"), plans })
+                      }}
+                      className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border/50 dark:border-[#1e2d3d]/50 rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-xs outline-none focus:border-navy/40 resize-none mb-3"
+                      rows={5}
+                      placeholder={lang === "en" ? "Plan description..." : "وصف الباقة..."}
+                    />
+                    <button onClick={async () => {
+                      if (!plan.desc?.trim) return
+                      const k = `q_desc_${i}`; setTranslatingField(k)
+                      try {
+                        const r = await translateObject(plan.desc, lang, lang === "en" ? "ar" : "en")
+                        const otherPlans = [...getOtherLocalized("quotes").plans]
+                        otherPlans[i] = { ...otherPlans[i], desc: r }
+                        const other = getOtherLocalized("quotes")
+                        other.plans = otherPlans
+                        setOtherLocalized("quotes", other)
+                      } catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                      setTranslatingField(null)
                     }}
-                    className="w-full bg-gray-50 dark:bg-[#15202b] border border-border/50 dark:border-[#1e2d3d]/50 rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-xs outline-none focus:border-navy/40 resize-none mb-3"
-                    rows={5}
-                    placeholder={lang === "en" ? "Plan description..." : "وصف الباقة..."}
-                  />
+                      className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
+                      title="Translate">
+                      <i className={`fa-solid fa-language text-[9px] ${translatingField === `q_desc_${i}` ? "animate-spin" : ""}`} />
+                    </button>
+                  </div>
+                  <p className="text-[9px] text-navy/40 dark:text-white/40 -mt-3 mb-2 ml-1">
+                    {lang === "en" ? (getOtherLocalized("quotes").plans?.[i]?.desc || "—") : (getOtherLocalized("quotes").plans?.[i]?.desc || "—")}
+                  </p>
                   <div className="flex-1">
                     <p className="text-[10px] text-navy dark:text-white font-semibold mb-1.5">Features</p>
                     {(plan.features || []).map((f, j) => (
@@ -448,6 +574,25 @@ export default function HomepageEdit() {
                           }}
                           className="flex-1 bg-transparent border-0 border-b border-dotted border-gray-200 dark:border-[#1e2d3d] text-navy/70 dark:text-white/50 text-xs outline-none focus:border-navy/40 pb-0.5"
                         />
+                        <button onClick={async () => {
+                          if (!f?.trim) return
+                          const k = `q_feat_${i}_${j}`; setTranslatingField(k)
+                          try {
+                            const r = await translateObject(f, lang, lang === "en" ? "ar" : "en")
+                            const otherPlans = [...getOtherLocalized("quotes").plans]
+                            const otherFeatures = [...(otherPlans[i]?.features || [])]
+                            otherFeatures[j] = r
+                            otherPlans[i] = { ...otherPlans[i], features: otherFeatures }
+                            const other = getOtherLocalized("quotes")
+                            other.plans = otherPlans
+                            setOtherLocalized("quotes", other)
+                          } catch(e) { showToast("Translate failed: " + sanitizeError(e.message), "error") }
+                          setTranslatingField(null)
+                        }}
+                          className="shrink-0 w-4 h-4 rounded bg-navy/5 hover:bg-navy/10 border-0 cursor-pointer flex items-center justify-center text-navy/30"
+                          title="Translate">
+                          <i className="fa-solid fa-language text-[7px]" />
+                        </button>
                         <button
                           onClick={() => setConfirmAction({ type: "feature", planIndex: i, featureIndex: j })}
                           className="text-red/50 hover:text-red text-xs bg-transparent border-0 cursor-pointer p-0 leading-none"

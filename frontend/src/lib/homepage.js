@@ -125,7 +125,7 @@ async function translateText(text, source, target) {
   return text
 }
 
-async function translateObject(obj, source, target) {
+export async function translateObject(obj, source, target) {
   if (typeof obj === "string") return translateText(obj, source, target)
   if (Array.isArray(obj)) return Promise.all(obj.map((item) => translateObject(item, source, target)))
   if (obj && typeof obj === "object") {

@@ -146,7 +146,7 @@ export default function Navbar() {
             className="bg-transparent border border-border dark:border-[#1e2d3d] text-navy dark:text-white/80 font-semibold text-[0.75rem] px-3 py-[0.45rem] rounded-full cursor-pointer hover:bg-gray-50 dark:hover:bg-white/10 transition-colors whitespace-nowrap flex items-center gap-1.5"
             aria-label="Toggle dark mode"
           >
-            {dark ? <><i className="fa-solid fa-sun" /> Light</> : <><i className="fa-solid fa-moon" /> Dark</>}
+            {dark ? <><i className="fa-solid fa-sun" /> {t("Light", "فاتح", lang)}</> : <><i className="fa-solid fa-moon" /> {t("Dark", "داكن", lang)}</>}
           </button>
           <button
             onClick={toggleLang}

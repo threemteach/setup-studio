@@ -47,17 +47,18 @@ function matchHeader(item, pathname) {
   return pathname.startsWith(item.path)
 }
 
-function DarkModeToggle() {
+function DarkModeToggle({ lang }) {
   const { dark, toggle } = useTheme()
+  const t = (en, ar) => lang === "ar" ? ar : en
   return (
-    <button onClick={toggle} title={dark ? "Switch to light mode" : "Switch to dark mode"}
+    <button onClick={toggle} title={dark ? t("Switch to light mode", "التبديل إلى الوضع النهاري") : t("Switch to dark mode", "التبديل إلى الوضع الليلي")}
       className="w-9 h-9 rounded-xl bg-gray-50 dark:bg-[#1e2d3d] hover:bg-gray-100 dark:hover:bg-[#2a3d4d] border-0 text-navy dark:text-white/70 hover:text-navy dark:hover:text-white flex items-center justify-center cursor-pointer transition-colors duration-200 text-lg">
       {dark ? <i className="fa-solid fa-sun" /> : <i className="fa-solid fa-moon" />}
     </button>
   )
 }
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout({ children, lang = "en" }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -171,7 +172,7 @@ export default function AdminLayout({ children }) {
           </div>
 
           <div className="flex items-center gap-3">
-            <DarkModeToggle />
+            <DarkModeToggle lang={lang} />
             <span className="w-[1.5px] h-6 bg-border dark:bg-[#1e2d3d]" />
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-navy/10 dark:bg-white/10 flex items-center justify-center text-navy dark:text-white font-bold text-xs">
