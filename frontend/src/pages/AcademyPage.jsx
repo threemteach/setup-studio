@@ -6,24 +6,121 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
-/* ─── Video Card — light placeholder + play button, no thumb generation ───────────────── */
+/* ─── Thumbnail generator (canvas, cross-browser) ─────────────────────────── */
+function generateThumbFromVideo(videoUrl) {
+  return new Promise((resolve) => {
+    const vid = document.createElement("video")
+    vid.crossOrigin = "anonymous"
+    vid.preload = "metadata"
+    vid.muted = true
+    vid.playsInline = true
+    vid.setAttribute("playsinline", "")
+
+    let settled = false
+    function done(result) {
+      if (settled) return
+      settled = true
+      vid.src = ""
+      vid.load()
+      resolve(result)
+    }
+
+    const timer = setTimeout(() => done(null), 12000)
+
+    function capture() {
+      clearTimeout(timer)
+      try {
+        const canvas = document.createElement("canvas")
+        canvas.width = vid.videoWidth || 320
+        canvas.height = vid.videoHeight || 180
+        canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
+        done(canvas.toDataURL("image/jpeg", 0.75))
+      } catch {
+        done(null)
+      }
+    }
+
+    vid.addEventListener("seeked", capture, { once: true })
+    vid.addEventListener("loadeddata", () => {
+      vid.currentTime = 0.001
+    }, { once: true })
+    vid.addEventListener("error", () => {
+      clearTimeout(timer)
+      done(null)
+    }, { once: true })
+
+    vid.src = videoUrl
+    vid.load()
+  })
+}
+
+/* ─── Video Card with lazy thumbnail ──────────────────────────────────────── */
 function VideoCard({ video, lang, onPlay }) {
+  const [thumb, setThumb] = useState(video.thumbnail_url || null)
+  const [thumbLoading, setThumbLoading] = useState(!video.thumbnail_url)
+  const cardRef = useRef(null)
+  const observerRef = useRef(null)
+
+  useEffect(() => {
+    if (video.thumbnail_url) return // already have thumb
+
+    const el = cardRef.current
+    if (!el) return
+
+    // Intersection Observer — only generate thumb when card is visible
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          observerRef.current?.disconnect()
+          generateThumbFromVideo(video.video_url).then((dataUrl) => {
+            setThumb(dataUrl)
+            setThumbLoading(false)
+          })
+        }
+      },
+      { rootMargin: "200px" }
+    )
+    observerRef.current.observe(el)
+
+    return () => observerRef.current?.disconnect()
+  }, [video.thumbnail_url, video.video_url])
+
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
 
   return (
-    <div className="group mb-5">
+    <div ref={cardRef} className="group mb-5">
       <div className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-border/50 dark:border-[#1e2d3d]/50">
+        {/* Thumbnail area */}
         <div
-          className="relative cursor-pointer select-none bg-gradient-to-br from-[#0c1e2e] to-[#162840]"
+          className="relative bg-gray-900 cursor-pointer select-none"
           onClick={() => onPlay(video)}
+          style={{ minHeight: "140px" }}
         >
-          <div className="w-full aspect-video flex items-center justify-center">
+          {thumb ? (
+            <img
+              src={thumb}
+              alt={title}
+              className="w-full h-auto block"
+              loading="lazy"
+              draggable={false}
+            />
+          ) : (
+            <div className="w-full aspect-video bg-gradient-to-br from-[#0f2030] to-[#1a3248] flex items-center justify-center">
+              {thumbLoading && (
+                <div className="w-6 h-6 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
+              )}
+            </div>
+          )}
+
+          {/* Play overlay */}
+          <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors duration-200 flex items-center justify-center pointer-events-none">
             <div className="w-14 h-14 rounded-full bg-red/90 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-200">
               <i className="fa-solid fa-play text-white text-lg ml-1" />
             </div>
           </div>
         </div>
 
+        {/* Info */}
         <div className={`p-4 ${lang === "ar" ? "text-right" : ""}`}>
           <h3 className="text-navy dark:text-white font-bold text-sm m-0 line-clamp-1">
             {title}
