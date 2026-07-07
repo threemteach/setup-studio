@@ -6,91 +6,36 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
-/* ─── VideoCard — canvas thumbnail (dataURL, no upload), lazy via IntersectionObserver ── */
+/* ─── VideoCard — light placeholder + play button, video loads in modal on click ── */
 function VideoCard({ video, lang, onPlay }) {
-  const cardRef = useRef(null)
-  const [thumb, setThumb] = useState(video.thumbnail_url || null)
   const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
 
-  useEffect(() => {
-    if (video.thumbnail_url) return
-    const el = cardRef.current
-    if (!el) return
-    let done = false
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting || done) return
-      done = true
-      observer.disconnect()
-      const vid = document.createElement("video")
-      vid.crossOrigin = "anonymous"
-      vid.preload = "metadata"
-      vid.muted = true
-      vid.playsInline = true
-      vid.onloadeddata = () => { vid.currentTime = 0.001 }
-      vid.onseeked = () => {
-        requestAnimationFrame(() => {
-          try {
-            const canvas = document.createElement("canvas")
-            canvas.width = vid.videoWidth || 320
-            canvas.height = vid.videoHeight || 180
-            canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
-            setThumb(canvas.toDataURL("image/jpeg", 0.75))
-          } catch { /* ignore */ }
-          vid.remove()
-        })
-      }
-      vid.onerror = () => { vid.remove() }
-      vid.src = video.video_url
-    }, { rootMargin: "200px" })
-    observer.observe(el)
-    return () => { observer.disconnect() }
-  }, [video.thumbnail_url, video.video_url])
-
-  const PlayOverlay = (
-    <div
-      style={{
-        position: "absolute", inset: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        background: "rgba(0,0,0,0)",
-        transition: "background 0.2s",
-        pointerEvents: "none",
-      }}
-      className="group-hover:bg-black/20"
-    >
-      <div
-        style={{
-          width: 52, height: 52, borderRadius: "50%",
-          background: "rgba(231,59,73,0.92)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 8px 24px rgba(231,59,73,0.45)",
-          transition: "transform 0.2s",
-        }}
-        className="group-hover:scale-110"
-      >
-        <i className="fa-solid fa-play text-white" style={{ fontSize: 16, marginLeft: 3 }} />
-      </div>
-    </div>
-  )
-
   return (
-    <div ref={cardRef} className="group mb-5">
+    <div className="group mb-5">
       <div
         className="bg-white dark:bg-[#0f1a24] rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-border/50 dark:border-[#1e2d3d]/50"
         style={{ transform: "translateZ(0)" }}
       >
         <div
-          className="relative cursor-pointer select-none overflow-hidden"
+          className="relative cursor-pointer select-none overflow-hidden bg-gradient-to-br from-[#0c1e2e] to-[#162840]"
           onClick={() => onPlay(video)}
         >
-          {thumb ? (
-            <img src={thumb} alt={title} className="w-full h-auto block" draggable={false} />
-          ) : (
-            <div className="w-full aspect-video bg-gradient-to-br from-[#0c1e2e] to-[#162840]" />
-          )}
-          {PlayOverlay}
+          <div className="w-full aspect-video flex items-center justify-center">
+            <div
+              style={{
+                width: 52, height: 52, borderRadius: "50%",
+                background: "rgba(231,59,73,0.92)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 8px 24px rgba(231,59,73,0.45)",
+                transition: "transform 0.2s",
+              }}
+              className="group-hover:scale-110"
+            >
+              <i className="fa-solid fa-play text-white" style={{ fontSize: 16, marginLeft: 3 }} />
+            </div>
+          </div>
         </div>
 
-        {/* ── Card info ───────────────────────────────────────────── */}
         <div style={{ padding: "14px 16px" }} className={lang === "ar" ? "text-right" : ""}>
           <h3
             style={{ margin: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}
