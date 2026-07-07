@@ -15,8 +15,17 @@ export default function PortfolioPage() {
   const videoRef = useRef(null)
 
   useEffect(() => {
-    if (activeVideo && videoRef.current) {
-      videoRef.current.requestFullscreen?.()?.catch(() => {})
+    const el = videoRef.current
+    if (!activeVideo || !el) return
+    const onExit = () => {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) setActiveVideo(null)
+    }
+    el.addEventListener("fullscreenchange", onExit)
+    el.addEventListener("webkitfullscreenchange", onExit)
+    el.requestFullscreen?.()?.catch(() => {})
+    return () => {
+      el.removeEventListener("fullscreenchange", onExit)
+      el.removeEventListener("webkitfullscreenchange", onExit)
     }
   }, [activeVideo])
 
