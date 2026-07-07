@@ -65,6 +65,12 @@ export default function DashboardPage() {
       let totalDeleted = 0
       let pageNum = 0
 
+      let totalOnCloudinary = 0
+      let usedInPhotos = 0
+      let usedFromPortfolio = 0
+      let sampleCloudinaryIds = []
+      let sampleUsedIds = []
+
       do {
         pageNum++
         const res = await fetch(apiUrl, {
@@ -77,11 +83,18 @@ export default function DashboardPage() {
           throw new Error(err.error || `Cleanup failed on page ${pageNum}`)
         }
         const data = await res.json()
+        if (data.debug) {
+          totalOnCloudinary = data.debug.total_on_cloudinary || 0
+          usedInPhotos = data.debug.used_in_photos || 0
+          usedFromPortfolio = data.debug.used_from_portfolio_videos || 0
+          sampleCloudinaryIds = data.debug.sample_cloudinary_ids || []
+          sampleUsedIds = data.debug.sample_used_ids || []
+        }
         totalDeleted = data.total_deleted
         nextCursor = data.next_cursor
       } while (nextCursor)
 
-      setCleanupState({ status: "done", result: { deleted: totalDeleted } })
+      setCleanupState({ status: "done", result: { deleted: totalDeleted, totalOnCloudinary, usedInPhotos, usedFromPortfolio, sampleCloudinaryIds, sampleUsedIds } })
     } catch (err) {
       setCleanupState({ status: "error", result: err.message })
     }
@@ -246,6 +259,17 @@ export default function DashboardPage() {
                 <p className="text-emerald-600 dark:text-emerald-400">
                   {cleanupState.result.deleted} unused images deleted from Cloudinary.
                 </p>
+                {cleanupState.result.totalOnCloudinary > 0 && (
+                  <p className="text-emerald-600/70 dark:text-emerald-400/70 mt-1">
+                    Found {cleanupState.result.totalOnCloudinary} total on Cloudinary, {cleanupState.result.usedInPhotos} used in photos table, {cleanupState.result.usedFromPortfolio} from portfolio videos
+                  </p>
+                )}
+                {cleanupState.result.sampleCloudinaryIds?.length > 0 && (
+                  <div className="mt-2 text-[10px] font-mono text-emerald-600/50 dark:text-emerald-400/50">
+                    <p>Sample Cloudinary public_ids: {cleanupState.result.sampleCloudinaryIds.join(", ")}</p>
+                    <p>Sample used public_ids: {cleanupState.result.sampleUsedIds.join(", ")}</p>
+                  </div>
+                )}
               </div>
             )}
             {cleanupState.status === "error" && (

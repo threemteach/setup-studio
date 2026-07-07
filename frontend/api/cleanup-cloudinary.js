@@ -61,6 +61,24 @@ export default async function handler(req, res) {
   }
 
   // 2. List ONE page of Cloudinary images
+  // First, try getting total count via a separate request with max_results=0
+  let totalOnCloudinary = null
+  if (!incomingCursor) {
+    const countParams = new URLSearchParams({
+      prefix: "setup-studio/locations/",
+      max_results: "0",
+      type: "upload",
+    })
+    const countRes = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?${countParams}`,
+      { headers: { Authorization: `Basic ${auth}` } }
+    )
+    if (countRes.ok) {
+      const countData = await countRes.json()
+      totalOnCloudinary = countData.total_count || countData.resources?.length || null
+    }
+  }
+
   const params = new URLSearchParams({
     prefix: "setup-studio/locations/",
     max_results: "500",
@@ -81,6 +99,15 @@ export default async function handler(req, res) {
   const listData = await listRes.json()
   const pageIds = (listData.resources || []).map(r => r.public_id)
   const nextCursor = listData.next_cursor || null
+
+  // Debug: show sample IDs on first page to understand format mismatch
+  const debug = !incomingCursor ? {
+    total_on_cloudinary: totalOnCloudinary,
+    used_in_photos: usedIds.size,
+    used_from_portfolio_videos: portfolioVideos?.length || 0,
+    sample_cloudinary_ids: pageIds.slice(0, 3),
+    sample_used_ids: [...usedIds].slice(0, 3),
+  } : undefined
 
   // 3. Find unused IDs on this page
   const unusedIds = pageIds.filter(id => !usedIds.has(id))
@@ -119,5 +146,6 @@ export default async function handler(req, res) {
     total_deleted: totalDeleted,
     next_cursor: nextCursor,
     done: !nextCursor,
+    ...(debug ? { debug } : {}),
   })
 }
