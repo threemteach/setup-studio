@@ -56,6 +56,7 @@ export default async function handler(req, res) {
     Key: key,
     Body: raw,
     ContentType: contentType,
+    CacheControl: "public, max-age=31536000, immutable",
   }))
 
   return res.status(200).json({

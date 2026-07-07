@@ -80,7 +80,12 @@ function VideoCard({ video, lang }) {
         el.play().catch(() => {})
       }, { once: true })
     })
-    if (el.requestFullscreen) {
+    // On iOS, requestFullscreen() hands the video off to the native
+    // AVPlayerViewController — a separate playback session from the inline
+    // preview, which adds real latency. Keep playback inline there and only
+    // use the web fullscreen API on platforms where it's cheap (desktop/Android).
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+    if (!isIOS && el.requestFullscreen) {
       el.requestFullscreen().catch(() => {})
     }
   }
@@ -107,6 +112,7 @@ function VideoCard({ video, lang }) {
               src={inView || playing ? video.video_url : undefined}
               preload={playing ? "auto" : hasThumbnail ? "none" : inView ? "metadata" : "none"}
               controls={playing}
+              playsInline
               poster={video.thumbnail_url || undefined}
               tabIndex={-1}
               style={{

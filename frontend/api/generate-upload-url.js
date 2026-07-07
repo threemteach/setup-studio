@@ -42,6 +42,7 @@ export default async function handler(req, res) {
       Bucket: bucket,
       Key: key,
       ContentType: contentType || "video/mp4",
+      CacheControl: "public, max-age=31536000, immutable",
     })
     const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 })
     const createRes = await fetch(uploadUrl, { method: "POST" })
@@ -56,6 +57,7 @@ export default async function handler(req, res) {
     Bucket: bucket,
     Key: key,
     ContentType: contentType || "video/mp4",
+    CacheControl: "public, max-age=31536000, immutable",
   })
   const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 })
   return res.json({ upload_url: uploadUrl, video_key: key, video_url: `${publicUrl}/${key}` })
