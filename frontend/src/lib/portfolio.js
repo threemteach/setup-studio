@@ -222,51 +222,63 @@ export async function uploadVideo(file, category, onProgress) {
 }
 
 export async function generateVideoThumbnail(videoUrl) {
+  // Capture frame as data URL first (synchronous canvas), then upload
+  const dataUrl = await captureVideoFrame(videoUrl)
+  if (!dataUrl) return null
+
+  const blob = dataURItoBlob(dataUrl)
+  try {
+    const result = await uploadToCloudinary(new File([blob], "thumb.jpg", { type: "image/jpeg" }), "portfolio-thumbnails")
+    return result.secure_url
+  } catch {
+    return null
+  }
+}
+
+function dataURItoBlob(dataUrl) {
+  const parts = dataUrl.split(",")
+  const mime = parts[0].match(/:(.*?);/)?.[1] || "image/jpeg"
+  const binary = atob(parts[1])
+  const array = new Uint8Array(binary.length)
+  for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i)
+  return new Blob([array], { type: mime })
+}
+
+function captureVideoFrame(videoUrl) {
   return new Promise((resolve) => {
-    const video = document.createElement("video")
-    video.crossOrigin = "anonymous"
-    video.muted = true
-    video.playsInline = true
+    const vid = document.createElement("video")
+    vid.crossOrigin = "anonymous"
+    vid.preload = "metadata"
+    vid.muted = true
+    vid.playsInline = true
 
     let settled = false
     function done(result) {
       if (settled) return
       settled = true
-      video.src = ""
-      video.load()
+      vid.remove()
       resolve(result)
     }
 
     const timer = setTimeout(() => done(null), 15000)
 
-    video.addEventListener("seeked", () => {
+    function capture() {
       clearTimeout(timer)
       try {
         const canvas = document.createElement("canvas")
-        canvas.width = video.videoWidth || 320
-        canvas.height = video.videoHeight || 180
-        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height)
-        canvas.toBlob(async (blob) => {
-          if (!blob) return done(null)
-          try {
-            const result = await uploadToCloudinary(new File([blob], "thumb.jpg", { type: "image/jpeg" }), "portfolio-thumbnails")
-            done(result.secure_url)
-          } catch { done(null) }
-        }, "image/jpeg", 0.8)
+        canvas.width = vid.videoWidth || 320
+        canvas.height = vid.videoHeight || 180
+        canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
+        done(canvas.toDataURL("image/jpeg", 0.75))
       } catch { done(null) }
-    }, { once: true })
+    }
 
-    video.addEventListener("loadeddata", () => {
-      video.currentTime = 0.5
-    }, { once: true })
+    vid.addEventListener("seeked", capture, { once: true })
+    vid.addEventListener("loadeddata", () => { vid.currentTime = 0.001 }, { once: true })
+    vid.addEventListener("error", () => { clearTimeout(timer); done(null) }, { once: true })
 
-    video.addEventListener("error", () => {
-      clearTimeout(timer)
-      done(null)
-    }, { once: true })
-
-    video.src = videoUrl
-    video.load()
+    vid.src = videoUrl
+    vid.load()
   })
 }
 
