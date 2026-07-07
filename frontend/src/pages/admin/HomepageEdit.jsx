@@ -165,7 +165,7 @@ export default function HomepageEdit() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-navy/20 border-t-navy rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
         </div>
       </AdminLayout>
     )
@@ -173,22 +173,22 @@ export default function HomepageEdit() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-navy font-bold text-2xl m-0">Home Page Editor</h1>
-          <p className="text-muted text-sm m-0 mt-1">Edit homepage content — all changes are bilingual (EN / AR)</p>
+          <h1 className="text-navy dark:text-white font-bold text-2xl m-0">Home Page Editor</h1>
+          <p className="text-muted dark:text-white/50 text-sm m-0 mt-1">Edit homepage content — all changes are bilingual (EN / AR)</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setLang(lang === "en" ? "ar" : "en")}
-            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors"
           >
             {lang === "en" ? "Edit العربية" : "Edit English"}
           </button>
           <button
             onClick={handleAutoTranslate}
             disabled={translating}
-            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
             title="Auto-translate this section to the other language"
           >
             {translating ? "Translating..." : "Auto-translate"}
@@ -212,7 +212,7 @@ export default function HomepageEdit() {
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer border-0 ${
               activeSection === key
                 ? "bg-navy text-white shadow-lg shadow-navy/20"
-                : "bg-white text-navy border border-border hover:bg-gray-50"
+                : "bg-white dark:bg-[#15202b] text-navy dark:text-white border border-border dark:border-[#1e2d3d] hover:bg-gray-50 dark:hover:bg-[#1e2d3d]"
             }`}
           >
             <i className={sectionIcons[key]} />
@@ -223,8 +223,8 @@ export default function HomepageEdit() {
 
       {/* ─── HERO EDITOR (preview-like layout) ─── */}
       {activeSection === "hero" && (
-        <div className="bg-white rounded-3xl border border-border/85 shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-br from-[#f8fafc] to-white p-6 sm:p-8">
+        <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/85 dark:border-[#1e2d3d]/85 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-br from-[#f8fafc] dark:from-[#15202b] to-white dark:to-[#0f1a24] p-6 sm:p-8">
             <div className="flex flex-col items-center gap-6 max-w-3xl mx-auto">
               {/* Wordmark preview */}
               <svg className="w-[clamp(14rem,40vw,28rem)] h-auto" viewBox="55 -5 170 75" fill="none">
@@ -247,7 +247,7 @@ export default function HomepageEdit() {
                 {[0, 1, 2, 3].map((i) => {
                   const photo = (getLocalized("hero").photos || [])[i]
                   return (
-                    <div key={i} className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-gray-100 border-2 border-white shadow-md group cursor-pointer" onClick={() => setPhotoPicker({ section: "hero", index: i })}>
+                    <div key={i} className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-white dark:border-[#1e2d3d] shadow-md group cursor-pointer" onClick={() => setPhotoPicker({ section: "hero", index: i })}>
                       {photo ? (
                         <img src={optimizeImageUrl(photo.url, 200)} alt="" className="w-full h-full object-cover" />
                       ) : (
@@ -275,7 +275,7 @@ export default function HomepageEdit() {
                 <textarea
                   value={getLocalized("hero").description || ""}
                   onChange={(e) => setLocalized("hero", { ...getLocalized("hero"), description: e.target.value })}
-                  className="w-full text-center bg-white/80 border border-border rounded-2xl px-5 py-4 text-navy text-sm outline-none focus:border-navy/40 resize-none shadow-sm"
+                  className="w-full text-center bg-white/80 dark:bg-white/10 border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-4 text-navy dark:text-white text-sm outline-none focus:border-navy/40 resize-none shadow-sm"
                   rows={3}
                   placeholder={lang === "en" ? "Hero description text..." : "نص وصف الهيرو..."}
                 />
@@ -287,7 +287,7 @@ export default function HomepageEdit() {
 
       {/* ─── ABOUT EDITOR (preview-like layout) ─── */}
       {activeSection === "about" && (
-        <div className="bg-white rounded-3xl border border-border/85 shadow-sm p-8 sm:p-10">
+        <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/85 dark:border-[#1e2d3d]/85 shadow-sm p-8 sm:p-10">
           <div className="max-w-2xl mx-auto text-center space-y-6">
             {/* Decorative header */}
             <div className="flex items-center justify-center gap-3 mb-2">
@@ -295,7 +295,7 @@ export default function HomepageEdit() {
                 <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
               </svg>
               <span className="block w-16 h-[2px] bg-red" />
-              <span className="text-navy font-bold text-sm tracking-widest uppercase">About Setup</span>
+              <span className="text-navy dark:text-white font-bold text-sm tracking-widest uppercase">About Setup</span>
               <span className="block w-16 h-[2px] bg-red" />
               <svg className="w-3 h-3 text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
                 <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
@@ -306,14 +306,14 @@ export default function HomepageEdit() {
               type="text"
               value={getLocalized("about").heading || ""}
               onChange={(e) => setLocalized("about", { ...getLocalized("about"), heading: e.target.value })}
-              className="w-full text-center border-0 border-b-2 border-border bg-transparent text-navy font-bold text-xl outline-none focus:border-navy/40 px-2 py-1"
+              className="w-full text-center border-0 border-b-2 border-border dark:border-[#1e2d3d] bg-transparent text-navy dark:text-white font-bold text-xl outline-none focus:border-navy/40 px-2 py-1"
               placeholder={lang === "en" ? "Heading text..." : "نص العنوان..."}
             />
 
             <textarea
               value={getLocalized("about").body || ""}
               onChange={(e) => setLocalized("about", { ...getLocalized("about"), body: e.target.value })}
-              className="w-full text-center bg-gray-50 border border-border rounded-2xl px-5 py-4 text-navy/70 text-sm outline-none focus:border-navy/40 resize-none leading-relaxed"
+              className="w-full text-center bg-gray-50 dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-4 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 resize-none leading-relaxed"
               rows={5}
               placeholder={lang === "en" ? "Body text..." : "نص المحتوى..."}
             />
@@ -323,23 +323,23 @@ export default function HomepageEdit() {
 
       {/* ─── PROCESS EDITOR (timeline preview) ─── */}
       {activeSection === "process" && (
-        <div className="bg-white rounded-3xl border border-border/85 shadow-sm p-6 sm:p-8">
+        <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/85 dark:border-[#1e2d3d]/85 shadow-sm p-6 sm:p-8">
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
-              <h3 className="text-navy font-bold uppercase tracking-[0.08em] text-lg m-0">Our Process</h3>
-              <p className="text-navy/60 text-xs tracking-[0.15em] uppercase mt-1 m-0">From Idea to Action</p>
+              <h3 className="text-navy dark:text-white font-bold uppercase tracking-[0.08em] text-lg m-0">Our Process</h3>
+              <p className="text-navy/60 dark:text-white/40 text-xs tracking-[0.15em] uppercase mt-1 m-0">From Idea to Action</p>
             </div>
             <div className="relative">
-              <div className="absolute ltr:left-[clamp(3.5rem,8vw,5rem)] rtl:right-[clamp(3.5rem,8vw,5rem)] top-0 bottom-0 w-[3px] bg-navy/20" />
+              <div className="absolute ltr:left-[clamp(3.5rem,8vw,5rem)] rtl:right-[clamp(3.5rem,8vw,5rem)] top-0 bottom-0 w-[3px] bg-navy/20 dark:bg-white/20" />
               {getLocalized("process").steps?.map((step, i) => (
                 <div key={i} className="relative flex gap-4 pb-8 last:pb-0">
                   <div className="shrink-0 w-[clamp(3.5rem,8vw,5rem)] ltr:text-right rtl:text-left ltr:pr-4 rtl:pl-4 pt-1">
-                    <span className="text-navy font-extrabold text-2xl opacity-30">{step.number}</span>
+                    <span className="text-navy dark:text-white font-extrabold text-2xl opacity-30">{step.number}</span>
                   </div>
                   <div className="shrink-0 pt-2 relative z-10">
-                    <span className="block w-3.5 h-3.5 rounded-full bg-navy ring-4 ring-white" />
+                    <span className="block w-3.5 h-3.5 rounded-full bg-navy dark:bg-white ring-4 ring-white dark:ring-[#15202b]" />
                   </div>
-                  <div className="flex-1 bg-gray-50 rounded-2xl p-4 border border-border/60">
+                  <div className="flex-1 bg-gray-50 dark:bg-[#0f1a24] rounded-2xl p-4 border border-border/60 dark:border-[#1e2d3d]/60">
                     <input
                       type="text"
                       value={step.title || ""}
@@ -348,7 +348,7 @@ export default function HomepageEdit() {
                         steps[i] = { ...steps[i], title: e.target.value }
                         setLocalized("process", { ...getLocalized("process"), steps })
                       }}
-                      className="w-full bg-transparent border-0 border-b border-border pb-1 text-navy font-bold text-base outline-none focus:border-navy/40 mb-2"
+                      className="w-full bg-transparent border-0 border-b border-border dark:border-[#1e2d3d] pb-1 text-navy dark:text-white font-bold text-base outline-none focus:border-navy/40 mb-2"
                       placeholder={lang === "en" ? `Step ${step.number} title...` : `عنوان الخطوة ${step.number}...`}
                     />
                     <textarea
@@ -358,7 +358,7 @@ export default function HomepageEdit() {
                         steps[i] = { ...steps[i], desc: e.target.value }
                         setLocalized("process", { ...getLocalized("process"), steps })
                       }}
-                      className="w-full bg-transparent border-0 text-navy/60 text-sm outline-none resize-none leading-relaxed"
+                      className="w-full bg-transparent border-0 text-navy/60 dark:text-white/40 text-sm outline-none resize-none leading-relaxed"
                       rows={2}
                       placeholder={lang === "en" ? `Step ${step.number} description...` : `وصف الخطوة ${step.number}...`}
                     />
@@ -391,7 +391,7 @@ export default function HomepageEdit() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
               {(getLocalized("quotes").plans || []).map((plan, i) => (
-                <div key={i} className="bg-white rounded-2xl p-5 flex flex-col shadow-lg relative min-h-[380px]">
+                <div key={i} className="bg-white dark:bg-[#0f1a24] rounded-2xl p-5 flex flex-col shadow-lg relative min-h-[380px]">
                   <div className="flex items-center justify-between mb-3">
                     <input
                       type="text"
@@ -401,10 +401,10 @@ export default function HomepageEdit() {
                         plans[i] = { ...plans[i], name: e.target.value }
                         setLocalized("quotes", { ...getLocalized("quotes"), plans })
                       }}
-                      className="w-full bg-transparent border-0 text-navy font-extrabold text-base outline-none mr-2"
+                      className="w-full bg-transparent border-0 text-navy dark:text-white font-extrabold text-base outline-none mr-2"
                       placeholder={lang === "en" ? "Plan name..." : "اسم الباقة..."}
                     />
-                    <label className="flex items-center gap-1.5 text-[10px] text-navy font-semibold whitespace-nowrap cursor-pointer shrink-0">
+                    <label className="flex items-center gap-1.5 text-[10px] text-navy dark:text-white font-semibold whitespace-nowrap cursor-pointer shrink-0">
                       <input
                         type="checkbox"
                         checked={plan.popular || false}
@@ -425,12 +425,12 @@ export default function HomepageEdit() {
                       plans[i] = { ...plans[i], desc: e.target.value }
                       setLocalized("quotes", { ...getLocalized("quotes"), plans })
                     }}
-                    className="w-full bg-gray-50 border border-border/50 rounded-xl px-3 py-2 text-navy/60 text-xs outline-none focus:border-navy/40 resize-none mb-3"
+                    className="w-full bg-gray-50 dark:bg-[#15202b] border border-border/50 dark:border-[#1e2d3d]/50 rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-xs outline-none focus:border-navy/40 resize-none mb-3"
                     rows={5}
                     placeholder={lang === "en" ? "Plan description..." : "وصف الباقة..."}
                   />
                   <div className="flex-1">
-                    <p className="text-[10px] text-navy font-semibold mb-1.5">Features</p>
+                    <p className="text-[10px] text-navy dark:text-white font-semibold mb-1.5">Features</p>
                     {(plan.features || []).map((f, j) => (
                       <div key={j} className="flex items-center gap-1.5 mb-1">
                         <svg className="w-3 h-3 text-red shrink-0" viewBox="0 0 12 12" fill="currentColor">
@@ -446,7 +446,7 @@ export default function HomepageEdit() {
                             plans[i] = { ...plans[i], features }
                             setLocalized("quotes", { ...getLocalized("quotes"), plans })
                           }}
-                          className="flex-1 bg-transparent border-0 border-b border-dotted border-gray-200 text-navy/70 text-xs outline-none focus:border-navy/40 pb-0.5"
+                          className="flex-1 bg-transparent border-0 border-b border-dotted border-gray-200 dark:border-[#1e2d3d] text-navy/70 dark:text-white/50 text-xs outline-none focus:border-navy/40 pb-0.5"
                         />
                         <button
                           onClick={() => setConfirmAction({ type: "feature", planIndex: i, featureIndex: j })}
@@ -477,13 +477,13 @@ export default function HomepageEdit() {
       {/* ─── PHOTO PICKER MODAL ─── */}
       {photoPicker && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPhotoPicker(null)}>
-          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-border">
+          <div className="bg-white dark:bg-[#15202b] rounded-3xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-border dark:border-[#1e2d3d]">
               <div>
-                <h3 className="text-navy font-bold text-base m-0">Choose Photo</h3>
-                <p className="text-muted text-xs m-0 mt-0.5">Select from existing location photos or upload a new one</p>
+                <h3 className="text-navy dark:text-white font-bold text-base m-0">Choose Photo</h3>
+                <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5">Select from existing location photos or upload a new one</p>
               </div>
-              <button onClick={() => setPhotoPicker(null)} className="w-8 h-8 rounded-full bg-gray-100 border-0 text-navy cursor-pointer hover:bg-gray-200 transition-colors flex items-center justify-center">
+              <button onClick={() => setPhotoPicker(null)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#1e2d3d] border-0 text-navy dark:text-white cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a3d4d] transition-colors flex items-center justify-center">
                 <i className="fa-solid fa-xmark" />
               </button>
             </div>
@@ -498,14 +498,14 @@ export default function HomepageEdit() {
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUploadNew} />
               </div>
               {allPhotos.length === 0 ? (
-                <p className="text-muted text-sm text-center py-8">No photos found in the database.</p>
+                <p className="text-muted dark:text-white/50 text-sm text-center py-8">No photos found in the database.</p>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {allPhotos.map((photo) => (
                     <button
                       key={photo.id}
                       onClick={() => handlePickPhoto(photo)}
-                      className="aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative"
+                      className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative"
                     >
                       <img src={optimizeImageUrl(photo.cloudinary_url, 200)} alt="" className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] font-medium px-2 py-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">

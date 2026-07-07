@@ -16,7 +16,7 @@ export default function CtaBanner() {
   }
 
   return (
-    <section className="w-full py-[clamp(2rem,5vw,4rem)] px-[clamp(1rem,4vw,3rem)]">
+    <section className="w-full py-[clamp(2rem,5vw,4rem)] px-[clamp(1rem,4vw,3rem)] bg-white dark:bg-[#0A1216]">
       <div className="max-w-[1280px] mx-auto">
         <Reveal>
           <div className="relative overflow-hidden rounded-[clamp(1.25rem,2.5vw,2.5rem)] bg-[#0A1216] min-h-[clamp(10rem,16vw,16rem)] flex items-center">

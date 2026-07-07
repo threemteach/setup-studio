@@ -15,7 +15,7 @@ const positions = [
 ]
 
 function getCardClasses(wide) {
-  return `absolute object-cover rounded-[10%] shadow-[0_8px_20px_rgba(48,93,116,0.22)] border-[3px] sm:border-4 border-white ${
+  return `absolute object-cover rounded-[10%] shadow-[0_8px_20px_rgba(48,93,116,0.22)] border-[3px] sm:border-4 border-white dark:border-[#1e2d3d] ${
     wide ? "w-[52%] h-[76%]" : "w-[46%] h-[70%]"
   }`
 }
@@ -38,12 +38,10 @@ export default function Hero() {
     <section
       id="hero"
       dir="ltr"
-      className="w-full bg-white flex flex-col justify-center min-h-[60svh] sm:min-h-[75vh] lg:min-h-[calc(100vh-4.5rem)] py-[clamp(1rem,3vw,2rem)] overflow-hidden"
+      className="w-full bg-white dark:bg-[#0A1216] flex flex-col justify-center min-h-[60svh] sm:min-h-[75vh] lg:min-h-[calc(100vh-4.5rem)] py-[clamp(1rem,3vw,2rem)] overflow-hidden"
     >
       <div className="max-w-[1440px] mx-auto px-[clamp(1rem,4vw,3rem)] flex flex-col justify-center flex-1 min-h-0 w-full gap-[clamp(1rem,3vw,1.5rem)]">
-        {/* ─── Row: wordmark + cards ─── */}
         <div className="flex flex-col sm:flex-row items-center justify-center w-full gap-1 sm:gap-[clamp(1rem,3vw,1.5rem)]">
-          {/* Wordmark */}
           <div className="flex items-center justify-center sm:justify-start w-full sm:w-auto">
             <svg
               className="w-[clamp(18rem,80vw,50rem)] sm:w-[clamp(11rem,55vw,50rem)] h-auto block animate-fade-up opacity-0"
@@ -68,7 +66,6 @@ export default function Hero() {
             </svg>
           </div>
 
-          {/* Cards */}
           <div className="relative w-[clamp(10rem,45vw,24rem)] sm:w-[clamp(7.5rem,32vw,24rem)] aspect-square shrink-0">
             {photos.slice(0, 4).map((photo, i) => {
               const pos = positions[i] || positions[0]
@@ -94,13 +91,12 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* ─── Bottom content ─── */}
         <div className="flex flex-col items-center text-center gap-[clamp(0.5rem,1.5vw,0.75rem)] w-full">
           {description && (
             <p className="m-0 max-w-[42rem] leading-[1.5] animate-fade-up opacity-0"
               style={{ animationDelay: "0.35s" }}
             >
-              <span className="block text-[clamp(0.8rem,2vw,1rem)] sm:text-[clamp(0.6rem,2vw,1rem)] text-navy font-semibold">
+              <span className="block text-[clamp(0.8rem,2vw,1rem)] sm:text-[clamp(0.6rem,2vw,1rem)] text-navy dark:text-white/80 font-semibold">
                 {description}
               </span>
             </p>

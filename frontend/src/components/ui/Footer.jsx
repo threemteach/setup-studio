@@ -19,12 +19,10 @@ const socialLinks = [
 export default function Footer() {
   const { lang } = useTranslation()
   return (
-    <footer className="w-full bg-white">
-      {/* ─── Top navy line 60% centered ─── */}
+    <footer className="w-full bg-white dark:bg-[#0A1216]">
       <div className="h-[1.5px] bg-[#305D74] w-3/5 mx-auto" />
 
       <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)] py-[clamp(2rem,4vw,3.5rem)] flex flex-col items-center text-center">
-        {/* ─── SETUP wordmark centered ─── */}
         <a href="/" onClick={() => window.location.reload()} className="flex items-center justify-center gap-2 mb-8" dir="ltr">
         <svg
           className="h-[clamp(3rem,7vw,6rem)] w-auto"
@@ -40,10 +38,9 @@ export default function Footer() {
           <path d="M335.134 -0.000393149L315.032 26.6885L335.14 53.1257L355.243 26.4368L335.134 -0.000393149Z" fill="#E73B49"/>
           <path d="M550.448 179.68H522.21V216.987H550.448V179.68Z" fill="#E73B49"/>
         </svg>
-        <span className="text-[clamp(0.65rem,1.5vw,1rem)] text-navy font-bold self-end tracking-wider">BY VITA</span>
+        <span className="text-[clamp(0.65rem,1.5vw,1rem)] text-navy dark:text-white/80 font-bold self-end tracking-wider">BY VITA</span>
         </a>
 
-        {/* ─── Social icons (brand colors, no bg) ─── */}
         <div className="flex items-center justify-center gap-6 mb-8">
           {socialLinks.map((s) => (
             <a
@@ -58,7 +55,6 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* ─── Nav links ─── */}
         <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-8">
           {navLinks.map((link) => (
             <NavLink
@@ -68,8 +64,8 @@ export default function Footer() {
               className={({ isActive }) =>
                 `text-sm no-underline transition-colors duration-200 font-medium ${
                   isActive
-                    ? "text-navy font-bold"
-                    : "text-[#8899a6] hover:text-navy"
+                    ? "text-navy dark:text-white font-bold"
+                    : "text-[#8899a6] dark:text-white/50 hover:text-navy dark:hover:text-white"
                 }`
               }
             >
@@ -78,11 +74,10 @@ export default function Footer() {
           ))}
         </nav>
 
-        {/* ─── Copyright ─── */}
-        <p className="text-[#0A1216]/50 text-xs m-0">
+        <p className="text-[#0A1216]/50 dark:text-white/40 text-xs m-0">
           &copy; {new Date().getFullYear()} {t("Setup Studio. All rights reserved.", "سيت أب ستوديو. جميع الحقوق محفوظة.", lang)}
         </p>
-        <p className="text-[#0A1216]/40 text-[10px] m-0 mt-2">
+        <p className="text-[#0A1216]/40 dark:text-white/30 text-[10px] m-0 mt-2">
           {t("Designed by 3m Tech", "تم التصميم بواسطة 3m Tech", lang)}
         </p>
       </div>

@@ -190,7 +190,7 @@ export default function AboutPageEdit() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-navy/20 border-t-navy rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
         </div>
       </AdminLayout>
     )
@@ -198,22 +198,22 @@ export default function AboutPageEdit() {
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-navy font-bold text-2xl m-0">About Page Editor</h1>
-          <p className="text-muted text-sm m-0 mt-1">Edit About page — changes are bilingual (EN / AR)</p>
+          <h1 className="text-navy dark:text-white font-bold text-2xl m-0">About Page Editor</h1>
+          <p className="text-muted dark:text-white/50 text-sm m-0 mt-1">Edit About page — changes are bilingual (EN / AR)</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setLang(lang === "en" ? "ar" : "en")}
-            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors"
           >
             {lang === "en" ? "Edit العربية" : "Edit English"}
           </button>
           <button
             onClick={handleAutoTranslate}
             disabled={translating}
-            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
           >
             {translating ? "Translating..." : "Auto-translate"}
           </button>
@@ -316,9 +316,9 @@ export default function AboutPageEdit() {
       {/* ════════════════════════════════════════
           OUR STORY
          ════════════════════════════════════════ */}
-      <div className="relative bg-[#f8f9fb] rounded-3xl overflow-hidden mb-6 shadow-sm border border-border/50">
+      <div className="relative bg-[#f8f9fb] dark:bg-[#15202b] rounded-3xl overflow-hidden mb-6 shadow-sm border border-border/50 dark:border-[#1e2d3d]/50">
         <div className="p-6 sm:p-8">
-          <h3 className="text-navy/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
+          <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
             <i className="fa-solid fa-book-open mr-2" />Our Story
           </h3>
 
@@ -327,7 +327,7 @@ export default function AboutPageEdit() {
             <div>
               <label className="text-navy/50 text-xs font-medium mb-2 block tracking-wide">Story Photo</label>
               <div
-                className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-white border-2 border-dashed border-border group cursor-pointer hover:border-navy/30 transition-colors shadow-sm"
+                className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-white dark:bg-[#0f1a24] border-2 border-dashed border-border dark:border-[#1e2d3d] group cursor-pointer hover:border-navy/30 transition-colors shadow-sm"
                 onClick={() => setPhotoPicker("story")}
               >
                 {form?.story_photo_url ? (
@@ -353,7 +353,7 @@ export default function AboutPageEdit() {
             <div className="space-y-5">
               {[0, 1].map((i) => (
                 <div key={i}>
-                  <label className="text-navy/50 text-xs font-medium mb-1.5 block">Paragraph {i + 1}</label>
+                  <label className="text-navy/50 dark:text-white/50 text-xs font-medium mb-1.5 block">Paragraph {i + 1}</label>
                   <textarea
                     value={(form?.[`story_paragraphs_${lang}`] || [])[i] || ""}
                     onChange={(e) => {
@@ -361,7 +361,7 @@ export default function AboutPageEdit() {
                       arr[i] = e.target.value
                       setVal(`story_paragraphs_${lang}`, arr)
                     }}
-                    className="w-full bg-white border border-border rounded-2xl px-5 py-3 text-navy/70 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                    className="w-full bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-3 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
                     rows={3}
                     placeholder={lang === "en" ? `Paragraph ${i + 1}...` : `الفقرة ${i + 1}...`}
                   />
@@ -369,13 +369,13 @@ export default function AboutPageEdit() {
               ))}
 
               <div>
-                <label className="text-navy/50 text-xs font-medium mb-1.5 block">Quote</label>
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-white border border-border">
+                <label className="text-navy/50 dark:text-white/50 text-xs font-medium mb-1.5 block">Quote</label>
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d]">
                   <i className="fa-solid fa-quote-left text-red text-lg mt-0.5 shrink-0" />
                   <textarea
                     value={val("story_quote")}
                     onChange={(e) => handleChange("story_quote", e.target.value)}
-                    className="flex-1 bg-transparent border-0 text-navy/60 text-sm italic outline-none resize-none p-0"
+                    className="flex-1 bg-transparent border-0 text-navy/60 dark:text-white/50 text-sm italic outline-none resize-none p-0"
                     rows={2}
                     placeholder={lang === "en" ? "Quote text..." : "نص الاقتباس..."}
                   />
@@ -389,31 +389,31 @@ export default function AboutPageEdit() {
       {/* ════════════════════════════════════════
           SERVICES
          ════════════════════════════════════════ */}
-      <div className="bg-white rounded-3xl border border-border/50 shadow-sm p-6 sm:p-8 mb-6">
-        <h3 className="text-navy/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
+      <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-6 sm:p-8 mb-6">
+        <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
           <i className="fa-solid fa-briefcase mr-2" />Services
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {(form?.services || defaultServices).map((service, i) => (
-            <div key={i} className="flex items-start gap-4 p-5 rounded-2xl border border-border bg-white hover:shadow-sm transition-shadow">
-              <div className="w-11 h-11 rounded-xl bg-navy/5 flex items-center justify-center shrink-0">
-                <i className={`${service.icon} text-navy text-base`} />
+            <div key={i} className="flex items-start gap-4 p-5 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] hover:shadow-sm transition-shadow">
+              <div className="w-11 h-11 rounded-xl bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0">
+                <i className={`${service.icon} text-navy dark:text-white text-base`} />
               </div>
               <div className="flex-1 min-w-0 space-y-2">
-                <div className="flex items-center gap-2 text-navy/40 text-xs font-medium">
+                <div className="flex items-center gap-2 text-navy/40 dark:text-white/40 text-xs font-medium">
                   <span>Service {i + 1}</span>
                 </div>
                 <input
                   type="text"
                   value={service[`title_${lang}`] || ""}
                   onChange={(e) => setServiceField(i, `title_${lang}`, e.target.value)}
-                  className="w-full bg-gray-50 border border-border rounded-xl px-4 py-2 text-navy font-bold text-sm outline-none focus:border-navy/40 transition-colors"
+                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors"
                   placeholder={lang === "en" ? "Title..." : "العنوان..."}
                 />
                 <textarea
                   value={service[`desc_${lang}`] || ""}
                   onChange={(e) => setServiceField(i, `desc_${lang}`, e.target.value)}
-                  className="w-full bg-gray-50 border border-border rounded-xl px-4 py-2 text-navy/60 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
                   rows={2}
                   placeholder={lang === "en" ? "Description..." : "الوصف..."}
                 />
@@ -426,28 +426,28 @@ export default function AboutPageEdit() {
       {/* ════════════════════════════════════════
           VALUES
          ════════════════════════════════════════ */}
-      <div className="bg-[#f8f9fb] rounded-3xl border border-border/50 shadow-sm p-6 sm:p-8 mb-6">
-        <h3 className="text-navy/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
+      <div className="bg-[#f8f9fb] dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-6 sm:p-8 mb-6">
+        <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
           <i className="fa-solid fa-star mr-2" />Values
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(form?.values || defaultValues).map((v, i) => (
-            <div key={i} className="flex flex-col items-center text-center gap-3 p-5 rounded-2xl border border-border bg-white hover:shadow-sm transition-shadow">
-              <div className="w-11 h-11 rounded-xl bg-navy/5 flex items-center justify-center">
-                <i className={`${v.icon} text-navy text-base`} />
+            <div key={i} className="flex flex-col items-center text-center gap-3 p-5 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] hover:shadow-sm transition-shadow">
+              <div className="w-11 h-11 rounded-xl bg-navy/5 dark:bg-white/10 flex items-center justify-center">
+                <i className={`${v.icon} text-navy dark:text-white text-base`} />
               </div>
               <div className="w-full space-y-2">
                 <input
                   type="text"
                   value={v[`title_${lang}`] || ""}
                   onChange={(e) => setValueField(i, `title_${lang}`, e.target.value)}
-                  className="w-full bg-gray-50 border border-border rounded-xl px-3 py-2 text-navy font-semibold text-sm text-center outline-none focus:border-navy/40 transition-colors"
+                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-semibold text-sm text-center outline-none focus:border-navy/40 transition-colors"
                   placeholder={lang === "en" ? "Title..." : "العنوان..."}
                 />
                 <textarea
                   value={v[`desc_${lang}`] || ""}
                   onChange={(e) => setValueField(i, `desc_${lang}`, e.target.value)}
-                  className="w-full bg-gray-50 border border-border rounded-xl px-3 py-2 text-navy/60 text-xs text-center outline-none focus:border-navy/40 transition-colors resize-none"
+                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-xs text-center outline-none focus:border-navy/40 transition-colors resize-none"
                   rows={4}
                   placeholder={lang === "en" ? "Description..." : "الوصف..."}
                 />
@@ -462,13 +462,13 @@ export default function AboutPageEdit() {
          ════════════════════════════════════════ */}
       {photoPicker && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPhotoPicker(null)}>
-          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
+          <div className="bg-white dark:bg-[#15202b] rounded-3xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-border dark:border-[#1e2d3d] shrink-0">
               <div>
-                <h3 className="text-navy font-bold text-base m-0">Choose Photo</h3>
-                <p className="text-muted text-xs m-0 mt-0.5">Select from existing location photos or upload a new one</p>
+                <h3 className="text-navy dark:text-white font-bold text-base m-0">Choose Photo</h3>
+                <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5">Select from existing location photos or upload a new one</p>
               </div>
-              <button onClick={() => setPhotoPicker(null)} className="w-8 h-8 rounded-full bg-gray-100 border-0 text-navy cursor-pointer hover:bg-gray-200 transition-colors flex items-center justify-center">
+              <button onClick={() => setPhotoPicker(null)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#1e2d3d] border-0 text-navy dark:text-white cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a3d4d] transition-colors flex items-center justify-center">
                 <i className="fa-solid fa-xmark" />
               </button>
             </div>
@@ -483,14 +483,14 @@ export default function AboutPageEdit() {
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUploadNew} />
               </div>
               {allPhotos.length === 0 ? (
-                <p className="text-muted text-sm text-center py-8">No photos found in the database.</p>
+                <p className="text-muted dark:text-white/50 text-sm text-center py-8">No photos found in the database.</p>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {allPhotos.map((photo) => (
                     <button
                       key={photo.id}
                       onClick={() => handlePickPhoto(photo)}
-                      className="aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative"
+                      className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative"
                     >
                       <img src={optimizeImageUrl(photo.cloudinary_url, 200)} alt="" className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] font-medium px-2 py-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">

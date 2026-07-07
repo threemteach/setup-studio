@@ -121,20 +121,23 @@ const DarkSection = ({ id, title, icon, collapsed, onToggle, children }) => (
 )
 
 // ─── Light section wrapper ───
-const LightSection = ({ id, title, icon, collapsed, onToggle, bg = "bg-white", children }) => (
-  <div className={`${bg} rounded-3xl border border-border/50 shadow-sm mb-6 overflow-hidden`}>
+const LightSection = ({ id, title, icon, collapsed, onToggle, bg = "bg-white", children }) => {
+  const darkBg = bg === "bg-[#f8f9fb]" ? "dark:bg-[#15202b]" : "dark:bg-[#15202b]"
+  return (
+    <div className={`${bg} ${darkBg} rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm mb-6 overflow-hidden`}>
     <button
       onClick={() => onToggle(id)}
-      className="w-full flex items-center justify-between p-6 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-gray-50/50 transition-colors"
+      className="w-full flex items-center justify-between p-6 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors"
     >
-      <h3 className="text-navy/50 text-xs font-semibold uppercase tracking-wider m-0 flex items-center gap-2">
+      <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider m-0 flex items-center gap-2">
         <i className={`${icon} mr-1.5`} />{title}
       </h3>
-      <i className={`fa-solid fa-chevron-down text-navy/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
+      <i className={`fa-solid fa-chevron-down text-navy/30 dark:text-white/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
     </button>
     {!collapsed[id] && <div className="px-6 sm:px-8 pb-6 sm:pb-8">{children}</div>}
   </div>
-)
+  )
+}
 
 const defaultDifferences = [
   { en: "Practical training inside a real production studio", ar: "تدريب عملي داخل استوديو إنتاج حقيقي" },
@@ -478,7 +481,7 @@ export default function AcademyPageEdit() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-navy/20 border-t-navy rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
         </div>
       </AdminLayout>
     )
@@ -488,18 +491,18 @@ export default function AcademyPageEdit() {
     <AdminLayout>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-navy font-bold text-2xl m-0">Academy Page Editor</h1>
-          <p className="text-muted text-sm m-0 mt-1">Edit Academy page — changes are bilingual (EN / AR)</p>
+          <h1 className="text-navy dark:text-white font-bold text-2xl m-0">Academy Page Editor</h1>
+          <p className="text-muted dark:text-white/50 text-sm m-0 mt-1">Edit Academy page — changes are bilingual (EN / AR)</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setLang(lang === "en" ? "ar" : "en")}
-            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors"
           >
             {lang === "en" ? "Edit العربية" : "Edit English"}
           </button>
           <button onClick={handleAutoTranslate} disabled={translating}
-            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
           >{translating ? "Translating..." : "Auto-translate"}</button>
           <button onClick={handleSave} disabled={saving}
             className="px-6 py-2 rounded-xl bg-navy text-white font-semibold text-sm cursor-pointer hover:bg-navy/90 transition-colors disabled:opacity-50"
@@ -553,7 +556,7 @@ export default function AcademyPageEdit() {
           <TextField value={val("why_body")} onChange={(v) => handleChange("why_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Instead of traditional theory-heavy courses..." />
         </div>
         <div>
-          <span className="text-navy/50 text-xs font-medium mb-2 block">Differences</span>
+            <span className="text-navy/50 dark:text-white/50 text-xs font-medium mb-2 block">Differences</span>
           {(form?.differences || defaultDifferences).map((item, i) => (
             <div key={i} className="flex items-center gap-2 mb-1.5">
               <svg className="w-[0.7rem] h-[0.7rem] text-red shrink-0" viewBox="0 0 12 12" fill="currentColor">
@@ -562,7 +565,7 @@ export default function AcademyPageEdit() {
               <input type="text"
                 value={lang === "en" ? item.en : item.ar}
                 onChange={(e) => setArrayItem("differences", i, lang === "en" ? "en" : "ar", e.target.value)}
-                className="flex-1 bg-gray-50 border border-border rounded-lg px-3 py-1.5 text-navy/70 text-sm outline-none focus:border-navy/40 transition-colors"
+                className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors"
                 placeholder={lang === "en" ? "Difference text..." : "نص الفرق..."} />
               <button onClick={() => removeArrayItem("differences", i)}
                 className="w-6 h-6 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center shrink-0">
@@ -590,7 +593,7 @@ export default function AcademyPageEdit() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(form?.audiences || defaultAudiences).map((item, i) => (
-            <div key={i} className="p-5 rounded-2xl border border-border bg-white relative group">
+            <div key={i} className="p-5 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] relative group">
               <button onClick={() => removeArrayItem("audiences", i)}
                 className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 <i className="fa-solid fa-xmark" />
@@ -599,12 +602,12 @@ export default function AcademyPageEdit() {
               <input type="text"
                 value={lang === "en" ? item.titleEn : item.titleAr}
                 onChange={(e) => setArrayItem("audiences", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                className="w-full bg-gray-50 border border-border rounded-xl px-3 py-2 text-navy font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-2"
+                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-2"
                 placeholder={lang === "en" ? "Title..." : "العنوان..."} />
               <textarea
                 value={lang === "en" ? item.descEn : item.descAr}
                 onChange={(e) => setArrayItem("audiences", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                className="w-full bg-gray-50 border border-border rounded-xl px-3 py-2 text-navy/60 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
                 rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
             </div>
           ))}
@@ -627,23 +630,23 @@ export default function AcademyPageEdit() {
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="rounded-3xl border border-white/10 bg-white overflow-hidden">
-            <PhotoField url={form?.first_course_photo_url} urlId={form?.first_course_photo_id} prefix="first_course" label="Course Card Photo" aspect="aspect-video" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
-            <div className="p-5 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-navy/10 flex items-center justify-center shrink-0">
-                  <i className="fa-solid fa-video text-navy" />
+            <div className="rounded-3xl border border-white/10 bg-white dark:bg-[#0f1a24] overflow-hidden">
+              <PhotoField url={form?.first_course_photo_url} urlId={form?.first_course_photo_id} prefix="first_course" label="Course Card Photo" aspect="aspect-video" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
+              <div className="p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-navy/10 dark:bg-white/10 flex items-center justify-center shrink-0">
+                    <i className="fa-solid fa-video text-navy dark:text-white" />
+                  </div>
+                  <input type="text" value={val("first_course_heading")} onChange={(e) => handleChange("first_course_heading", e.target.value)}
+                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Video Content Foundation Course" : "دورة أساسيات إنتاج المحتوى المرئي"} />
                 </div>
-                <input type="text" value={val("first_course_heading")} onChange={(e) => handleChange("first_course_heading", e.target.value)}
-                  className="flex-1 bg-gray-50 border border-border rounded-xl px-3 py-2 text-navy font-bold text-sm outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Video Content Foundation Course" : "دورة أساسيات إنتاج المحتوى المرئي"} />
-              </div>
-              <textarea value={val("first_course_desc")} onChange={(e) => handleChange("first_course_desc", e.target.value)}
-                className="w-full bg-gray-50 border border-border rounded-xl px-3 py-2 text-navy/60 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Designed for beginners who want to understand video production..." : "مصممة للمبتدئين الذين يرغبون في فهم إنتاج الفيديو..."} />
-              <div className="bg-[#f8f9fb] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-navy font-semibold text-sm flex items-center gap-2">
-                    <i className="fa-solid fa-list-check text-red text-xs" />Course Focus
-                  </span>
+                <textarea value={val("first_course_desc")} onChange={(e) => handleChange("first_course_desc", e.target.value)}
+                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Designed for beginners who want to understand video production..." : "مصممة للمبتدئين الذين يرغبون في فهم إنتاج الفيديو..."} />
+                <div className="bg-[#f8f9fb] dark:bg-[#15202b] rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-navy dark:text-white font-semibold text-sm flex items-center gap-2">
+                      <i className="fa-solid fa-list-check text-red text-xs" />Course Focus
+                    </span>
                   <button onClick={() => addArrayItem("focus_items", { en: "", ar: "" })}
                     className="px-2 py-1 rounded-lg bg-navy/5 text-navy text-xs font-semibold border-0 cursor-pointer hover:bg-navy/10 transition-colors">
                     <i className="fa-solid fa-plus mr-1" />Add
@@ -656,7 +659,7 @@ export default function AcademyPageEdit() {
                       <input type="text"
                         value={lang === "en" ? item.en : item.ar}
                         onChange={(e) => setArrayItem("focus_items", i, lang === "en" ? "en" : "ar", e.target.value)}
-                        className="flex-1 bg-white border border-border rounded-lg px-2 py-1 text-navy/60 text-xs outline-none focus:border-navy/40 transition-colors"
+                        className="flex-1 bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-lg px-2 py-1 text-navy/60 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors"
                         placeholder={lang === "en" ? "Focus item..." : "عنصر التركيز..."} />
                       <button onClick={() => removeArrayItem("focus_items", i)}
                         className="w-5 h-5 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center shrink-0">
@@ -668,7 +671,7 @@ export default function AcademyPageEdit() {
               </div>
             </div>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white overflow-hidden">
+          <div className="rounded-3xl border border-white/10 bg-white dark:bg-[#0f1a24] overflow-hidden">
             <PhotoField url={form?.instructor_photo_url} urlId={form?.instructor_photo_id} prefix="instructor" label="Instructor Photo" aspect="aspect-[16/7]" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-2">
@@ -678,15 +681,15 @@ export default function AcademyPageEdit() {
                 <Diamond />
               </div>
               <input type="text" value={val("instructor_heading")} onChange={(e) => handleChange("instructor_heading", e.target.value)}
-                className="w-full bg-gray-50 border border-border rounded-xl px-4 py-2 text-navy font-bold text-lg outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Meet Your Instructor" : "تعرف على مدربك"} />
+                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-lg outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Meet Your Instructor" : "تعرف على مدربك"} />
               <textarea value={val("instructor_body")} onChange={(e) => handleChange("instructor_body", e.target.value)}
-                className="w-full bg-gray-50 border border-border rounded-xl px-4 py-2 text-navy/60 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Our instructors are selected for their practical experience..." : "يتم اختيار مدربينا بناءً على خبرتهم العملية..."} />
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] border border-dashed border-navy/10">
-                <div className="w-10 h-10 rounded-full bg-navy/5 flex items-center justify-center shrink-0">
-                  <i className="fa-solid fa-user-tie text-navy/30 text-lg" />
+                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Our instructors are selected for their practical experience..." : "يتم اختيار مدربينا بناءً على خبرتهم العملية..."} />
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] dark:bg-[#15202b] border border-dashed border-navy/10 dark:border-white/10">
+                <div className="w-10 h-10 rounded-full bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0">
+                  <i className="fa-solid fa-user-tie text-navy/30 dark:text-white/30 text-lg" />
                 </div>
                 <textarea value={val("instructor_info")} onChange={(e) => handleChange("instructor_info", e.target.value)}
-                  className="flex-1 bg-transparent border-0 text-navy/45 text-xs outline-none resize-none" rows={2} placeholder={lang === "en" ? "Full instructor details will be announced..." : "سيتم الإعلان عن تفاصيل المدرب لاحقاً..."} />
+                  className="flex-1 bg-transparent border-0 text-navy/45 dark:text-white/40 text-xs outline-none resize-none" rows={2} placeholder={lang === "en" ? "Full instructor details will be announced..." : "سيتم الإعلان عن تفاصيل المدرب لاحقاً..."} />
               </div>
             </div>
           </div>
@@ -745,23 +748,23 @@ export default function AcademyPageEdit() {
           <PhotoField url={form?.production_photo_url} urlId={form?.production_photo_id} prefix="production" label="Photo" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
           <TextField value={val("production_body")} onChange={(v) => handleChange("production_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Setup Academy teaches the complete production workflow..." />
         </div>
-        <span className="text-navy/50 text-xs font-medium mb-3 block">Production Stages</span>
+            <span className="text-navy/50 dark:text-white/50 text-xs font-medium mb-3 block">Production Stages</span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(form?.production_stages || defaultProductionStages).map((item, i) => (
-            <div key={i} className="flex items-start gap-3 p-4 rounded-xl border border-border bg-white">
-              <div className="w-9 h-9 rounded-lg bg-navy/10 flex items-center justify-center shrink-0">
-                <i className={`${item.icon || "fa-solid fa-video"} text-navy text-sm`} />
+            <div key={i} className="flex items-start gap-3 p-4 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24]">
+              <div className="w-9 h-9 rounded-lg bg-navy/10 dark:bg-white/10 flex items-center justify-center shrink-0">
+                <i className={`${item.icon || "fa-solid fa-video"} text-navy dark:text-white text-sm`} />
               </div>
               <div className="flex-1 space-y-2">
                 <input type="text"
                   value={lang === "en" ? item.titleEn : item.titleAr}
                   onChange={(e) => setArrayItem("production_stages", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                  className="w-full bg-gray-50 border border-border rounded-lg px-3 py-1.5 text-navy font-semibold text-sm outline-none focus:border-navy/40 transition-colors mb-2"
+                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors mb-2"
                   placeholder={lang === "en" ? "Title..." : "العنوان..."} />
                 <textarea
                   value={lang === "en" ? item.descEn : item.descAr}
                   onChange={(e) => setArrayItem("production_stages", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                  className="w-full bg-gray-50 border border-border rounded-lg px-3 py-1.5 text-navy/50 text-xs outline-none focus:border-navy/40 transition-colors resize-none"
+                  className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/50 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors resize-none"
                   rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
               </div>
               <button onClick={() => removeArrayItem("production_stages", i)}
@@ -820,19 +823,19 @@ export default function AcademyPageEdit() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(form?.upcoming_courses || defaultUpcomingCourses).map((item, i) => (
-            <div key={i} className="p-5 rounded-2xl border border-border bg-white">
-              <div className="w-10 h-10 rounded-full bg-navy/10 flex items-center justify-center mb-3">
-                <i className={`${item.icon || "fa-solid fa-"} text-navy text-sm`} />
+            <div key={i} className="p-5 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24]">
+              <div className="w-10 h-10 rounded-full bg-navy/10 dark:bg-white/10 flex items-center justify-center mb-3">
+                <i className={`${item.icon || "fa-solid fa-"} text-navy dark:text-white text-sm`} />
               </div>
               <input type="text"
                 value={lang === "en" ? item.titleEn : item.titleAr}
                 onChange={(e) => setArrayItem("upcoming_courses", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                className="w-full bg-gray-50 border border-border rounded-xl px-3 py-2 text-navy font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-1"
+                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-1"
                 placeholder={lang === "en" ? "Title..." : "العنوان..."} />
               <textarea
                 value={lang === "en" ? item.descEn : item.descAr}
                 onChange={(e) => setArrayItem("upcoming_courses", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                className="w-full bg-gray-50 border border-border rounded-xl px-3 py-2 text-navy/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/50 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
                 rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
             </div>
           ))}
@@ -852,21 +855,21 @@ export default function AcademyPageEdit() {
         </div>
         <div className="max-w-[800px] mx-auto space-y-3">
           {(form?.faqs || defaultFaqs).map((item, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-white p-4">
+            <div key={i} className="rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] p-4">
               <div className="flex items-center justify-between mb-2">
                 <input type="text"
                   value={lang === "en" ? item.qEn : item.qAr}
                   onChange={(e) => setArrayItem("faqs", i, lang === "en" ? "qEn" : "qAr", e.target.value)}
-                  className="flex-1 bg-gray-50 border border-border rounded-xl px-4 py-2 text-navy font-semibold text-sm outline-none focus:border-navy/40 transition-colors mr-2"
+                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors mr-2"
                   placeholder={lang === "en" ? "Question..." : "السؤال..."} />
-                <span className="shrink-0 w-7 h-7 rounded-full bg-navy/5 flex items-center justify-center text-navy/50 text-sm">
+                <span className="shrink-0 w-7 h-7 rounded-full bg-navy/5 dark:bg-white/10 flex items-center justify-center text-navy/50 dark:text-white/50 text-sm">
                   <i className="fa-solid fa-plus" />
                 </span>
               </div>
               <textarea
                 value={lang === "en" ? item.aEn : item.aAr}
                 onChange={(e) => setArrayItem("faqs", i, lang === "en" ? "aEn" : "aAr", e.target.value)}
-                className="w-full bg-gray-50 border border-border rounded-xl px-4 py-2 text-navy/60 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                className="w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
                 rows={2} placeholder={lang === "en" ? "Answer..." : "الإجابة..."} />
             </div>
           ))}
@@ -895,13 +898,13 @@ export default function AcademyPageEdit() {
       {/* ═══ PHOTO PICKER MODAL ═══ */}
       {photoPicker && (
         <div className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPhotoPicker(null)}>
-          <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
+          <div className="bg-white dark:bg-[#15202b] rounded-3xl w-full max-w-4xl max-h-[80vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-border dark:border-[#1e2d3d] shrink-0">
               <div>
-                <h3 className="text-navy font-bold text-base m-0">Choose Photo</h3>
-                <p className="text-muted text-xs m-0 mt-0.5">Select from existing location photos or upload a new one</p>
+                <h3 className="text-navy dark:text-white font-bold text-base m-0">Choose Photo</h3>
+                <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5">Select from existing location photos or upload a new one</p>
               </div>
-              <button onClick={() => setPhotoPicker(null)} className="w-8 h-8 rounded-full bg-gray-100 border-0 text-navy cursor-pointer hover:bg-gray-200 transition-colors flex items-center justify-center">
+              <button onClick={() => setPhotoPicker(null)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#1e2d3d] border-0 text-navy dark:text-white cursor-pointer hover:bg-gray-200 dark:hover:bg-[#2a3d4d] transition-colors flex items-center justify-center">
                 <i className="fa-solid fa-xmark" />
               </button>
             </div>
@@ -914,12 +917,12 @@ export default function AcademyPageEdit() {
                 <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUploadNew} />
               </div>
               {allPhotos.length === 0 ? (
-                <p className="text-muted text-sm text-center py-8">No photos found in the database.</p>
+                <p className="text-muted dark:text-white/50 text-sm text-center py-8">No photos found in the database.</p>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {allPhotos.map((photo) => (
                     <button key={photo.id} onClick={() => handlePickPhoto(photo)}
-                      className="aspect-square rounded-xl overflow-hidden bg-gray-100 border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative">
+                      className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative">
                       <img src={optimizeImageUrl(photo.cloudinary_url, 200)} alt="" className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] font-medium px-2 py-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">{photo.category}</div>
                     </button>

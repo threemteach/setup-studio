@@ -67,27 +67,20 @@ export default function LocationsPage() {
 
   if (lightbox) {
     return (
-      <div
-        className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center cursor-pointer"
+      <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center cursor-pointer"
         onClick={() => setLightbox(null)}
       >
-        <button
-          onClick={() => setLightbox(null)}
+        <button onClick={() => setLightbox(null)}
           className="absolute top-4 ltr:right-4 rtl:left-4 z-10 text-white/70 hover:text-white text-2xl bg-transparent border-0 cursor-pointer p-2"
         >
           <i className="fa-solid fa-xmark" />
         </button>
-        <img
-          src={lightbox}
-          alt=""
-          className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg cursor-default"
-          onClick={(e) => e.stopPropagation()}
-        />
+        <img src={lightbox} alt="" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg cursor-default"
+          onClick={(e) => e.stopPropagation()} />
       </div>
     )
   }
 
-  /* ─── Category detail ─── */
   if (category) {
     const cat = categoryTitles[category]
     const title = cat ? t(cat.en, cat.ar, lang) : category
@@ -106,9 +99,7 @@ export default function LocationsPage() {
                   </svg>
                   <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
                 </div>
-                <h1 className="text-white text-[clamp(1.3rem,4.5vw,3.5rem)] font-bold leading-tight m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap">
-                  {title}
-                </h1>
+                <h1 className="text-white text-[clamp(1.3rem,4.5vw,3.5rem)] font-bold leading-tight m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap">{title}</h1>
                 <div className="flex items-center min-w-0 shrink">
                   <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
                   <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
@@ -119,12 +110,7 @@ export default function LocationsPage() {
             </Reveal>
             <Reveal delay={0.1}>
               <div className="flex justify-center">
-                <Button
-                  variant="navy"
-                  size="md"
-                  onClick={() => navigate("/locations")}
-                  className="text-[clamp(0.8rem,1.1vw,0.95rem)]"
-                >
+                <Button variant="navy" size="md" onClick={() => navigate("/locations")} className="text-[clamp(0.8rem,1.1vw,0.95rem)]">
                   <i className="fa-solid fa-arrow-left" />
                   {t("All Spaces", "كل المساحات", lang)}
                 </Button>
@@ -133,36 +119,25 @@ export default function LocationsPage() {
           </div>
         </section>
 
-        <section className="w-full bg-white py-[clamp(2rem,5vw,5rem)] overflow-hidden">
+        <section className="w-full bg-white dark:bg-[#0A1216] py-[clamp(2rem,5vw,5rem)] overflow-hidden">
           <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)]">
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 border-2 border-navy/20 border-t-navy rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
               </div>
             ) : photos.length === 0 ? (
               <div className="text-center py-20">
-                <p className="text-muted text-sm">{t("No photos yet in this category.", "لا توجد صور بعد في هذه الفئة.", lang)}</p>
+                <p className="text-muted dark:text-white/50 text-sm">{t("No photos yet in this category.", "لا توجد صور بعد في هذه الفئة.", lang)}</p>
               </div>
             ) : (
               <div className="columns-1 sm:columns-2 lg:columns-3 gap-[clamp(0.75rem,2vw,1.5rem)] w-full [column-fill:_balance]">
                 {photos.map((photo, i) => (
-                  <div
-                    key={photo.id}
-                    className="break-inside-avoid inline-block w-full mb-[clamp(0.75rem,2vw,1.5rem)]"
-                  >
+                  <div key={photo.id} className="break-inside-avoid inline-block w-full mb-[clamp(0.75rem,2vw,1.5rem)]">
                     <Reveal delay={i * 0.06}>
-                      <button
-                        onClick={() => setLightbox(photo.cloudinary_url)}
+                      <button onClick={() => setLightbox(photo.cloudinary_url)}
                         className="group relative w-full rounded-[clamp(1rem,2vw,2rem)] overflow-hidden shadow-[0_4px_24px_rgba(48,93,116,0.08)] hover:shadow-[0_8px_32px_rgba(48,93,116,0.16)] transition-shadow duration-300 border-0 cursor-pointer p-0 bg-transparent"
                       >
-                        <img
-                          src={optimizeImageUrl(photo.cloudinary_url, 600)}
-                          alt={photo.alt || ""}
-                          className="w-full h-auto block"
-                          loading="lazy"
-                        />
-
-                        {/* Hover details overlay */}
+                        <img src={optimizeImageUrl(photo.cloudinary_url, 600)} alt={photo.alt || ""} className="w-full h-auto block" loading="lazy" />
                         <div className="absolute inset-0 bg-gradient-to-t from-blue-400/80 via-blue-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end ltr:items-start rtl:items-end p-[clamp(0.75rem,2vw,1.5rem)] pointer-events-none">
                           {(photo.title || photo.description) && (
                             <>
@@ -170,18 +145,9 @@ export default function LocationsPage() {
                                 <svg className="w-[clamp(0.35rem,0.6vw,0.5rem)] h-[clamp(0.35rem,0.6vw,0.5rem)] text-white/70 shrink-0" viewBox="0 0 13 13" fill="currentColor">
                                   <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
                                 </svg>
-                                <span className="block w-[clamp(1rem,6vw,3rem)] h-[1.5px] bg-white/50" />
+                                <span className="text-white text-[clamp(0.75rem,1.2vw,0.85rem)] font-bold">{photo.title}</span>
                               </div>
-                              {photo.title && (
-                                <p className="text-white font-bold text-[clamp(0.9rem,1.4vw,1.15rem)] leading-tight m-0">
-                                  {photo.title}
-                                </p>
-                              )}
-                              {photo.description && (
-                                <p className="text-white/70 text-[clamp(0.75rem,1vw,0.85rem)] mt-1 leading-relaxed line-clamp-2 m-0">
-                                  {photo.description}
-                                </p>
-                              )}
+                              <p className="text-white/80 text-[clamp(0.65rem,1vw,0.75rem)] leading-relaxed m-0">{photo.description}</p>
                             </>
                           )}
                         </div>
@@ -197,7 +163,6 @@ export default function LocationsPage() {
     )
   }
 
-  /* ─── Categories grid ─── */
   return (
     <div className="page-enter">
       {allPhotos.length > 0 && (
@@ -234,62 +199,48 @@ export default function LocationsPage() {
               </div>
             </Reveal>
             <Reveal delay={0.1}>
-              <p className={`text-white/60 text-[clamp(0.85rem,1.2vw,1.05rem)] max-w-[600px] leading-relaxed m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
-                {t("Browse our curated collection of premium locations. Each space is professionally designed and maintained for your creative production.", "تصفح مجموعتنا المختارة من المواقع المتميزة. كل مساحة مصممة وصيانة بشكل احترافي لإنتاجك الإبداعي.", lang)}
+              <p className="text-white/60 text-[clamp(0.85rem,1.2vw,1.05rem)] max-w-[600px] leading-relaxed m-0">
+                {t("Browse our curated collection of premium locations.", "تصفح مجموعتنا المختارة من المواقع المتميزة.", lang)}
               </p>
             </Reveal>
           </div>
         </div>
       </section>
 
-      <section className="w-full bg-white py-[clamp(2rem,5vw,5rem)] overflow-hidden">
+      <section className="w-full bg-white dark:bg-[#0A1216] py-[clamp(2rem,5vw,5rem)] overflow-hidden">
         <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)]">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <div className="w-8 h-8 border-2 border-navy/20 border-t-navy rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
             </div>
           ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-[clamp(0.75rem,2vw,1.875rem)]">
-                {Object.entries(categoryTitles).map(([slug, cat], i) => {
-                  const title = t(cat.en, cat.ar, lang)
-                  const cover = getCategoryCover(slug)
-                  const count = getCategoryCount(slug)
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[clamp(0.75rem,2vw,1.875rem)]">
+              {Object.entries(categoryTitles).map(([slug, cat], i) => {
+                const title = t(cat.en, cat.ar, lang)
+                const cover = getCategoryCover(slug)
+                const count = getCategoryCount(slug)
                 return (
                   <Reveal key={slug} delay={0.1 + i * 0.08}>
-                    <button
-                      onClick={() => navigate(`/locations/${slug}`)}
-                      className="group relative rounded-[clamp(1.5rem,4vw,4.75rem)] overflow-hidden bg-gray-100 shadow-[0_4px_24px_rgba(48,93,116,0.08)] transition-shadow duration-300 hover:shadow-[0_8px_32px_rgba(48,93,116,0.16)] w-full ltr:text-left rtl:text-right cursor-pointer border-0 p-0"
+                    <button onClick={() => navigate(`/locations/${slug}`)}
+                      className="group relative rounded-[clamp(1.5rem,4vw,4.75rem)] overflow-hidden bg-gray-100 dark:bg-[#15202b] shadow-[0_4px_24px_rgba(48,93,116,0.08)] transition-shadow duration-300 hover:shadow-[0_8px_32px_rgba(48,93,116,0.16)] w-full ltr:text-left rtl:text-right cursor-pointer border-0 p-0"
                     >
                       {cover ? (
-                        <img
-                          src={cover}
-                          alt={title}
-                          className="w-full aspect-square object-cover block"
-                          loading="lazy"
-                        />
+                        <img src={cover} alt={title} className="w-full aspect-square object-cover block" loading="lazy" />
                       ) : (
-                        <div className="w-full aspect-square bg-gray-100 flex items-center justify-center">
-                          <i className="fa-solid fa-image text-gray-300 text-4xl" />
+                        <div className="w-full aspect-square bg-gray-100 dark:bg-[#15202b] flex items-center justify-center">
+                          <i className="fa-solid fa-image text-gray-300 dark:text-white/20 text-4xl" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-blue-400/60 via-blue-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                      <div className="absolute bottom-0 ltr:left-[clamp(0.5rem,6vw,5.25rem)] rtl:right-[clamp(0.5rem,6vw,5.25rem)] ltr:right-[clamp(0.5rem,6vw,5.25rem)] rtl:left-[clamp(0.5rem,6vw,5.25rem)] bg-white ltr:rounded-t-[clamp(0.85rem,2.5vw,3rem)] rtl:rounded-t-[clamp(0.85rem,2.5vw,3rem)] px-[clamp(0.75rem,2vw,2rem)] py-[clamp(0.5rem,1.2vw,1rem)] flex items-center justify-between gap-3 shadow-[0_-1px_8px_rgba(48,93,116,0.06)]">
+                      <div className="absolute bottom-0 ltr:left-[clamp(0.5rem,6vw,5.25rem)] rtl:right-[clamp(0.5rem,6vw,5.25rem)] ltr:right-[clamp(0.5rem,6vw,5.25rem)] rtl:left-[clamp(0.5rem,6vw,5.25rem)] bg-white dark:bg-[#0f1a24] ltr:rounded-t-[clamp(0.85rem,2.5vw,3rem)] rtl:rounded-t-[clamp(0.85rem,2.5vw,3rem)] px-[clamp(0.75rem,2vw,2rem)] py-[clamp(0.5rem,1.2vw,1rem)] flex items-center justify-between gap-3 shadow-[0_-1px_8px_rgba(48,93,116,0.06)]">
                         <div className="min-w-0 flex-1">
-                          <h3 className="text-navy font-bold text-[clamp(1.1rem,2.2vw,1.85rem)] m-0 tracking-tight">
-                            {title}
-                          </h3>
-                          <p className="text-muted text-[clamp(0.6rem,0.8vw,0.75rem)] m-0 mt-0.5">
-                            {count} {lang === "ar" ? "صورة" : count === 1 ? "photo" : "photos"}
-                          </p>
+                          <h3 className="text-navy dark:text-white font-bold text-[clamp(1.1rem,2.2vw,1.85rem)] m-0 tracking-tight">{title}</h3>
+                          <span className="text-muted dark:text-white/40 text-[clamp(0.65rem,0.9vw,0.75rem)] font-medium">{count} {t("locations", "موقع", lang)}</span>
                         </div>
-                        <span className="block w-[3px] self-stretch bg-navy rounded-sm shrink-0" />
-                        <Button
-                          variant="navy"
-                          size="sm"
-                          className="text-[clamp(0.55rem,0.9vw,0.8rem)] px-[clamp(0.6rem,1.2vw,1.5rem)] py-[clamp(0.3rem,0.6vw,0.625rem)]"
-                        >
-                          {t("See All Locations", "عرض الكل", lang)}
-                        </Button>
+                        <span className="block w-[3px] self-stretch bg-navy dark:bg-white/30 rounded-sm" />
+                        <span className="text-muted dark:text-white/50 text-[clamp(0.7rem,0.9vw,0.8rem)] font-semibold shrink-0">
+                          {t("View All", "عرض الكل", lang)} <i className="fa-solid fa-arrow-right text-[0.6rem]" />
+                        </span>
                       </div>
                     </button>
                   </Reveal>

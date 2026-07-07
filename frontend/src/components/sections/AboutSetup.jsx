@@ -20,7 +20,7 @@ export default function AboutSetup() {
   const body = localized?.body || ""
 
   return (
-    <section className="w-full bg-white py-[clamp(2rem,5vw,5rem)] overflow-hidden">
+    <section className="w-full bg-white dark:bg-[#0A1216] py-[clamp(2rem,5vw,5rem)] overflow-hidden">
       <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)]">
         <div className="flex flex-col items-center text-center mb-[clamp(1.5rem,4vw,3.5rem)]">
           <Reveal>
@@ -31,7 +31,7 @@ export default function AboutSetup() {
                 </svg>
                 <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
               </div>
-              <h2 className="text-navy text-[clamp(1.3rem,4.5vw,3.5rem)] font-bold leading-tight m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap">
+              <h2 className="text-navy dark:text-white text-[clamp(1.3rem,4.5vw,3.5rem)] font-bold leading-tight m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap">
                 {t("About Setup", "عن سيت أب", lang)}
               </h2>
               <div className="flex items-center min-w-0 shrink">
@@ -44,7 +44,7 @@ export default function AboutSetup() {
           </Reveal>
           {heading && (
             <Reveal delay={0.1}>
-              <p className="text-navy font-semibold text-[clamp(1rem,2vw,1.35rem)] mt-4 max-w-[40rem] mx-auto leading-snug tracking-wide">
+              <p className="text-navy dark:text-white/90 font-semibold text-[clamp(1rem,2vw,1.35rem)] mt-4 max-w-[40rem] mx-auto leading-snug tracking-wide">
                 {heading}
               </p>
             </Reveal>
@@ -53,7 +53,7 @@ export default function AboutSetup() {
 
         <Reveal delay={0.2}>
           <div className="max-w-[clamp(35rem,60vw,55rem)] mx-auto">
-            <p className={`text-[#0A1216]/70 text-[clamp(0.85rem,1.2vw,1.05rem)] leading-[1.8] m-0 ${lang === 'ar' ? 'text-right' : 'text-center'}`}>
+            <p className={`text-[#0A1216]/70 dark:text-white/60 text-[clamp(0.85rem,1.2vw,1.05rem)] leading-[1.8] m-0 ${lang === 'ar' ? 'text-right' : 'text-center'}`}>
               {body}
             </p>
           </div>

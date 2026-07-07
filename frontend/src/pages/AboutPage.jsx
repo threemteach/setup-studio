@@ -40,7 +40,6 @@ export default function AboutPage() {
 
   return (
     <div className="page-enter">
-      {/* ─── Hero ─── */}
       <section className="w-full bg-[#0A1216] py-[clamp(3rem,8vw,5.5rem)] overflow-hidden relative">
         <div className="absolute -top-[clamp(8rem,15vw,12rem)] -right-[clamp(4rem,8vw,6rem)] w-[clamp(16rem,40vw,30rem)] h-[clamp(16rem,40vw,30rem)] rounded-full bg-[#11AFFF] opacity-[0.25] blur-[clamp(4rem,8vw,6rem)] pointer-events-none" />
         <div className="absolute -bottom-[clamp(6rem,12vw,10rem)] -left-[clamp(2rem,4vw,4rem)] w-[clamp(12rem,30vw,22rem)] h-[clamp(12rem,30vw,22rem)] rounded-full bg-[#11AFFF] opacity-[0.18] blur-[clamp(4rem,8vw,6rem)] pointer-events-none" />
@@ -56,7 +55,7 @@ export default function AboutPage() {
                     </svg>
                     <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
                   </div>
-                  <h1 className={`text-white text-[clamp(1.3rem,4.5vw,3.5rem)] font-bold leading-tight m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap ${lang === 'ar' ? 'text-right' : ''}`}>
+                  <h1 className={`text-white font-bold text-[clamp(1.3rem,4.5vw,3.5rem)] leading-tight m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap ${lang === 'ar' ? 'text-right' : ''}`}>
                     {p("hero_heading") || t("About Setup", "عن سيت أب", lang)}
                   </h1>
                   <div className="flex items-center min-w-0 shrink">
@@ -70,7 +69,7 @@ export default function AboutPage() {
                   {p("hero_subtitle") || t("Full-Service Production Studio", "استوديو إنتاج متكامل الخدمات", lang)}
                 </p>
                 <p className={`text-white/60 text-[clamp(0.85rem,1.2vw,1.05rem)] max-w-[540px] leading-relaxed m-0 w-full ${lang === 'ar' ? 'text-right' : ''}`}>
-                  {p("hero_description") || t("Setup is a premium production studio offering exclusive spaces for photography, filmmaking, podcasting, and creative productions. We partner with creators, brands, and production teams to provide distinctive locations that elevate every frame.", "سيت أب هو استوديو إنتاج متميز يقدم مساحات حصرية للتصوير الفوتوغرافي وصناعة الأفلام والبودكاست والإنتاج الإبداعي. نحن نتعاون مع المبدعين والعلامات التجارية وفرق الإنتاج لتوفير مواقع مميزة ترتقي بكل لقطة.", lang)}
+                  {p("hero_description") || t("Setup is a premium production studio offering exclusive spaces for photography, filmmaking, podcasting, and creative productions.", "سيت أب هو استوديو إنتاج متميز يقدم مساحات حصرية للتصوير الفوتوغرافي وصناعة الأفلام والبودكاست والإنتاج الإبداعي.", lang)}
                 </p>
               </div>
             </Reveal>
@@ -91,8 +90,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ─── Our Story ─── */}
-      <section className="w-full bg-[#f8f9fb] py-[clamp(2rem,5vw,5rem)] overflow-hidden">
+      <section className="w-full bg-[#f8f9fb] dark:bg-[#15202b] py-[clamp(2rem,5vw,5rem)] overflow-hidden">
         <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)]">
           <SectionHeader
             label={t("Our Story", "قصتنا", lang)}
@@ -112,14 +110,14 @@ export default function AboutPage() {
             </Reveal>
             <Reveal delay={0.15}>
               {storyParagraphs.map((para, i) => (
-                <p key={i} className={`text-navy/70 text-[clamp(0.85rem,1.2vw,1.05rem)] leading-[1.8] mb-5 m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
+                <p key={i} className={`text-navy/70 dark:text-white/70 text-[clamp(0.85rem,1.2vw,1.05rem)] leading-[1.8] mb-5 m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
                   {para}
                 </p>
               ))}
               {p("story_quote") && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-white border border-border">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d]">
                   <i className={`fa-solid ${lang === 'ar' ? 'fa-quote-right' : 'fa-quote-left'} text-red text-xl shrink-0`} />
-                  <p className={`text-navy/60 text-[clamp(0.8rem,1.1vw,0.9rem)] italic m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
+                  <p className={`text-navy/60 dark:text-white/60 text-[clamp(0.8rem,1.1vw,0.9rem)] italic m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
                     {p("story_quote")}
                   </p>
                 </div>
@@ -129,8 +127,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ─── What We Do ─── */}
-      <section className="w-full bg-white py-[clamp(2rem,5vw,5rem)] overflow-hidden">
+      <section className="w-full bg-white dark:bg-[#0A1216] py-[clamp(2rem,5vw,5rem)] overflow-hidden">
         <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)]">
           <SectionHeader
             label={t("What We Offer", "ماذا نقدم", lang)}
@@ -141,15 +138,15 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-[clamp(1rem,2vw,1.5rem)]">
             {services.map((item, i) => (
               <Reveal key={i} delay={i * 0.08}>
-                <div className="flex items-start gap-4 p-[clamp(1.25rem,2vw,1.75rem)] rounded-2xl border border-border bg-white hover:shadow-[0_8px_32px_rgba(48,93,116,0.1)] hover:border-navy/20 transition-all duration-300 hover:-translate-y-0.5">
-                  <div className="w-[clamp(2.5rem,3.5vw,3.5rem)] h-[clamp(2.5rem,3.5vw,3.5rem)] rounded-xl bg-navy/5 flex items-center justify-center shrink-0 group-hover:bg-navy transition-colors duration-300">
-                    <i className={`${item.icon} text-navy text-[clamp(1rem,1.5vw,1.35rem)]`} />
+                <div className="flex items-start gap-4 p-[clamp(1.25rem,2vw,1.75rem)] rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] hover:shadow-[0_8px_32px_rgba(48,93,116,0.1)] hover:border-navy/20 dark:hover:border-white/20 transition-all duration-300 hover:-translate-y-0.5">
+                  <div className="w-[clamp(2.5rem,3.5vw,3.5rem)] h-[clamp(2.5rem,3.5vw,3.5rem)] rounded-xl bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0 group-hover:bg-navy transition-colors duration-300">
+                    <i className={`${item.icon} text-navy dark:text-white/80 text-[clamp(1rem,1.5vw,1.35rem)]`} />
                   </div>
                   <div>
-                    <h3 className="text-navy font-bold text-[clamp(0.95rem,1.5vw,1.15rem)] m-0 mb-1.5">
+                    <h3 className="text-navy dark:text-white font-bold text-[clamp(0.95rem,1.5vw,1.15rem)] m-0 mb-1.5">
                       {t(item.title_en, item.title_ar, lang)}
                     </h3>
-                    <p className={`text-navy/60 text-[clamp(0.8rem,1.1vw,0.9rem)] leading-relaxed m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
+                    <p className={`text-navy/60 dark:text-white/50 text-[clamp(0.8rem,1.1vw,0.9rem)] leading-relaxed m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
                       {t(item.desc_en, item.desc_ar, lang)}
                     </p>
                   </div>
@@ -160,8 +157,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ─── Values ─── */}
-      <section className="w-full bg-[#f8f9fb] py-[clamp(2rem,5vw,5rem)] overflow-hidden">
+      <section className="w-full bg-[#f8f9fb] dark:bg-[#15202b] py-[clamp(2rem,5vw,5rem)] overflow-hidden">
         <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)]">
           <SectionHeader
             label={t("Why Choose Us", "لماذا تختارنا", lang)}
@@ -171,14 +167,14 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[clamp(1rem,2.5vw,1.5rem)]">
             {values.map((v, i) => (
               <Reveal key={v.title_en || i} delay={i * 0.08}>
-                <div className="flex flex-col items-center text-center gap-4 p-[clamp(1.25rem,2.5vw,2rem)] rounded-2xl border border-border bg-white hover:shadow-[0_8px_32px_rgba(48,93,116,0.1)] hover:border-navy/20 transition-all duration-300 hover:-translate-y-0.5">
-                  <div className="w-12 h-12 rounded-xl bg-navy/5 flex items-center justify-center">
-                    <i className={`${v.icon} text-navy text-lg`} />
+                <div className="flex flex-col items-center text-center gap-4 p-[clamp(1.25rem,2.5vw,2rem)] rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] hover:shadow-[0_8px_32px_rgba(48,93,116,0.1)] hover:border-navy/20 dark:hover:border-white/20 transition-all duration-300 hover:-translate-y-0.5">
+                  <div className="w-12 h-12 rounded-xl bg-navy/5 dark:bg-white/10 flex items-center justify-center">
+                    <i className={`${v.icon} text-navy dark:text-white/80 text-lg`} />
                   </div>
-                  <h3 className="text-navy font-semibold text-[clamp(0.9rem,1.5vw,1rem)] m-0">
+                  <h3 className="text-navy dark:text-white font-semibold text-[clamp(0.9rem,1.5vw,1rem)] m-0">
                     {t(v.title_en, v.title_ar, lang)}
                   </h3>
-                  <p className={`text-navy/60 text-[clamp(0.8rem,1.3vw,0.875rem)] leading-relaxed m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
+                  <p className={`text-navy/60 dark:text-white/50 text-[clamp(0.8rem,1.3vw,0.875rem)] leading-relaxed m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
                     {t(v.desc_en, v.desc_ar, lang)}
                   </p>
                 </div>
@@ -188,8 +184,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ─── CTA ─── */}
-      <section className="w-full py-[clamp(2rem,5vw,4rem)] px-[clamp(1rem,4vw,3rem)]">
+      <section className="w-full py-[clamp(2rem,5vw,4rem)] px-[clamp(1rem,4vw,3rem)] bg-white dark:bg-[#0A1216]">
         <div className="max-w-[1280px] mx-auto">
           <Reveal>
             <div className="relative overflow-hidden rounded-[clamp(1.25rem,2.5vw,2.5rem)] bg-[#0A1216] min-h-[clamp(10rem,16vw,16rem)] flex items-center">

@@ -57,12 +57,12 @@ const DarkSection = ({ id, title, icon, collapsed, onToggle, children }) => (
 )
 
 const LightSection = ({ id, title, icon, collapsed, onToggle, bg = "bg-white", children }) => (
-  <div className={`${bg} rounded-3xl border border-border/50 shadow-sm mb-6 overflow-hidden`}>
-    <button onClick={() => onToggle(id)} className="w-full flex items-center justify-between p-6 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-gray-50/50 transition-colors">
-      <h3 className="text-navy/50 text-xs font-semibold uppercase tracking-wider m-0 flex items-center gap-2">
+  <div className={`${bg} dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm mb-6 overflow-hidden`}>
+    <button onClick={() => onToggle(id)} className="w-full flex items-center justify-between p-6 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+      <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider m-0 flex items-center gap-2">
         <i className={`${icon} mr-1.5`} />{title}
       </h3>
-      <i className={`fa-solid fa-chevron-down text-navy/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
+      <i className={`fa-solid fa-chevron-down text-navy/30 dark:text-white/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
     </button>
     {!collapsed[id] && <div className="px-6 sm:px-8 pb-6 sm:pb-8">{children}</div>}
   </div>
@@ -350,7 +350,7 @@ export default function PortfolioPageEdit() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-navy/20 border-t-navy rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
         </div>
       </AdminLayout>
     )
@@ -362,15 +362,15 @@ export default function PortfolioPageEdit() {
     <AdminLayout>
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-navy font-bold text-2xl m-0">Portfolio Page Editor</h1>
-          <p className="text-muted text-sm m-0 mt-1">Manage portfolio categories and videos — bilingual EN / AR</p>
+          <h1 className="text-navy dark:text-white font-bold text-2xl m-0">Portfolio Page Editor</h1>
+          <p className="text-muted dark:text-white/50 text-sm m-0 mt-1">Manage portfolio categories and videos — bilingual EN / AR</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setLang(lang === "en" ? "ar" : "en")}
-            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors"
           >{lang === "en" ? "Edit العربية" : "Edit English"}</button>
           <button onClick={handleAutoTranslate} disabled={translating}
-            className="px-4 py-2 rounded-xl border border-border bg-white text-navy font-semibold text-sm cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#15202b] text-navy dark:text-white font-semibold text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
           >{translating ? "Translating..." : "Auto-translate"}</button>
           <button onClick={handleSave} disabled={saving}
             className="px-6 py-2 rounded-xl bg-navy text-white font-semibold text-sm cursor-pointer hover:bg-navy/90 transition-colors disabled:opacity-50"
@@ -384,15 +384,15 @@ export default function PortfolioPageEdit() {
         const barColor = pct < 70 ? "bg-green-500" : pct < 90 ? "bg-yellow-500" : "bg-red-500"
         const textColor = pct < 70 ? "text-green-600" : pct < 90 ? "text-yellow-600" : "text-red-600"
         return (
-          <div className="bg-white rounded-3xl border border-border/50 shadow-sm p-5 mb-6">
+          <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-5 mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-navy font-semibold text-sm"><i className="fa-solid fa-database mr-2 text-navy/40" />Database</span>
+              <span className="text-navy dark:text-white font-semibold text-sm"><i className="fa-solid fa-database mr-2 text-navy/40 dark:text-white/40" />Database</span>
               <span className={`text-xs font-bold ${textColor}`}>{storage.usedMB.toFixed(2)} MB / {storage.limitGB} GB</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-gray-100 dark:bg-[#1e2d3d] rounded-full h-3 overflow-hidden">
               <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${Math.min(pct, 100)}%` }} />
             </div>
-            <div className="flex justify-between text-[10px] text-muted/50 mt-1">
+            <div className="flex justify-between text-[10px] text-muted/50 dark:text-white/30 mt-1">
               <span>0 GB</span>
               <span>{pct < 100 ? `${pct.toFixed(1)}% used` : "FULL"}</span>
               <span>{storage.limitGB} GB</span>
@@ -421,7 +421,7 @@ export default function PortfolioPageEdit() {
       <LightSection id="categories" title="Categories" icon="fa-solid fa-tags" collapsed={collapsed} onToggle={toggleCollapse}>
         <div className="space-y-4">
           {categories.map((cat, i) => (
-            <div key={i} className="p-4 rounded-2xl border border-border bg-white relative group">
+            <div key={i} className="p-4 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] relative group">
               <button onClick={() => removeCategory(i)}
                 className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center z-10">
               <i className="fa-solid fa-xmark" />
@@ -432,8 +432,8 @@ export default function PortfolioPageEdit() {
                 label={`Heading (${lang === "en" ? "EN" : "AR"})`}
                 placeholder={lang === "en" ? "Category heading..." : "عنوان الفئة..."} />
               <div className="mt-1 flex items-center gap-2">
-                <span className="text-xs font-medium text-navy/50">Slug:</span>
-                <span className="px-2.5 py-1 rounded-lg bg-gray-100 text-navy/60 text-xs font-mono">{cat.slug || makeSlug(cat.heading_en) || "—"}</span>
+                <span className="text-xs font-medium text-navy/50 dark:text-white/50">Slug:</span>
+                <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-[#1e2d3d] text-navy/60 dark:text-white/50 text-xs font-mono">{cat.slug || makeSlug(cat.heading_en) || "—"}</span>
               </div>
               <div className="mt-2">
                 <TextField value={lang === "en" ? cat.desc_en : cat.desc_ar}
@@ -444,7 +444,7 @@ export default function PortfolioPageEdit() {
             </div>
           ))}
           <button onClick={addCategory}
-            className="px-4 py-2 rounded-xl border border-dashed border-border bg-gray-50 text-navy text-sm font-semibold cursor-pointer hover:bg-gray-100 transition-colors w-full">
+            className="px-4 py-2 rounded-xl border border-dashed border-border dark:border-[#1e2d3d] bg-gray-50 dark:bg-[#0f1a24] text-navy dark:text-white text-sm font-semibold cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1e2d3d] transition-colors w-full">
             <i className="fa-solid fa-plus mr-2" />Add Category
           </button>
         </div>

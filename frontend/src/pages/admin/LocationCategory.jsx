@@ -280,29 +280,29 @@ export default function LocationCategory() {
       <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
         <button
           onClick={() => navigate("/admin/locations")}
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-border/60 flex items-center justify-center text-muted hover:text-navy hover:border-navy/30 transition-all duration-200 cursor-pointer shrink-0"
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white dark:bg-[#15202b] border border-border/60 dark:border-[#1e2d3d]/60 flex items-center justify-center text-muted dark:text-white/50 hover:text-navy dark:hover:text-white hover:border-navy/30 transition-all duration-200 cursor-pointer shrink-0"
         >
           <i className="fa-solid fa-arrow-left text-sm" />
         </button>
         <div className="min-w-0">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-navy/5 flex items-center justify-center shrink-0">
-              <i className={`${iconMap[cat.slug]} text-navy text-sm`} />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0">
+              <i className={`${iconMap[cat.slug]} text-navy dark:text-white text-sm`} />
             </div>
-            <h1 className="text-navy font-bold text-xl sm:text-2xl m-0 truncate">{cat.title}</h1>
+            <h1 className="text-navy dark:text-white font-bold text-xl sm:text-2xl m-0 truncate">{cat.title}</h1>
           </div>
         </div>
       </div>
 
       {/* Upload area */}
-      <div className="bg-white rounded-2xl border border-border/60 p-4 sm:p-6 mb-6">
-        <div className="flex flex-col items-center justify-center gap-4 py-6 sm:py-10 px-4 rounded-xl border-2 border-dashed border-border/70 bg-[#fafbfc]">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-navy/5 flex items-center justify-center">
-            <i className="fa-solid fa-crop text-navy/40 text-xl sm:text-2xl" />
+      <div className="bg-white dark:bg-[#15202b] rounded-2xl border border-border/60 dark:border-[#1e2d3d]/60 p-4 sm:p-6 mb-6">
+        <div className="flex flex-col items-center justify-center gap-4 py-6 sm:py-10 px-4 rounded-xl border-2 border-dashed border-border/70 dark:border-[#1e2d3d]/70 bg-[#fafbfc] dark:bg-[#0f1a24]">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-navy/5 dark:bg-white/10 flex items-center justify-center">
+            <i className="fa-solid fa-crop text-navy/40 dark:text-white/40 text-xl sm:text-2xl" />
           </div>
           <div className="text-center">
-            <p className="text-navy font-semibold text-sm m-0">Upload photos</p>
-            <p className="text-muted text-xs m-0 mt-1">Tap to browse and upload photos</p>
+            <p className="text-navy dark:text-white font-semibold text-sm m-0">Upload photos</p>
+            <p className="text-muted dark:text-white/50 text-xs m-0 mt-1">Tap to browse and upload photos</p>
           </div>
           <input
             ref={fileInputRef}
@@ -334,8 +334,8 @@ export default function LocationCategory() {
       {/* Photo grid */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h3 className="text-navy font-bold text-sm sm:text-base m-0">Photos</h3>
-          <span className="text-xs bg-navy/5 text-navy/60 font-medium px-2.5 py-1 rounded-full">
+          <h3 className="text-navy dark:text-white font-bold text-sm sm:text-base m-0">Photos</h3>
+          <span className="text-xs bg-navy/5 dark:bg-white/10 text-navy/60 dark:text-white/50 font-medium px-2.5 py-1 rounded-full">
             {loading ? "..." : `${photos.length}`}
           </span>
         </div>
@@ -343,15 +343,15 @@ export default function LocationCategory() {
 
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-2 border-navy/20 border-t-navy rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-navy/20 dark:border-white/20 border-t-navy dark:border-t-white rounded-full animate-spin" />
         </div>
       ) : photos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 sm:py-20 bg-white rounded-2xl border border-border/60">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gray-50 flex items-center justify-center mb-4">
-            <i className="fa-solid fa-image text-gray-200 text-2xl sm:text-3xl" />
+        <div className="flex flex-col items-center justify-center py-16 sm:py-20 bg-white dark:bg-[#15202b] rounded-2xl border border-border/60 dark:border-[#1e2d3d]/60">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gray-50 dark:bg-[#0f1a24] flex items-center justify-center mb-4">
+            <i className="fa-solid fa-image text-gray-200 dark:text-white/20 text-2xl sm:text-3xl" />
           </div>
-          <p className="text-navy font-semibold text-sm m-0">No photos yet</p>
-          <p className="text-muted text-xs m-0 mt-1">Upload your first photo to get started</p>
+          <p className="text-navy dark:text-white font-semibold text-sm m-0">No photos yet</p>
+          <p className="text-muted dark:text-white/50 text-xs m-0 mt-1">Upload your first photo to get started</p>
         </div>
       ) : (
         <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-3 sm:gap-4 w-full [column-fill:_balance]">
@@ -362,9 +362,9 @@ export default function LocationCategory() {
               onDragStart={() => setDraggedIdx(i)}
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => handleDrop(i)}
-              className={`break-inside-avoid inline-block w-full mb-3 sm:mb-4 relative group rounded-xl overflow-hidden bg-white border border-border/60 shadow-sm transition-all duration-300 ${
-                editing === photo.id ? "ring-2 ring-navy ring-offset-2" : "hover:shadow-md hover:shadow-navy/[0.06]"
-              } ${!photo.cloudinary_url ? "border-2 border-dashed border-border" : ""}`}
+              className={`break-inside-avoid inline-block w-full mb-3 sm:mb-4 relative group rounded-xl overflow-hidden bg-white dark:bg-[#0f1a24] border border-border/60 dark:border-[#1e2d3d]/60 shadow-sm transition-all duration-300 ${
+                editing === photo.id ? "ring-2 ring-navy ring-offset-2 dark:ring-offset-[#0A1216]" : "hover:shadow-md hover:shadow-navy/[0.06]"
+              } ${!photo.cloudinary_url ? "border-2 border-dashed border-border dark:border-[#1e2d3d]" : ""}`}
             >
               {photo.cloudinary_url ? (
                 <>
@@ -450,21 +450,21 @@ export default function LocationCategory() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
           onClick={() => { setPendingClearId(null); setEditing(null) }}
         >
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white dark:bg-[#15202b] rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-center justify-between px-4 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-border/60">
+            <div className="flex items-center justify-between px-4 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-border/60 dark:border-[#1e2d3d]/60">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-navy/5 flex items-center justify-center shrink-0">
-                  <i className="fa-solid fa-pen text-navy text-xs" />
+                <div className="w-8 h-8 rounded-lg bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0">
+                  <i className="fa-solid fa-pen text-navy dark:text-white text-xs" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-navy font-bold text-sm sm:text-base m-0">Edit Photo</h3>
-                  <p className="text-muted text-[11px] m-0 mt-0.5 truncate">Update title, description, or image</p>
+                  <h3 className="text-navy dark:text-white font-bold text-sm sm:text-base m-0">Edit Photo</h3>
+                  <p className="text-muted dark:text-white/50 text-[11px] m-0 mt-0.5 truncate">Update title, description, or image</p>
                 </div>
               </div>
               <button
                 onClick={() => { setPendingClearId(null); setEditing(null) }}
-                className="w-8 h-8 rounded-lg bg-transparent border-0 text-muted hover:text-navy hover:bg-gray-100 cursor-pointer flex items-center justify-center transition-colors duration-200 text-lg shrink-0"
+                className="w-8 h-8 rounded-lg bg-transparent border-0 text-muted dark:text-white/50 hover:text-navy dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1e2d3d] cursor-pointer flex items-center justify-center transition-colors duration-200 text-lg shrink-0"
               >
                 <i className="fa-solid fa-xmark" />
               </button>
@@ -473,13 +473,13 @@ export default function LocationCategory() {
             {/* Body */}
             <div className="p-4 sm:p-6">
               {photo && (
-                <div className="relative rounded-xl overflow-hidden bg-gray-100 mb-5 aspect-[4/3]">
+                <div className="relative rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] mb-5 aspect-[4/3]">
                   {isPendingClear ? (
                     <div className="flex flex-col items-center justify-center w-full h-full gap-3">
                       <div className="w-12 h-12 rounded-xl bg-red/5 flex items-center justify-center">
                         <i className="fa-solid fa-trash-can text-red/30 text-xl" />
                       </div>
-                      <span className="text-navy/40 text-xs text-center px-4">Image cleared — upload a new one or delete the card</span>
+                      <span className="text-navy/40 dark:text-white/40 text-xs text-center px-4">Image cleared — upload a new one or delete the card</span>
                     </div>
                   ) : (
                     <>
@@ -491,7 +491,7 @@ export default function LocationCategory() {
                       <div className="absolute bottom-2 ltr:right-2 rtl:left-2 flex gap-1.5">
                         <button
                           onClick={() => handleCropClick(photo)}
-                          className="px-3 py-1.5 rounded-lg bg-white/90 backdrop-blur-sm text-navy text-xs font-semibold border-0 cursor-pointer hover:bg-white transition-all duration-200 flex items-center gap-1.5 shadow-sm"
+                          className="px-3 py-1.5 rounded-lg bg-white/90 dark:bg-[#0f1a24]/90 backdrop-blur-sm text-navy dark:text-white text-xs font-semibold border-0 cursor-pointer hover:bg-white dark:hover:bg-[#0f1a24] transition-all duration-200 flex items-center gap-1.5 shadow-sm"
                         >
                           <i className="fa-solid fa-crop" /> Crop
                         </button>
@@ -513,27 +513,27 @@ export default function LocationCategory() {
                   placeholder="Photo title"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full border border-border/70 rounded-xl px-4 py-3 text-sm text-navy outline-none focus:border-navy/40 focus:ring-2 focus:ring-navy/5 transition-all duration-200 placeholder:text-muted/50"
+                  className="w-full border border-border/70 dark:border-[#1e2d3d]/70 rounded-xl px-4 py-3 text-sm text-navy dark:text-white outline-none focus:border-navy/40 focus:ring-2 focus:ring-navy/5 transition-all duration-200 placeholder:text-muted/50 dark:bg-[#0f1a24]"
                 />
                 <textarea
                   placeholder="Photo description"
                   rows={3}
                   value={editDesc}
                   onChange={(e) => setEditDesc(e.target.value)}
-                  className="w-full border border-border/70 rounded-xl px-4 py-3 text-sm text-navy outline-none focus:border-navy/40 focus:ring-2 focus:ring-navy/5 transition-all duration-200 resize-none placeholder:text-muted/50"
+                  className="w-full border border-border/70 dark:border-[#1e2d3d]/70 rounded-xl px-4 py-3 text-sm text-navy dark:text-white outline-none focus:border-navy/40 focus:ring-2 focus:ring-navy/5 transition-all duration-200 resize-none placeholder:text-muted/50 dark:bg-[#0f1a24]"
                 />
                 <input
                   type="text"
                   placeholder="Alt text"
                   value={editAlt}
                   onChange={(e) => setEditAlt(e.target.value)}
-                  className="w-full border border-border/70 rounded-xl px-4 py-3 text-sm text-navy outline-none focus:border-navy/40 focus:ring-2 focus:ring-navy/5 transition-all duration-200 placeholder:text-muted/50"
+                  className="w-full border border-border/70 dark:border-[#1e2d3d]/70 rounded-xl px-4 py-3 text-sm text-navy dark:text-white outline-none focus:border-navy/40 focus:ring-2 focus:ring-navy/5 transition-all duration-200 placeholder:text-muted/50 dark:bg-[#0f1a24]"
                 />
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-4 sm:px-6 pb-5 sm:pb-6 pt-4 border-t border-border/60">
+            <div className="flex items-center justify-between px-4 sm:px-6 pb-5 sm:pb-6 pt-4 border-t border-border/60 dark:border-[#1e2d3d]/60">
               {isPendingClear ? (
                 <>
                   <button
