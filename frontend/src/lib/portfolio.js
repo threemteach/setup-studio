@@ -206,6 +206,10 @@ export async function uploadVideo(file, category, onProgress) {
   if (!r2PublicUrl) {
     throw new Error("VITE_R2_PUBLIC_URL not configured")
   }
+
+  // Generate thumbnail from local file FIRST (before R2 upload completes)
+  const thumbnailPromise = captureVideoFrame(file)
+
   const key = `${category}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`
   const contentType = file.type || "video/mp4"
 
@@ -216,23 +220,19 @@ export async function uploadVideo(file, category, onProgress) {
   }
 
   const video_url = `${r2PublicUrl}/${key}`
-  const thumbnail_url = await generateVideoThumbnail(video_url).catch(() => null)
+
+  // Upload thumbnail to Cloudinary
+  let thumbnail_url = null
+  try {
+    const dataUrl = await thumbnailPromise
+    if (dataUrl) {
+      const blob = dataURItoBlob(dataUrl)
+      const result = await uploadToCloudinary(new File([blob], "thumb.jpg", { type: "image/jpeg" }), "portfolio-thumbnails")
+      thumbnail_url = result.secure_url
+    }
+  } catch { /* thumbnail optional */ }
 
   return { video_url, video_key: key, thumbnail_url }
-}
-
-export async function generateVideoThumbnail(videoUrl) {
-  // Capture frame as data URL first (synchronous canvas), then upload
-  const dataUrl = await captureVideoFrame(videoUrl)
-  if (!dataUrl) return null
-
-  const blob = dataURItoBlob(dataUrl)
-  try {
-    const result = await uploadToCloudinary(new File([blob], "thumb.jpg", { type: "image/jpeg" }), "portfolio-thumbnails")
-    return result.secure_url
-  } catch {
-    return null
-  }
 }
 
 function dataURItoBlob(dataUrl) {
@@ -244,41 +244,39 @@ function dataURItoBlob(dataUrl) {
   return new Blob([array], { type: mime })
 }
 
-function captureVideoFrame(videoUrl) {
+function captureVideoFrame(file) {
   return new Promise((resolve) => {
+    const url = URL.createObjectURL(file)
     const vid = document.createElement("video")
-    vid.crossOrigin = "anonymous"
-    vid.preload = "metadata"
     vid.muted = true
     vid.playsInline = true
 
-    let settled = false
-    function done(result) {
-      if (settled) return
-      settled = true
+    let done = false
+    function finish(result) {
+      if (done) return
+      done = true
+      clearTimeout(timer)
+      URL.revokeObjectURL(url)
       vid.remove()
       resolve(result)
     }
 
-    const timer = setTimeout(() => done(null), 15000)
+    const timer = setTimeout(() => finish(null), 15000)
 
-    function capture() {
-      clearTimeout(timer)
-      try {
-        const canvas = document.createElement("canvas")
-        canvas.width = vid.videoWidth || 320
-        canvas.height = vid.videoHeight || 180
-        canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
-        done(canvas.toDataURL("image/jpeg", 0.75))
-      } catch { done(null) }
+    vid.onloadeddata = () => {
+      requestAnimationFrame(() => {
+        try {
+          const canvas = document.createElement("canvas")
+          canvas.width = vid.videoWidth || 320
+          canvas.height = vid.videoHeight || 180
+          canvas.getContext("2d").drawImage(vid, 0, 0, canvas.width, canvas.height)
+          finish(canvas.toDataURL("image/jpeg", 0.75))
+        } catch { finish(null) }
+      })
     }
+    vid.onerror = () => finish(null)
 
-    vid.addEventListener("seeked", capture, { once: true })
-    vid.addEventListener("loadeddata", () => { vid.currentTime = 0.001 }, { once: true })
-    vid.addEventListener("error", () => { clearTimeout(timer); done(null) }, { once: true })
-
-    vid.src = videoUrl
-    vid.load()
+    vid.src = url
   })
 }
 
