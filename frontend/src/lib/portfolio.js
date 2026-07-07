@@ -222,37 +222,51 @@ export async function uploadVideo(file, category, onProgress) {
 }
 
 export async function generateVideoThumbnail(videoUrl) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const video = document.createElement("video")
     video.crossOrigin = "anonymous"
-    video.src = videoUrl
     video.muted = true
-    video.currentTime = 0.5
-    video.oncanplay = () => {
+    video.playsInline = true
+
+    let settled = false
+    function done(result) {
+      if (settled) return
+      settled = true
+      video.src = ""
+      video.load()
+      resolve(result)
+    }
+
+    const timer = setTimeout(() => done(null), 15000)
+
+    video.addEventListener("seeked", () => {
+      clearTimeout(timer)
+      try {
+        const canvas = document.createElement("canvas")
+        canvas.width = video.videoWidth || 320
+        canvas.height = video.videoHeight || 180
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height)
+        canvas.toBlob(async (blob) => {
+          if (!blob) return done(null)
+          try {
+            const result = await uploadToCloudinary(new File([blob], "thumb.jpg", { type: "image/jpeg" }), "portfolio-thumbnails")
+            done(result.secure_url)
+          } catch { done(null) }
+        }, "image/jpeg", 0.8)
+      } catch { done(null) }
+    }, { once: true })
+
+    video.addEventListener("loadeddata", () => {
       video.currentTime = 0.5
-    }
-    video.onseeked = () => {
-      const canvas = document.createElement("canvas")
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      canvas.getContext("2d").drawImage(video, 0, 0)
-      canvas.toBlob(async (blob) => {
-        if (!blob) return reject(new Error("Failed to capture thumbnail"))
-        try {
-          const result = await uploadToCloudinary(new File([blob], "thumb.jpg", { type: "image/jpeg" }), "portfolio-thumbnails")
-          resolve(result.secure_url)
-        } catch (err) {
-          reject(err)
-        }
-      }, "image/jpeg", 0.8)
-      video.remove()
-    }
-    video.onerror = () => {
-      video.remove()
-      resolve(null)
-    }
-    // timeout fallback
-    setTimeout(() => { video.remove(); resolve(null) }, 15000)
+    }, { once: true })
+
+    video.addEventListener("error", () => {
+      clearTimeout(timer)
+      done(null)
+    }, { once: true })
+
+    video.src = videoUrl
+    video.load()
   })
 }
 
