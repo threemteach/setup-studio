@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import Reveal from "../components/ui/Reveal"
+import Masonry from "react-masonry-css"
 import { useTranslation } from "../context/LanguageContext"
 import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 
@@ -110,12 +111,14 @@ export default function PortfolioPage() {
                 {vids.length === 0 ? (
                   <p className="text-muted/50 text-sm text-center py-12">{t("No videos yet", "لا توجد فيديوهات بعد", lang)}</p>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  <Masonry breakpointCols={{ default: 3, 768: 2, 480: 1 }}
+                    className="flex -ml-5 w-auto"
+                    columnClassName="pl-5 bg-clip-padding">
                     {vids.map((video) => (
                       <Reveal key={video.id}>
-                        <div className="group cursor-pointer" onClick={() => setActiveVideo(video)}>
-                          <div className="aspect-video rounded-2xl overflow-hidden bg-gray-900 relative shadow-md">
-                            <video src={video.video_url} className="w-full h-full object-cover" muted playsInline poster={video.thumbnail_url || undefined} />
+                        <div className="group cursor-pointer mb-5" onClick={() => setActiveVideo(video)}>
+                          <div className="rounded-2xl overflow-hidden bg-gray-900 relative shadow-md">
+                            <video src={video.video_url} className="w-full h-auto block" muted playsInline poster={video.thumbnail_url || undefined} />
                             <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                               <div className="w-16 h-16 rounded-full bg-red/90 flex items-center justify-center shadow-xl">
                                 <i className="fa-solid fa-play text-white text-xl ml-1" />
@@ -135,7 +138,7 @@ export default function PortfolioPage() {
                         </div>
                       </Reveal>
                     ))}
-                  </div>
+                  </Masonry>
                 )}
               </div>
             )
