@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Reveal from "../components/ui/Reveal"
 import Masonry from "react-masonry-css"
 import { useTranslation } from "../context/LanguageContext"
@@ -12,6 +12,13 @@ export default function PortfolioPage() {
   const [videosByCategory, setVideosByCategory] = useState({})
   const [activeVideo, setActiveVideo] = useState(null)
   const [activeCategory, setActiveCategory] = useState("")
+  const videoRef = useRef(null)
+
+  useEffect(() => {
+    if (activeVideo && videoRef.current) {
+      videoRef.current.requestFullscreen?.()?.catch(() => {})
+    }
+  }, [activeVideo])
 
   useEffect(() => {
     fetchPortfolioContent().then(async (data) => {
@@ -150,7 +157,7 @@ export default function PortfolioPage() {
       {activeVideo && (
         <div className="fixed inset-0 z-50 flex flex-col bg-black" onClick={() => setActiveVideo(null)}>
           <div className="relative flex-1 min-h-0 flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-            <video src={activeVideo.video_url} controls autoPlay className="w-full h-full object-contain" poster={activeVideo.thumbnail_url || undefined} />
+            <video ref={videoRef} src={activeVideo.video_url} controls autoPlay className="w-full h-full object-contain" poster={activeVideo.thumbnail_url || undefined} />
             <button onClick={() => setActiveVideo(null)}
               className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 text-white border-0 cursor-pointer hover:bg-black/70 transition-colors flex items-center justify-center text-lg z-10">
               <i className="fa-solid fa-xmark" />
