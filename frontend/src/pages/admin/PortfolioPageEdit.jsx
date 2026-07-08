@@ -7,15 +7,15 @@ import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 
 const Diamond = () => (
-  <svg className="w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+  <svg className="hidden sm:block w-[0.8rem] h-[0.8rem] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
     <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
   </svg>
 )
 
 function HeadingInput({ value, onChange, dark, placeholder, onTranslate, translating }) {
   const cls = dark
-    ? "flex-1 min-w-[12rem] bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
-    : "flex-1 min-w-[12rem] bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-xl text-navy dark:text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 dark:placeholder:text-white/30 focus:border-navy/40 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
+    ? "flex-1 min-w-0 sm:min-w-[12rem] bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
+    : "flex-1 min-w-0 sm:min-w-[12rem] bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-xl text-navy dark:text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 dark:placeholder:text-white/30 focus:border-navy/40 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
   return (
     <div className="flex items-center gap-1 w-full">
       <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
@@ -51,8 +51,8 @@ function LabelInput({ value, onChange, dark, placeholder, onTranslate, translati
 const TextField = ({ value, onChange, label, placeholder, type = "text", rows, dark = false, onBlur, onTranslate, translating, reference }) => {
   const Tag = type === "textarea" ? "textarea" : "input"
   const base = dark
-    ? "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
-    : "w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2.5 text-navy dark:text-white/80 text-sm outline-none focus:border-navy/40 transition-colors placeholder:text-muted dark:placeholder:text-white/30 resize-none"
+    ? "flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
+    : "flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2.5 text-navy dark:text-white/80 text-sm outline-none focus:border-navy/40 transition-colors placeholder:text-muted dark:placeholder:text-white/30 resize-none"
   return (
     <div>
       {label && <label className={`text-xs font-medium mb-1.5 block ${dark ? "text-white/40" : "text-navy/50"}`}>{label}</label>}
@@ -83,7 +83,7 @@ const DarkSection = ({ id, title, icon, collapsed, onToggle, children }) => (
         </h3>
         <i className={`fa-solid fa-chevron-down text-white/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
       </button>
-      {!collapsed[id] && <div className="px-6 sm:px-8 pb-6 sm:pb-8">{children}</div>}
+      {!collapsed[id] && <div className="px-4 sm:px-8 pb-4 sm:pb-8">{children}</div>}
     </div>
   </div>
 )
@@ -96,7 +96,7 @@ const LightSection = ({ id, title, icon, collapsed, onToggle, bg = "bg-white", c
       </h3>
       <i className={`fa-solid fa-chevron-down text-navy/30 dark:text-white/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
     </button>
-    {!collapsed[id] && <div className="px-6 sm:px-8 pb-6 sm:pb-8">{children}</div>}
+    {!collapsed[id] && <div className="px-4 sm:px-8 pb-4 sm:pb-8">{children}</div>}
   </div>
 )
 
@@ -340,10 +340,10 @@ export default function PortfolioPageEdit() {
 
   return (
     <AdminLayout lang={lang}>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-navy dark:text-white font-bold text-2xl m-0">Portfolio Page Editor</h1>
-          <p className="text-muted dark:text-white/50 text-sm m-0 mt-1">Manage portfolio categories and videos — bilingual EN / AR</p>
+          <h1 className="text-navy dark:text-white font-bold text-xl sm:text-2xl m-0">Portfolio Page Editor</h1>
+          <p className="text-muted dark:text-white/50 text-xs sm:text-sm m-0 mt-1">Manage portfolio categories and videos — bilingual EN / AR</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => setLang(lang === "en" ? "ar" : "en")}
@@ -384,11 +384,11 @@ export default function PortfolioPageEdit() {
         <div className="flex flex-col items-center text-center">
           <div className="flex items-center w-full mb-4">
             <Diamond />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <HeadingInput value={val("hero_heading")} onChange={(v) => handleChange("hero_heading", v)} dark placeholder="Our Work"
               onTranslate={() => translateField("hero_heading", val("hero_heading"))}
               translating={translatingField === "hero_heading"} />
-            <span className="block flex-1 h-[2px] bg-red" />
+            <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
           <p className="text-[10px] text-muted dark:text-white/40 -mt-3 mb-3">{ref("hero_heading") || "—"}</p>
@@ -402,7 +402,7 @@ export default function PortfolioPageEdit() {
 
       {/* ════════════════════ CATEGORIES ════════════════════ */}
       <LightSection id="categories" title="Categories" icon="fa-solid fa-tags" collapsed={collapsed} onToggle={toggleCollapse}>
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {categories.map((cat, i) => (
             <div key={i} className="p-4 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] relative group">
               <button onClick={() => removeCategory(i)}
@@ -426,7 +426,7 @@ export default function PortfolioPageEdit() {
                 reference={lang === "en" ? (cat.heading_ar || "—") : (cat.heading_en || "—")} />
               <div className="mt-1 flex items-center gap-2">
                 <span className="text-xs font-medium text-navy/50 dark:text-white/50">Slug:</span>
-                <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-[#1e2d3d] text-navy/60 dark:text-white/50 text-xs font-mono">{cat.slug || makeSlug(cat.heading_en) || "—"}</span>
+                <span className="px-2.5 py-1 rounded-lg bg-gray-100 dark:bg-[#1e2d3d] text-navy/60 dark:text-white/50 text-xs font-mono truncate max-w-[120px]">{cat.slug || makeSlug(cat.heading_en) || "—"}</span>
               </div>
               <div className="mt-2">
                 <TextField value={lang === "en" ? cat.desc_en : cat.desc_ar}
@@ -447,7 +447,7 @@ export default function PortfolioPageEdit() {
             </div>
           ))}
           <button onClick={addCategory}
-            className="px-4 py-2 rounded-xl border border-dashed border-border dark:border-[#1e2d3d] bg-gray-50 dark:bg-[#0f1a24] text-navy dark:text-white text-sm font-semibold cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1e2d3d] transition-colors w-full">
+            className="px-4 py-2 rounded-xl border border-dashed border-border dark:border-[#1e2d3d] bg-gray-50 dark:bg-[#0f1a24] text-navy dark:text-white text-sm font-semibold cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1e2d3d] transition-colors col-span-1 sm:col-span-2">
             <i className="fa-solid fa-plus mr-2" />Add Category
           </button>
         </div>
@@ -474,7 +474,7 @@ export default function PortfolioPageEdit() {
             </div>
 
             {/* Upload */}
-            <div className="mb-6 p-6 rounded-2xl border-2 border-dashed border-white/10 text-center">
+            <div className="mb-6 p-4 sm:p-6 rounded-2xl border-2 border-dashed border-white/10 text-center">
               <input ref={fileInputRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => handleUpload(e.target.files)} />
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
                 className="px-6 py-3 rounded-xl bg-red text-white text-sm font-semibold cursor-pointer hover:bg-red/90 transition-colors border-0 disabled:opacity-50">
@@ -499,10 +499,10 @@ export default function PortfolioPageEdit() {
                       className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center z-10">
                       <i className="fa-solid fa-trash-can" />
                     </button>
-                    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-4">
                       {/* Video Preview */}
                       <div className="rounded-xl overflow-hidden">
-                        <video src={video.video_url} className="w-full h-auto max-h-[300px] object-contain rounded-xl" controls poster={video.thumbnail_url || undefined}
+                        <video src={video.video_url} className="w-full h-auto max-h-[200px] sm:max-h-[300px] object-contain rounded-xl" controls poster={video.thumbnail_url || undefined}
                           onPlay={(e) => {
                             if (currentVideoRef.current && currentVideoRef.current !== e.target) {
                               currentVideoRef.current.pause()
@@ -516,7 +516,8 @@ export default function PortfolioPageEdit() {
                           <input type="text"
                             value={lang === "en" ? video.title_en : video.title_ar}
                             onChange={(e) => handleVideoFieldChange(video.id, lang === "en" ? "title_en" : "title_ar", e.target.value)}
-                            className="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
+                            className="flex-1 min-w-0 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 text-start"
+                            dir={lang === "ar" ? "rtl" : "ltr"}
                             placeholder={lang === "en" ? "Title (EN)" : "العنوان (AR)"} />
                           <button onClick={async () => {
                             const src = lang === "en" ? video.title_en : video.title_ar
@@ -530,14 +531,15 @@ export default function PortfolioPageEdit() {
                             <i className="fa-solid fa-language text-[9px]" />
                           </button>
                         </div>
-                        <p className="text-[9px] text-white/40 -mt-1 ml-1">
+                        <p className="text-[9px] text-white/40 -mt-1 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                           {lang === "en" ? (video.title_ar || "—") : (video.title_en || "—")}
                         </p>
                         <div className="flex items-start gap-1">
                           <textarea
                             value={lang === "en" ? video.description_en : video.description_ar}
                             onChange={(e) => handleVideoFieldChange(video.id, lang === "en" ? "description_en" : "description_ar", e.target.value)}
-                            className="flex-1 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
+                            className="flex-1 min-w-0 bg-white/10 border border-white/10 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none text-start"
+                            dir={lang === "ar" ? "rtl" : "ltr"}
                             rows={2} placeholder={lang === "en" ? "Description (EN)" : "الوصف (AR)"} />
                           <button onClick={async () => {
                             const src = lang === "en" ? video.description_en : video.description_ar
@@ -551,7 +553,7 @@ export default function PortfolioPageEdit() {
                             <i className="fa-solid fa-language text-[9px]" />
                           </button>
                         </div>
-                        <p className="text-[9px] text-white/40 -mt-1 ml-1">
+                        <p className="text-[9px] text-white/40 -mt-1 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                           {lang === "en" ? (video.description_ar || "—") : (video.description_en || "—")}
                         </p>
                         <input type="number" value={video.sort_order}

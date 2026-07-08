@@ -17,13 +17,13 @@ const Diamond = () => (
 )
 
 // ─── Inline input for headings placed between diamonds ───
-function HeadingInput({ value, onChange, dark, placeholder, onTranslate, translating }) {
+function HeadingInput({ value, onChange, dark, placeholder, onTranslate, translating, dir }) {
   const cls = dark
-    ? "flex-1 bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
-    : "flex-1 bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-xl text-navy dark:text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-left outline-none px-3 py-1 leading-tight placeholder:text-navy/30 dark:placeholder:text-white/30 focus:border-navy/40 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
+    ? "flex-1 min-w-0 sm:min-w-[12rem] bg-transparent border-0 text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-center outline-none px-2 leading-tight placeholder:text-white/30"
+    : "flex-1 min-w-0 sm:min-w-[12rem] bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-xl text-navy dark:text-white font-bold text-[clamp(1.2rem,3vw,1.8rem)] text-start outline-none px-3 py-1 leading-tight placeholder:text-navy/30 dark:placeholder:text-white/30 focus:border-navy/40 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
   return (
     <div className="flex items-center gap-1 flex-1">
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} dir={dir} />
       {onTranslate && (
         <button onClick={onTranslate} disabled={translating}
           className="shrink-0 w-6 h-6 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 disabled:opacity-40"
@@ -36,13 +36,13 @@ function HeadingInput({ value, onChange, dark, placeholder, onTranslate, transla
 }
 
 // ─── Inline input for section labels (small badge text) ───
-function LabelInput({ value, onChange, dark, placeholder, onTranslate, translating }) {
+function LabelInput({ value, onChange, dark, placeholder, onTranslate, translating, dir }) {
   const cls = dark
     ? "bg-transparent border-0 text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-center outline-none placeholder:text-red/30"
-    : "bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-lg text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-left outline-none px-2 py-0.5 placeholder:text-red/30 focus:border-navy/30 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
+    : "bg-white/50 dark:bg-[#15202b] border border-navy/15 dark:border-[#1e2d3d] rounded-lg text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70 text-start outline-none px-2 py-0.5 placeholder:text-red/30 focus:border-navy/30 focus:bg-white/80 dark:focus:bg-[#1e2d3d] transition-colors"
   return (
     <div className="flex items-center gap-1">
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} />
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className={cls} placeholder={placeholder || ""} dir={dir} />
       {onTranslate && (
         <button onClick={onTranslate} disabled={translating}
           className="shrink-0 w-5 h-5 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 disabled:opacity-40"
@@ -87,16 +87,16 @@ const PhotoField = ({ url, urlId, prefix, label, aspect = "aspect-[4/3]", dark =
 }
 
 // ─── Standard text input (not for inline headings) ───
-const TextField = ({ value, onChange, label, placeholder, type = "text", rows, dark = false, onTranslate, translating, reference }) => {
+const TextField = ({ value, onChange, label, placeholder, type = "text", rows, dark = false, onTranslate, translating, reference, dir }) => {
   const Tag = type === "textarea" ? "textarea" : "input"
   const base = dark
-    ? "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none"
-    : "w-full bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2.5 text-navy dark:text-white/80 text-sm outline-none focus:border-navy/40 transition-colors placeholder:text-muted dark:placeholder:text-white/30 resize-none"
+    ? "flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-white/30 transition-colors placeholder:text-white/30 resize-none text-start"
+    : "flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2.5 text-navy dark:text-white/80 text-sm outline-none focus:border-navy/40 transition-colors placeholder:text-muted dark:placeholder:text-white/30 resize-none text-start"
   return (
     <div>
       {label && <label className={`text-xs font-medium mb-1.5 block ${dark ? "text-white/40" : "text-navy/50"}`}>{label}</label>}
       <div className="flex items-start gap-2">
-        <Tag value={value} onChange={(e) => onChange(e.target.value)} className={`${base} ${onTranslate ? "flex-1" : "w-full"}`} rows={rows} placeholder={placeholder || ""} />
+        <Tag value={value} onChange={(e) => onChange(e.target.value)} className={base} rows={rows} placeholder={placeholder || ""} dir={dir} />
         {onTranslate && (
           <button onClick={onTranslate} disabled={translating}
             className="shrink-0 w-8 h-8 rounded-lg bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/50 dark:text-white/50 disabled:opacity-40 mt-0.5"
@@ -106,7 +106,7 @@ const TextField = ({ value, onChange, label, placeholder, type = "text", rows, d
         )}
       </div>
       {reference !== undefined && (
-        <p className="text-[10px] text-muted dark:text-white/40 mt-1 leading-tight ltr:pr-2 rtl:pl-2">
+        <p className="text-[10px] text-muted dark:text-white/40 mt-1 leading-tight text-start" dir={dir === "rtl" ? "ltr" : "rtl"}>
           {reference || "—"}
         </p>
       )}
@@ -123,14 +123,14 @@ const DarkSection = ({ id, title, icon, collapsed, onToggle, children }) => (
     <div className="relative z-10">
       <button
         onClick={() => onToggle(id)}
-        className="w-full flex items-center justify-between p-6 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-white/5 transition-colors"
+        className="w-full flex items-center justify-between p-4 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-white/5 transition-colors"
       >
         <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider m-0 flex items-center gap-2">
           <i className={`${icon} mr-1.5`} />{title}
         </h3>
         <i className={`fa-solid fa-chevron-down text-white/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
       </button>
-      {!collapsed[id] && <div className="px-6 sm:px-8 pb-6 sm:pb-8">{children}</div>}
+      {!collapsed[id] && <div className="px-4 pb-4 sm:px-8 sm:pb-8">{children}</div>}
     </div>
   </div>
 )
@@ -142,14 +142,14 @@ const LightSection = ({ id, title, icon, collapsed, onToggle, bg = "bg-white", c
     <div className={`${bg} ${darkBg} rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm mb-6 overflow-hidden`}>
     <button
       onClick={() => onToggle(id)}
-      className="w-full flex items-center justify-between p-6 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors"
+      className="w-full flex items-center justify-between p-4 sm:p-8 border-0 bg-transparent cursor-pointer hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors"
     >
       <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider m-0 flex items-center gap-2">
         <i className={`${icon} mr-1.5`} />{title}
       </h3>
       <i className={`fa-solid fa-chevron-down text-navy/30 dark:text-white/30 text-sm transition-transform duration-200 ${collapsed[id] ? "" : "rotate-180"}`} />
     </button>
-    {!collapsed[id] && <div className="px-6 sm:px-8 pb-6 sm:pb-8">{children}</div>}
+    {!collapsed[id] && <div className="px-4 pb-4 sm:px-8 sm:pb-8">{children}</div>}
   </div>
   )
 }
@@ -452,10 +452,10 @@ export default function AcademyPageEdit() {
 
   return (
     <AdminLayout lang={lang}>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-navy dark:text-white font-bold text-2xl m-0">Academy Page Editor</h1>
-          <p className="text-muted dark:text-white/50 text-sm m-0 mt-1">Edit Academy page — changes are bilingual (EN / AR)</p>
+          <h1 className="text-navy dark:text-white font-bold text-xl sm:text-2xl m-0">Academy Page Editor</h1>
+          <p className="text-muted dark:text-white/50 text-xs sm:text-sm m-0 mt-1">Edit Academy page — changes are bilingual (EN / AR)</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -487,13 +487,15 @@ export default function AcademyPageEdit() {
             <TextField value={val("hero_subtitle")} onChange={(v) => handleChange("hero_subtitle", v)} label="Subtitle" placeholder="Learn Content Creation Inside a Real Production Studio" dark
               onTranslate={() => translateField("hero_subtitle", val("hero_subtitle"))}
               translating={translatingField === "hero_subtitle"}
-              reference={ref("hero_subtitle")} />
+              reference={ref("hero_subtitle")}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <TextField value={val("hero_body")} onChange={(v) => handleChange("hero_body", v)} label="Body Text" type="textarea" rows={4} placeholder="Setup Academy is the educational arm of Setup Studio..." dark
               onTranslate={() => translateField("hero_body", val("hero_body"))}
               translating={translatingField === "hero_body"}
-              reference={ref("hero_body")} />
+              reference={ref("hero_body")}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
           </div>
-          <PhotoField url={form?.hero_photo_url} urlId={form?.hero_photo_id} prefix="hero" label="Hero Photo" dark onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
+          <PhotoField url={form?.hero_photo_url} urlId={form?.hero_photo_id} prefix="hero" label="Hero Photo" dark aspect="aspect-video" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
         </div>
       </DarkSection>
 
@@ -506,7 +508,8 @@ export default function AcademyPageEdit() {
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
             <LabelInput value={val("why_label")} onChange={(v) => handleChange("why_label", v)} placeholder="Why Setup Academy?"
               onTranslate={() => translateField("why_label", val("why_label"))}
-              translating={translatingField === "why_label"} />
+              translating={translatingField === "why_label"}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
           <div className="flex items-center w-full mb-1">
@@ -514,18 +517,20 @@ export default function AcademyPageEdit() {
             <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <HeadingInput value={val("why_heading")} onChange={(v) => handleChange("why_heading", v)} placeholder="What Makes Us Different?"
               onTranslate={() => translateField("why_heading", val("why_heading"))}
-              translating={translatingField === "why_heading"} />
+              translating={translatingField === "why_heading"}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
-          <p className="text-[10px] text-muted dark:text-white/40 text-center mb-3">
+          <p className="text-[10px] text-muted dark:text-white/40 text-center mb-3 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
             {ref("why_heading") || "—"}
           </p>
           <div className="max-w-[600px] mx-auto w-full">
             <TextField value={val("why_intro")} onChange={(v) => handleChange("why_intro", v)} label="" placeholder="Learning happens where real production happens."
               onTranslate={() => translateField("why_intro", val("why_intro"))}
               translating={translatingField === "why_intro"}
-              reference={ref("why_intro")} />
+              reference={ref("why_intro")}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
@@ -533,7 +538,8 @@ export default function AcademyPageEdit() {
           <TextField value={val("why_body")} onChange={(v) => handleChange("why_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Instead of traditional theory-heavy courses..."
             onTranslate={() => translateField("why_body", val("why_body"))}
             translating={translatingField === "why_body"}
-            reference={ref("why_body")} />
+            reference={ref("why_body")}
+            dir={lang === "ar" ? "rtl" : "ltr"} />
         </div>
         <div>
             <span className="text-navy/50 dark:text-white/50 text-xs font-medium mb-2 block">Differences</span>
@@ -547,7 +553,8 @@ export default function AcademyPageEdit() {
                   <input type="text"
                     value={lang === "en" ? item.en : item.ar}
                     onChange={(e) => setArrayItem("differences", i, lang === "en" ? "en" : "ar", e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors"
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors text-start"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     placeholder={lang === "en" ? "Difference text..." : "نص الفرق..."} />
                   <button onClick={async () => {
                     const src = lang === "en" ? item.en : item.ar
@@ -568,7 +575,7 @@ export default function AcademyPageEdit() {
                   <i className="fa-solid fa-xmark" />
                 </button>
               </div>
-              <p className="text-[10px] text-muted dark:text-white/40 mt-0.5 ml-5">
+              <p className="text-[10px] text-muted dark:text-white/40 mt-0.5 ml-5 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                 {lang === "en" ? (item.ar || "—") : (item.en || "—")}
               </p>
             </div>
@@ -589,26 +596,28 @@ export default function AcademyPageEdit() {
           <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <HeadingInput value={val("audience_heading")} onChange={(v) => handleChange("audience_heading", v)} placeholder="Who Is Setup Academy For?"
             onTranslate={() => translateField("audience_heading", val("audience_heading"))}
-            translating={translatingField === "audience_heading"} />
+            translating={translatingField === "audience_heading"}
+            dir={lang === "ar" ? "rtl" : "ltr"} />
           <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
-        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
+        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4" dir={lang === "en" ? "rtl" : "ltr"}>
           {ref("audience_heading") || "—"}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {(form?.audiences || defaultAudiences).map((item, i) => (
-            <div key={i} className="p-5 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] relative group">
+            <div key={i} className="p-5 rounded-2xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] relative group flex flex-col items-center text-center">
               <button onClick={() => removeArrayItem("audiences", i)}
                 className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center z-10">
                 <i className="fa-solid fa-xmark" />
               </button>
               <span className="w-10 h-10 rounded-full bg-navy text-white font-bold flex items-center justify-center mb-3">{i + 1}</span>
-              <div className="flex items-center gap-1 mb-2">
+              <div className="flex items-center gap-1 mb-2 w-full">
                 <input type="text"
                   value={lang === "en" ? item.titleEn : item.titleAr}
                   onChange={(e) => setArrayItem("audiences", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors"
+                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors text-start"
+                  dir={lang === "ar" ? "rtl" : "ltr"}
                   placeholder={lang === "en" ? "Title..." : "العنوان..."} />
                 <button onClick={async () => {
                   const src = lang === "en" ? item.titleEn : item.titleAr
@@ -622,11 +631,15 @@ export default function AcademyPageEdit() {
                   <i className="fa-solid fa-language text-[9px]" />
                 </button>
               </div>
-              <div className="flex items-start gap-1">
+              <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2 w-full text-start" dir={lang === "en" ? "rtl" : "ltr"}>
+                {lang === "en" ? (item.titleAr || "—") : (item.titleEn || "—")}
+              </p>
+              <div className="flex items-start gap-1 w-full">
                 <textarea
                   value={lang === "en" ? item.descEn : item.descAr}
                   onChange={(e) => setArrayItem("audiences", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none text-start"
+                  dir={lang === "ar" ? "rtl" : "ltr"}
                   rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
                 <button onClick={async () => {
                   const src = lang === "en" ? item.descEn : item.descAr
@@ -640,6 +653,9 @@ export default function AcademyPageEdit() {
                   <i className="fa-solid fa-language text-[9px]" />
                 </button>
               </div>
+              <p className="text-[9px] text-muted dark:text-white/40 mt-1 w-full text-start" dir={lang === "en" ? "rtl" : "ltr"}>
+                {lang === "en" ? (item.descAr || "—") : (item.descEn || "—")}
+              </p>
             </div>
           ))}
         </div>
@@ -658,7 +674,8 @@ export default function AcademyPageEdit() {
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
             <LabelInput value={val("first_course_label")} onChange={(v) => handleChange("first_course_label", v)} dark placeholder="Our First Course"
               onTranslate={() => translateField("first_course_label", val("first_course_label"))}
-              translating={translatingField === "first_course_label"} />
+              translating={translatingField === "first_course_label"}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
         </div>
@@ -671,24 +688,26 @@ export default function AcademyPageEdit() {
                     <i className="fa-solid fa-video text-navy dark:text-white" />
                   </div>
                   <input type="text" value={val("first_course_heading")} onChange={(e) => handleChange("first_course_heading", e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Video Content Foundation Course" : "دورة أساسيات إنتاج المحتوى المرئي"} />
+                    dir={lang === "ar" ? "rtl" : "ltr"}
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors text-start" placeholder={lang === "en" ? "Video Content Foundation Course" : "دورة أساسيات إنتاج المحتوى المرئي"} />
                   <button onClick={() => translateField("first_course_heading", val("first_course_heading"))}
                     className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
                     title="Translate">
                     <i className={`fa-solid fa-language text-[9px] ${translatingField === "first_course_heading" ? "animate-spin" : ""}`} />
                   </button>
                 </div>
-                <p className="text-[10px] text-muted dark:text-white/40 -mt-3 mb-2">{ref("first_course_heading") || "—"}</p>
+                <p className="text-[10px] text-muted dark:text-white/40 -mt-3 mb-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("first_course_heading") || "—"}</p>
                 <div className="flex items-start gap-1">
                   <textarea value={val("first_course_desc")} onChange={(e) => handleChange("first_course_desc", e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Designed for beginners who want to understand video production..." : "مصممة للمبتدئين الذين يرغبون في فهم إنتاج الفيديو..."} />
+                    dir={lang === "ar" ? "rtl" : "ltr"}
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none text-start" rows={2} placeholder={lang === "en" ? "Designed for beginners who want to understand video production..." : "مصممة للمبتدئين الذين يرغبون في فهم إنتاج الفيديو..."} />
                   <button onClick={() => translateField("first_course_desc", val("first_course_desc"))}
                     className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
                     title="Translate">
                     <i className={`fa-solid fa-language text-[9px] ${translatingField === "first_course_desc" ? "animate-spin" : ""}`} />
                   </button>
                 </div>
-                <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("first_course_desc") || "—"}</p>
+                <p className="text-[10px] text-muted dark:text-white/40 -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("first_course_desc") || "—"}</p>
                 <div className="bg-[#f8f9fb] dark:bg-[#15202b] rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-navy dark:text-white font-semibold text-sm flex items-center gap-2">
@@ -707,7 +726,8 @@ export default function AcademyPageEdit() {
                         <input type="text"
                           value={lang === "en" ? item.en : item.ar}
                           onChange={(e) => setArrayItem("focus_items", i, lang === "en" ? "en" : "ar", e.target.value)}
-                          className="flex-1 bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-lg px-2 py-1 text-navy/60 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors"
+                          className="flex-1 min-w-0 bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-lg px-2 py-1 text-navy/60 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors text-start"
+                          dir={lang === "ar" ? "rtl" : "ltr"}
                           placeholder={lang === "en" ? "Focus item..." : "عنصر التركيز..."} />
                         <button onClick={async () => {
                           const src = lang === "en" ? item.en : item.ar
@@ -725,7 +745,7 @@ export default function AcademyPageEdit() {
                           <i className="fa-solid fa-xmark" />
                         </button>
                       </div>
-                      <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-3">
+                      <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-3 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                         {lang === "en" ? (item.ar || "—") : (item.en || "—")}
                       </p>
                     </div>
@@ -741,30 +761,33 @@ export default function AcademyPageEdit() {
                 <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
                 <LabelInput value={val("instructor_label")} onChange={(v) => handleChange("instructor_label", v)} placeholder="Instructor"
                   onTranslate={() => translateField("instructor_label", val("instructor_label"))}
-                  translating={translatingField === "instructor_label"} />
+                  translating={translatingField === "instructor_label"}
+                  dir={lang === "ar" ? "rtl" : "ltr"} />
                 <span className="hidden sm:block flex-1 h-[2px] bg-red" />
                 <Diamond />
               </div>
               <div className="flex items-center gap-1">
                 <input type="text" value={val("instructor_heading")} onChange={(e) => handleChange("instructor_heading", e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-lg outline-none focus:border-navy/40 transition-colors" placeholder={lang === "en" ? "Meet Your Instructor" : "تعرف على مدربك"} />
+                  dir={lang === "ar" ? "rtl" : "ltr"}
+                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-lg outline-none focus:border-navy/40 transition-colors text-start" placeholder={lang === "en" ? "Meet Your Instructor" : "تعرف على مدربك"} />
                 <button onClick={() => translateField("instructor_heading", val("instructor_heading"))}
                   className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
                   title="Translate">
                   <i className={`fa-solid fa-language text-[9px] ${translatingField === "instructor_heading" ? "animate-spin" : ""}`} />
                 </button>
               </div>
-              <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("instructor_heading") || "—"}</p>
+              <p className="text-[10px] text-muted dark:text-white/40 -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("instructor_heading") || "—"}</p>
               <div className="flex items-start gap-1">
                 <textarea value={val("instructor_body")} onChange={(e) => handleChange("instructor_body", e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none" rows={2} placeholder={lang === "en" ? "Our instructors are selected for their practical experience..." : "يتم اختيار مدربينا بناءً على خبرتهم العملية..."} />
+                  dir={lang === "ar" ? "rtl" : "ltr"}
+                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none text-start" rows={2} placeholder={lang === "en" ? "Our instructors are selected for their practical experience..." : "يتم اختيار مدربينا بناءً على خبرتهم العملية..."} />
                 <button onClick={() => translateField("instructor_body", val("instructor_body"))}
                   className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
                   title="Translate">
                   <i className={`fa-solid fa-language text-[9px] ${translatingField === "instructor_body" ? "animate-spin" : ""}`} />
                 </button>
               </div>
-              <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("instructor_body") || "—"}</p>
+              <p className="text-[10px] text-muted dark:text-white/40 -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("instructor_body") || "—"}</p>
               <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] dark:bg-[#15202b] border border-dashed border-navy/10 dark:border-white/10">
                 <div className="w-10 h-10 rounded-full bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0">
                   <i className="fa-solid fa-user-tie text-navy/30 dark:text-white/30 text-lg" />
@@ -772,14 +795,15 @@ export default function AcademyPageEdit() {
                 <div className="flex-1">
                   <div className="flex items-start gap-1">
                     <textarea value={val("instructor_info")} onChange={(e) => handleChange("instructor_info", e.target.value)}
-                      className="flex-1 bg-transparent border-0 text-navy/45 dark:text-white/40 text-xs outline-none resize-none" rows={2} placeholder={lang === "en" ? "Full instructor details will be announced..." : "سيتم الإعلان عن تفاصيل المدرب لاحقاً..."} />
+                      dir={lang === "ar" ? "rtl" : "ltr"}
+                      className="flex-1 min-w-0 bg-transparent border-0 text-navy/45 dark:text-white/40 text-xs outline-none resize-none text-start" rows={2} placeholder={lang === "en" ? "Full instructor details will be announced..." : "سيتم الإعلان عن تفاصيل المدرب لاحقاً..."} />
                     <button onClick={() => translateField("instructor_info", val("instructor_info"))}
                       className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
                       title="Translate">
                       <i className={`fa-solid fa-language text-[8px] ${translatingField === "instructor_info" ? "animate-spin" : ""}`} />
                     </button>
                   </div>
-                  <p className="text-[9px] text-navy/30 dark:text-white/30 mt-0.5">{ref("instructor_info") || "—"}</p>
+                  <p className="text-[9px] text-navy/30 dark:text-white/30 mt-0.5 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("instructor_info") || "—"}</p>
                 </div>
               </div>
             </div>
@@ -796,11 +820,12 @@ export default function AcademyPageEdit() {
           <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <HeadingInput value={val("expectations_heading")} onChange={(v) => handleChange("expectations_heading", v)} dark placeholder="What Students Can Expect"
             onTranslate={() => translateField("expectations_heading", val("expectations_heading"))}
-            translating={translatingField === "expectations_heading"} />
+            translating={translatingField === "expectations_heading"}
+            dir={lang === "ar" ? "rtl" : "ltr"} />
           <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
-        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
+        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
           {ref("expectations_heading") || "—"}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -813,7 +838,8 @@ export default function AcademyPageEdit() {
                 <input type="text"
                   value={lang === "en" ? item.textEn : item.textAr}
                   onChange={(e) => setArrayItem("expectations", i, lang === "en" ? "textEn" : "textAr", e.target.value)}
-                  className="flex-1 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white/70 text-xs outline-none focus:border-white/30 transition-colors text-center"
+                  className="flex-1 min-w-0 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white/70 text-xs outline-none focus:border-white/30 transition-colors text-center"
+                  dir={lang === "ar" ? "rtl" : "ltr"}
                   placeholder={lang === "en" ? "Text..." : "النص..."} />
                 <button onClick={async () => {
                   const src = lang === "en" ? item.textEn : item.textAr
@@ -827,7 +853,7 @@ export default function AcademyPageEdit() {
                   <i className="fa-solid fa-language text-[8px]" />
                 </button>
               </div>
-              <p className="text-[9px] text-white/40 -mt-2">
+              <p className="text-[9px] text-white/40 -mt-2 text-center" dir={lang === "en" ? "rtl" : "ltr"}>
                 {lang === "en" ? (item.textAr || "—") : (item.textEn || "—")}
               </p>
             </div>
@@ -844,7 +870,8 @@ export default function AcademyPageEdit() {
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
             <LabelInput value={val("production_label")} onChange={(v) => handleChange("production_label", v)} placeholder="Full Production"
               onTranslate={() => translateField("production_label", val("production_label"))}
-              translating={translatingField === "production_label"} />
+              translating={translatingField === "production_label"}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
           <div className="flex items-center w-full mb-3">
@@ -852,27 +879,30 @@ export default function AcademyPageEdit() {
             <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <HeadingInput value={val("production_heading")} onChange={(v) => handleChange("production_heading", v)} placeholder="Beyond Just Shooting"
               onTranslate={() => translateField("production_heading", val("production_heading"))}
-              translating={translatingField === "production_heading"} />
+              translating={translatingField === "production_heading"}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
-          <p className="text-[10px] text-muted dark:text-white/40 -mt-2 mb-3">{ref("production_heading") || "—"}</p>
+          <p className="text-[10px] text-muted dark:text-white/40 -mt-2 mb-3 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("production_heading") || "—"}</p>
           <div className="max-w-[600px] mx-auto w-full">
             <TextField value={val("production_intro")} onChange={(v) => handleChange("production_intro", v)} label="" placeholder="We teach the complete production journey..."
               onTranslate={() => translateField("production_intro", val("production_intro"))}
-              translating={translatingField === "production_intro"} reference={ref("production_intro")} />
+              translating={translatingField === "production_intro"} reference={ref("production_intro")}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center mb-8">
           <PhotoField url={form?.production_photo_url} urlId={form?.production_photo_id} prefix="production" label="Photo" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
           <TextField value={val("production_body")} onChange={(v) => handleChange("production_body", v)} label="Body Paragraph" type="textarea" rows={4} placeholder="Setup Academy teaches the complete production workflow..."
             onTranslate={() => translateField("production_body", val("production_body"))}
-            translating={translatingField === "production_body"} reference={ref("production_body")} />
+            translating={translatingField === "production_body"} reference={ref("production_body")}
+            dir={lang === "ar" ? "rtl" : "ltr"} />
         </div>
             <span className="text-navy/50 dark:text-white/50 text-xs font-medium mb-3 block">Production Stages</span>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(form?.production_stages || defaultProductionStages).map((item, i) => (
-            <div key={i} className="flex items-start gap-3 p-4 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24]">
+            <div key={i} className="flex items-start gap-3 p-4 pt-8 sm:pt-4 rounded-xl border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] relative">
               <div className="w-9 h-9 rounded-lg bg-navy/10 dark:bg-white/10 flex items-center justify-center shrink-0">
                 <i className={`${item.icon || "fa-solid fa-video"} text-navy dark:text-white text-sm`} />
               </div>
@@ -881,7 +911,8 @@ export default function AcademyPageEdit() {
                   <input type="text"
                     value={lang === "en" ? item.titleEn : item.titleAr}
                     onChange={(e) => setArrayItem("production_stages", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors mb-2"
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors mb-2 text-start"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     placeholder={lang === "en" ? "Title..." : "العنوان..."} />
                   <button onClick={async () => {
                     const src = lang === "en" ? item.titleEn : item.titleAr
@@ -895,14 +926,15 @@ export default function AcademyPageEdit() {
                     <i className="fa-solid fa-language text-[8px]" />
                   </button>
                 </div>
-                <p className="text-[9px] text-muted dark:text-white/40 -mt-2 mb-1 ml-1">
+                <p className="text-[9px] text-muted dark:text-white/40 -mt-2 mb-1 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                   {lang === "en" ? (item.titleAr || "—") : (item.titleEn || "—")}
                 </p>
                 <div className="flex items-start gap-1">
                   <textarea
                     value={lang === "en" ? item.descEn : item.descAr}
                     onChange={(e) => setArrayItem("production_stages", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/50 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors resize-none"
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-lg px-3 py-1.5 text-navy/50 dark:text-white/50 text-xs outline-none focus:border-navy/40 transition-colors resize-none text-start"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
                   <button onClick={async () => {
                     const src = lang === "en" ? item.descEn : item.descAr
@@ -916,12 +948,12 @@ export default function AcademyPageEdit() {
                     <i className="fa-solid fa-language text-[8px]" />
                   </button>
                 </div>
-                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 ml-1">
+                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                   {lang === "en" ? (item.descAr || "—") : (item.descEn || "—")}
                 </p>
               </div>
               <button onClick={() => removeArrayItem("production_stages", i)}
-                className="w-6 h-6 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center shrink-0">
+                className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red/10 text-red text-xs border-0 cursor-pointer hover:bg-red/20 transition-colors flex items-center justify-center">
                 <i className="fa-solid fa-xmark" />
               </button>
             </div>
@@ -942,20 +974,23 @@ export default function AcademyPageEdit() {
           <div className="space-y-4">
             <LabelInput value={val("beyond_label")} onChange={(v) => handleChange("beyond_label", v)} dark placeholder="Beyond the Course"
               onTranslate={() => translateField("beyond_label", val("beyond_label"))}
-              translating={translatingField === "beyond_label"} />
+              translating={translatingField === "beyond_label"}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <div className="flex items-center w-full">
               <Diamond />
               <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <HeadingInput value={val("beyond_heading")} onChange={(v) => handleChange("beyond_heading", v)} dark placeholder="More Than Just a Course"
                 onTranslate={() => translateField("beyond_heading", val("beyond_heading"))}
-                translating={translatingField === "beyond_heading"} />
+                translating={translatingField === "beyond_heading"}
+                dir={lang === "ar" ? "rtl" : "ltr"} />
               <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <Diamond />
             </div>
-            <p className="text-[10px] text-muted dark:text-white/40 -mt-2">{ref("beyond_heading") || "—"}</p>
+            <p className="text-[10px] text-muted dark:text-white/40 -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("beyond_heading") || "—"}</p>
             <TextField value={val("beyond_body")} onChange={(v) => handleChange("beyond_body", v)} label="" type="textarea" rows={5} placeholder="Setup Academy is about helping learners..." dark
               onTranslate={() => translateField("beyond_body", val("beyond_body"))}
-              translating={translatingField === "beyond_body"} reference={ref("beyond_body")} />
+              translating={translatingField === "beyond_body"} reference={ref("beyond_body")}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
           </div>
         </div>
       </DarkSection>
@@ -969,7 +1004,8 @@ export default function AcademyPageEdit() {
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
             <LabelInput value={val("upcoming_label")} onChange={(v) => handleChange("upcoming_label", v)} placeholder="Coming Soon"
               onTranslate={() => translateField("upcoming_label", val("upcoming_label"))}
-              translating={translatingField === "upcoming_label"} />
+              translating={translatingField === "upcoming_label"}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
           <div className="flex items-center w-full mb-3">
@@ -977,15 +1013,17 @@ export default function AcademyPageEdit() {
             <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <HeadingInput value={val("upcoming_heading")} onChange={(v) => handleChange("upcoming_heading", v)} placeholder="Upcoming Courses"
               onTranslate={() => translateField("upcoming_heading", val("upcoming_heading"))}
-              translating={translatingField === "upcoming_heading"} />
+              translating={translatingField === "upcoming_heading"}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
             <span className="hidden sm:block flex-1 h-[2px] bg-red" />
             <Diamond />
           </div>
-          <p className="text-[10px] text-muted dark:text-white/40 -mt-2 mb-3">{ref("upcoming_heading") || "—"}</p>
+          <p className="text-[10px] text-muted dark:text-white/40 -mt-2 mb-3 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("upcoming_heading") || "—"}</p>
           <div className="max-w-[600px] mx-auto w-full">
             <TextField value={val("upcoming_intro")} onChange={(v) => handleChange("upcoming_intro", v)} label="" placeholder="We're building a full catalog..."
               onTranslate={() => translateField("upcoming_intro", val("upcoming_intro"))}
-              translating={translatingField === "upcoming_intro"} reference={ref("upcoming_intro")} />
+              translating={translatingField === "upcoming_intro"} reference={ref("upcoming_intro")}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -998,7 +1036,8 @@ export default function AcademyPageEdit() {
                 <input type="text"
                   value={lang === "en" ? item.titleEn : item.titleAr}
                   onChange={(e) => setArrayItem("upcoming_courses", i, lang === "en" ? "titleEn" : "titleAr", e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-1"
+                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors mb-1 text-start"
+                  dir={lang === "ar" ? "rtl" : "ltr"}
                   placeholder={lang === "en" ? "Title..." : "العنوان..."} />
                 <button onClick={async () => {
                   const src = lang === "en" ? item.titleEn : item.titleAr
@@ -1012,14 +1051,15 @@ export default function AcademyPageEdit() {
                   <i className="fa-solid fa-language text-[8px]" />
                 </button>
               </div>
-              <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2 ml-1">
+              <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                 {lang === "en" ? (item.titleAr || "—") : (item.titleEn || "—")}
               </p>
               <div className="flex items-start gap-1">
                 <textarea
                   value={lang === "en" ? item.descEn : item.descAr}
                   onChange={(e) => setArrayItem("upcoming_courses", i, lang === "en" ? "descEn" : "descAr", e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/50 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/50 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none text-start"
+                  dir={lang === "ar" ? "rtl" : "ltr"}
                   rows={2} placeholder={lang === "en" ? "Description..." : "الوصف..."} />
                 <button onClick={async () => {
                   const src = lang === "en" ? item.descEn : item.descAr
@@ -1033,7 +1073,7 @@ export default function AcademyPageEdit() {
                   <i className="fa-solid fa-language text-[8px]" />
                 </button>
               </div>
-              <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1">
+              <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                 {lang === "en" ? (item.descAr || "—") : (item.descEn || "—")}
               </p>
             </div>
@@ -1050,11 +1090,12 @@ export default function AcademyPageEdit() {
           <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <HeadingInput value={val("faq_heading")} onChange={(v) => handleChange("faq_heading", v)} placeholder="Frequently Asked Questions"
             onTranslate={() => translateField("faq_heading", val("faq_heading"))}
-            translating={translatingField === "faq_heading"} />
+            translating={translatingField === "faq_heading"}
+            dir={lang === "ar" ? "rtl" : "ltr"} />
           <span className="hidden sm:block flex-1 h-[2px] bg-red" />
           <Diamond />
         </div>
-        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4">
+        <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-4 mb-4 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
           {ref("faq_heading") || "—"}
         </p>
         <div className="max-w-[800px] mx-auto space-y-3">
@@ -1065,7 +1106,8 @@ export default function AcademyPageEdit() {
                   <input type="text"
                     value={lang === "en" ? item.qEn : item.qAr}
                     onChange={(e) => setArrayItem("faqs", i, lang === "en" ? "qEn" : "qAr", e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors"
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-semibold text-sm outline-none focus:border-navy/40 transition-colors text-start"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     placeholder={lang === "en" ? "Question..." : "السؤال..."} />
                   <button onClick={async () => {
                     const src = lang === "en" ? item.qEn : item.qAr
@@ -1080,14 +1122,15 @@ export default function AcademyPageEdit() {
                   </button>
                 </div>
               </div>
-              <p className="text-[9px] text-muted dark:text-white/40 mb-2 ml-1">
+              <p className="text-[9px] text-muted dark:text-white/40 mb-2 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                 {lang === "en" ? (item.qAr || "—") : (item.qEn || "—")}
               </p>
               <div className="flex items-start gap-1">
                 <textarea
                   value={lang === "en" ? item.aEn : item.aAr}
                   onChange={(e) => setArrayItem("faqs", i, lang === "en" ? "aEn" : "aAr", e.target.value)}
-                  className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none text-start"
+                  dir={lang === "ar" ? "rtl" : "ltr"}
                   rows={2} placeholder={lang === "en" ? "Answer..." : "الإجابة..."} />
                 <button onClick={async () => {
                   const src = lang === "en" ? item.aEn : item.aAr
@@ -1101,7 +1144,7 @@ export default function AcademyPageEdit() {
                   <i className="fa-solid fa-language text-[9px]" />
                 </button>
               </div>
-              <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1">
+              <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                 {lang === "en" ? (item.aAr || "—") : (item.aEn || "—")}
               </p>
             </div>
@@ -1120,18 +1163,21 @@ export default function AcademyPageEdit() {
               <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <HeadingInput value={val("cta_title")} onChange={(v) => handleChange("cta_title", v)} dark placeholder="Start Your Creative Journey"
                 onTranslate={() => translateField("cta_title", val("cta_title"))}
-                translating={translatingField === "cta_title"} />
+                translating={translatingField === "cta_title"}
+                dir={lang === "ar" ? "rtl" : "ltr"} />
               <span className="hidden sm:block flex-1 h-[2px] bg-red" />
               <Diamond />
             </div>
-            <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-2">{ref("cta_title") || "—"}</p>
+            <p className="text-[10px] text-muted dark:text-white/40 text-center -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("cta_title") || "—"}</p>
             <TextField value={val("cta_body")} onChange={(v) => handleChange("cta_body", v)} label="" dark placeholder="Join our first Video Content Foundation Course..."
               onTranslate={() => translateField("cta_body", val("cta_body"))}
-              translating={translatingField === "cta_body"} reference={ref("cta_body")} />
+              translating={translatingField === "cta_body"} reference={ref("cta_body")}
+              dir={lang === "ar" ? "rtl" : "ltr"} />
           </div>
           <TextField value={val("cta_button")} onChange={(v) => handleChange("cta_button", v)} label="Button Text" dark placeholder="Join the Waiting List"
             onTranslate={() => translateField("cta_button", val("cta_button"))}
-            translating={translatingField === "cta_button"} reference={ref("cta_button")} />
+            translating={translatingField === "cta_button"} reference={ref("cta_button")}
+            dir={lang === "ar" ? "rtl" : "ltr"} />
         </div>
       </DarkSection>
 
@@ -1159,7 +1205,7 @@ export default function AcademyPageEdit() {
               {allPhotos.length === 0 ? (
                 <p className="text-muted dark:text-white/50 text-sm text-center py-8">No photos found in the database.</p>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                   {allPhotos.map((photo) => (
                     <button key={photo.id} onClick={() => handlePickPhoto(photo)}
                       className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative">

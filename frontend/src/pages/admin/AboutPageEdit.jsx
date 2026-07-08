@@ -184,10 +184,10 @@ export default function AboutPageEdit() {
 
   return (
     <AdminLayout lang={lang}>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-navy dark:text-white font-bold text-2xl m-0">About Page Editor</h1>
-          <p className="text-muted dark:text-white/50 text-sm m-0 mt-1">Edit About page — changes are bilingual (EN / AR)</p>
+          <h1 className="text-navy dark:text-white font-bold text-xl sm:text-2xl m-0">About Page Editor</h1>
+          <p className="text-muted dark:text-white/50 text-xs sm:text-sm m-0 mt-1">Edit About page — changes are bilingual (EN / AR)</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -197,7 +197,7 @@ export default function AboutPageEdit() {
             {lang === "en" ? "Edit العربية" : "Edit English"}
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {photosMissing && (
               <span className="text-red text-xs font-medium">Upload both photos before saving</span>
             )}
@@ -221,7 +221,7 @@ export default function AboutPageEdit() {
         <div className="absolute -bottom-[10rem] -left-[4rem] w-[22rem] h-[22rem] rounded-full bg-[#11AFFF] opacity-[0.18] blur-[6rem] pointer-events-none" />
         <div className="absolute top-[4rem] right-[30%] w-[16rem] h-[16rem] rounded-full bg-[#11AFFF] opacity-[0.12] blur-[3rem] pointer-events-none" />
 
-        <div className="relative z-10 p-6 sm:p-8">
+        <div className="relative z-10 p-4 sm:p-8">
           <h3 className="text-white/60 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
             <i className="fa-solid fa-display mr-2" />Hero Section
           </h3>
@@ -238,7 +238,8 @@ export default function AboutPageEdit() {
                   type="text"
                   value={val("hero_heading")}
                   onChange={(e) => handleChange("hero_heading", e.target.value)}
-                  className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white text-lg font-bold text-center outline-none focus:border-red/50 transition-colors placeholder:text-white/30"
+                  className="flex-1 min-w-0 bg-white/10 border border-white/20 rounded-xl px-4 py-2.5 text-white text-lg font-bold text-center outline-none focus:border-red/50 transition-colors placeholder:text-white/30"
+                  dir={lang === "ar" ? "rtl" : "ltr"}
                   placeholder={lang === "en" ? "About Setup" : "عن سيت أب"}
                 />
                 <button onClick={() => translateField("hero_heading", val("hero_heading"))}
@@ -251,14 +252,15 @@ export default function AboutPageEdit() {
                   <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
                 </svg>
               </div>
-              <p className="text-[10px] text-white/40 text-center -mt-2 mb-2">{ref("hero_heading") || "—"}</p>
+              <p className="text-[10px] text-white/40 text-center -mt-2 mb-2" dir={lang === "en" ? "rtl" : "ltr"}>{ref("hero_heading") || "—"}</p>
 
                 <div className="flex items-center gap-1">
                   <input
                     type="text"
                     value={val("hero_subtitle")}
                     onChange={(e) => handleChange("hero_subtitle", e.target.value)}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white/80 font-semibold text-base outline-none focus:border-white/30 transition-colors placeholder:text-white/30"
+                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white/80 font-semibold text-base outline-none focus:border-white/30 transition-colors placeholder:text-white/30 text-start"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     placeholder={lang === "en" ? "Full-Service Production Studio" : "استوديو إنتاج متكامل الخدمات"}
                   />
                   <button onClick={() => translateField("hero_subtitle", val("hero_subtitle"))}
@@ -267,12 +269,13 @@ export default function AboutPageEdit() {
                     <i className={`fa-solid fa-language text-[9px] ${translatingField === "hero_subtitle" ? "animate-spin" : ""}`} />
                   </button>
                 </div>
-                <p className="text-[10px] text-white/40 -mt-2">{ref("hero_subtitle") || "—"}</p>
+                <p className="text-[10px] text-white/40 -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("hero_subtitle") || "—"}</p>
                 <div className="flex items-start gap-1">
                   <textarea
                     value={val("hero_description")}
                     onChange={(e) => handleChange("hero_description", e.target.value)}
-                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white/60 text-sm outline-none focus:border-white/30 transition-colors resize-none placeholder:text-white/20"
+                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white/60 text-sm outline-none focus:border-white/30 transition-colors resize-none placeholder:text-white/20 text-start"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     rows={4}
                     placeholder={lang === "en" ? "Description..." : "الوصف..."}
                   />
@@ -282,7 +285,7 @@ export default function AboutPageEdit() {
                     <i className={`fa-solid fa-language text-[9px] ${translatingField === "hero_description" ? "animate-spin" : ""}`} />
                   </button>
                 </div>
-                <p className="text-[10px] text-white/40 -mt-2">{ref("hero_description") || "—"}</p>
+                <p className="text-[10px] text-white/40 -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("hero_description") || "—"}</p>
             </div>
 
             {/* Right: photo */}
@@ -318,7 +321,7 @@ export default function AboutPageEdit() {
           OUR STORY
          ════════════════════════════════════════ */}
       <div className="relative bg-[#f8f9fb] dark:bg-[#15202b] rounded-3xl overflow-hidden mb-6 shadow-sm border border-border/50 dark:border-[#1e2d3d]/50">
-        <div className="p-6 sm:p-8">
+        <div className="p-4 sm:p-8">
           <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
             <i className="fa-solid fa-book-open mr-2" />Our Story
           </h3>
@@ -363,7 +366,8 @@ export default function AboutPageEdit() {
                         arr[i] = e.target.value
                         setVal(`story_paragraphs_${lang}`, arr)
                       }}
-                      className="flex-1 bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-3 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                      className="flex-1 min-w-0 bg-white dark:bg-[#0f1a24] border border-border dark:border-[#1e2d3d] rounded-2xl px-5 py-3 text-navy/70 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none text-start"
+                      dir={lang === "ar" ? "rtl" : "ltr"}
                       rows={3}
                       placeholder={lang === "en" ? `Paragraph ${i + 1}...` : `الفقرة ${i + 1}...`}
                     />
@@ -385,7 +389,7 @@ export default function AboutPageEdit() {
                       <i className={`fa-solid fa-language text-[9px] ${translatingField === `story_p_${i}` ? "animate-spin" : ""}`} />
                     </button>
                   </div>
-                  <p className="text-[9px] text-muted dark:text-white/40 mt-0.5">
+                  <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                     {lang === "en" ? ((form?.story_paragraphs_ar || [])[i] || "—") : ((form?.story_paragraphs_en || [])[i] || "—")}
                   </p>
                 </div>
@@ -400,7 +404,8 @@ export default function AboutPageEdit() {
                       <textarea
                         value={val("story_quote")}
                         onChange={(e) => handleChange("story_quote", e.target.value)}
-                        className="flex-1 bg-transparent border-0 text-navy/60 dark:text-white/50 text-sm italic outline-none resize-none p-0"
+                        className="flex-1 min-w-0 bg-transparent border-0 text-navy/60 dark:text-white/50 text-sm italic outline-none resize-none p-0 text-start"
+                        dir={lang === "ar" ? "rtl" : "ltr"}
                         rows={2}
                         placeholder={lang === "en" ? "Quote text..." : "نص الاقتباس..."}
                       />
@@ -410,7 +415,7 @@ export default function AboutPageEdit() {
                         <i className={`fa-solid fa-language text-[8px] ${translatingField === "story_quote" ? "animate-spin" : ""}`} />
                       </button>
                     </div>
-                    <p className="text-[9px] text-muted dark:text-white/40 mt-0.5">{ref("story_quote") || "—"}</p>
+                    <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("story_quote") || "—"}</p>
                   </div>
                 </div>
               </div>
@@ -422,7 +427,7 @@ export default function AboutPageEdit() {
       {/* ════════════════════════════════════════
           SERVICES
          ════════════════════════════════════════ */}
-      <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-6 sm:p-8 mb-6">
+      <div className="bg-white dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-4 sm:p-8 mb-6">
         <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
           <i className="fa-solid fa-briefcase mr-2" />Services
         </h3>
@@ -441,7 +446,8 @@ export default function AboutPageEdit() {
                     type="text"
                     value={service[`title_${lang}`] || ""}
                     onChange={(e) => setServiceField(i, `title_${lang}`, e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors"
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-sm outline-none focus:border-navy/40 transition-colors text-start"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     placeholder={lang === "en" ? "Title..." : "العنوان..."}
                   />
                   <button onClick={async () => {
@@ -457,14 +463,15 @@ export default function AboutPageEdit() {
                     <i className={`fa-solid fa-language text-[9px] ${translatingField === `svc_t_${i}` ? "animate-spin" : ""}`} />
                   </button>
                 </div>
-                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2 ml-1">
+                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                   {lang === "en" ? (service[`title_ar`] || "—") : (service[`title_en`] || "—")}
                 </p>
                 <div className="flex items-start gap-1">
                   <textarea
                     value={service[`desc_${lang}`] || ""}
                     onChange={(e) => setServiceField(i, `desc_${lang}`, e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none"
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none text-start"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     rows={2}
                     placeholder={lang === "en" ? "Description..." : "الوصف..."}
                   />
@@ -481,7 +488,7 @@ export default function AboutPageEdit() {
                     <i className={`fa-solid fa-language text-[9px] ${translatingField === `svc_d_${i}` ? "animate-spin" : ""}`} />
                   </button>
                 </div>
-                <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1">
+                <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 ml-1 text-start" dir={lang === "en" ? "rtl" : "ltr"}>
                   {lang === "en" ? (service[`desc_ar`] || "—") : (service[`desc_en`] || "—")}
                 </p>
               </div>
@@ -493,7 +500,7 @@ export default function AboutPageEdit() {
       {/* ════════════════════════════════════════
           VALUES
          ════════════════════════════════════════ */}
-      <div className="bg-[#f8f9fb] dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-6 sm:p-8 mb-6">
+      <div className="bg-[#f8f9fb] dark:bg-[#15202b] rounded-3xl border border-border/50 dark:border-[#1e2d3d]/50 shadow-sm p-4 sm:p-8 mb-6">
         <h3 className="text-navy/50 dark:text-white/50 text-xs font-semibold uppercase tracking-wider mb-6 m-0">
           <i className="fa-solid fa-star mr-2" />Values
         </h3>
@@ -509,7 +516,8 @@ export default function AboutPageEdit() {
                     type="text"
                     value={v[`title_${lang}`] || ""}
                     onChange={(e) => setValueField(i, `title_${lang}`, e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-semibold text-sm text-center outline-none focus:border-navy/40 transition-colors"
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy dark:text-white font-semibold text-sm text-center outline-none focus:border-navy/40 transition-colors"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     placeholder={lang === "en" ? "Title..." : "العنوان..."}
                   />
                   <button onClick={async () => {
@@ -525,14 +533,15 @@ export default function AboutPageEdit() {
                     <i className={`fa-solid fa-language text-[8px] ${translatingField === `val_t_${i}` ? "animate-spin" : ""}`} />
                   </button>
                 </div>
-                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2">
+                <p className="text-[9px] text-muted dark:text-white/40 -mt-1 mb-2 text-center" dir={lang === "en" ? "rtl" : "ltr"}>
                   {lang === "en" ? (v[`title_ar`] || "—") : (v[`title_en`] || "—")}
                 </p>
                 <div className="flex items-start gap-1">
                   <textarea
                     value={v[`desc_${lang}`] || ""}
                     onChange={(e) => setValueField(i, `desc_${lang}`, e.target.value)}
-                    className="flex-1 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-xs text-center outline-none focus:border-navy/40 transition-colors resize-none"
+                    className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-3 py-2 text-navy/60 dark:text-white/50 text-xs text-center outline-none focus:border-navy/40 transition-colors resize-none"
+                    dir={lang === "ar" ? "rtl" : "ltr"}
                     rows={4}
                     placeholder={lang === "en" ? "Description..." : "الوصف..."}
                   />
@@ -549,7 +558,7 @@ export default function AboutPageEdit() {
                     <i className={`fa-solid fa-language text-[8px] ${translatingField === `val_d_${i}` ? "animate-spin" : ""}`} />
                   </button>
                 </div>
-                <p className="text-[9px] text-muted dark:text-white/40 mt-0.5">
+                <p className="text-[9px] text-muted dark:text-white/40 mt-0.5 text-center" dir={lang === "en" ? "rtl" : "ltr"}>
                   {lang === "en" ? (v[`desc_ar`] || "—") : (v[`desc_en`] || "—")}
                 </p>
               </div>
@@ -586,7 +595,7 @@ export default function AboutPageEdit() {
               {allPhotos.length === 0 ? (
                 <p className="text-muted dark:text-white/50 text-sm text-center py-8">No photos found in the database.</p>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                   {allPhotos.map((photo) => (
                     <button
                       key={photo.id}

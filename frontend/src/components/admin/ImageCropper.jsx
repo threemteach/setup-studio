@@ -57,8 +57,8 @@ export default function ImageCropperModal({ src, aspect, onConfirm, onCancel }) 
           />
         </div>
 
-        <div className="px-5 py-3 border-t border-[#1e2d3d] flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
+        <div className="px-5 py-3 border-t border-[#1e2d3d] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <label className="text-white/40 text-xs">Zoom:</label>
             <input
               type="range"
@@ -67,10 +67,10 @@ export default function ImageCropperModal({ src, aspect, onConfirm, onCancel }) 
               step={0.05}
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
-              className="w-32 accent-red"
+              className="flex-1 sm:w-32 accent-red"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
             <button onClick={onCancel}
               className="px-4 py-2 rounded-xl border border-[#1e2d3d] bg-transparent text-white/70 text-sm font-semibold cursor-pointer hover:bg-white/10 transition-colors">
               Cancel

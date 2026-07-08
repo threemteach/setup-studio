@@ -42,19 +42,14 @@ function VideoCard({ video, lang }) {
     return () => el.removeEventListener("loadedmetadata", onMeta)
   }, [video.video_url, playing, inView, hasThumbnail])
 
-  /* pause on fullscreen exit or phone native-player dismissal */
+  /* pause when video naturally reaches end */
   useEffect(() => {
     if (!playing) return
     const el = previewVidRef.current
     if (!el) return
-    function stop() { el.pause(); setPlaying(false) }
-    el.addEventListener("pause", stop, { once: true })
-    function onFS() { if (!document.fullscreenElement) stop() }
-    document.addEventListener("fullscreenchange", onFS)
-    return () => {
-      el.removeEventListener("pause", stop)
-      document.removeEventListener("fullscreenchange", onFS)
-    }
+    function onEnded() { setPlaying(false) }
+    el.addEventListener("ended", onEnded, { once: true })
+    return () => el.removeEventListener("ended", onEnded)
   }, [playing])
 
   const title = t(video.title_en, video.title_ar, lang)
@@ -91,9 +86,6 @@ function VideoCard({ video, lang }) {
         el.addEventListener("canplay", onCanPlay, { once: true })
         el.load()
       })
-      if (el.requestFullscreen) {
-        el.requestFullscreen().catch(() => {})
-      }
     }
   }
 
@@ -118,7 +110,7 @@ function VideoCard({ video, lang }) {
               ref={previewVidRef}
               src={inView || playing || buffering ? video.video_url : undefined}
               preload={playing || buffering ? "auto" : hasThumbnail ? "none" : inView ? "metadata" : "none"}
-              controls={playing}
+              controls
               poster={video.thumbnail_url || undefined}
               tabIndex={-1}
               style={{
