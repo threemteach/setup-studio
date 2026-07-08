@@ -88,7 +88,7 @@ export default function AcademyPage() {
                     </svg>
                     <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
                   </div>
-                  <h1 className={`text-white font-bold text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] m-0 px-[clamp(0.4rem,2vw,1.5rem)] whitespace-nowrap w-full ${lang === 'ar' ? 'text-right' : ''}`}>
+                  <h1 className="text-white font-bold text-[clamp(2rem,5vw,3.25rem)] leading-[1.15] m-0 px-[clamp(0.4rem,2vw,1.5rem)] w-full text-center">
                     {t("Setup Academy", "أكاديمية سيت أب", lang)}
                   </h1>
                   <div className="flex items-center min-w-0 shrink">
@@ -138,7 +138,7 @@ export default function AcademyPage() {
                 </svg>
                 <span className="block w-[clamp(1.5rem,8vw,10rem)] h-[2px] bg-red" />
               </div>
-              <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] whitespace-nowrap">
+              <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] text-center ">
                 {cms("why_heading") || t("What Makes Us Different?", "ما الذي يميزنا؟", lang)}
               </h2>
               <div className="flex items-center min-w-0 shrink">
@@ -194,7 +194,7 @@ export default function AcademyPage() {
               </svg>
               <span className="block w-[clamp(1.5rem,8vw,10rem)] h-[2px] bg-red" />
             </div>
-            <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] whitespace-nowrap">
+            <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] text-center ">
               {audienceHeading || t("Who Is Setup Academy For?", "لمن هذه الأكاديمية؟", lang)}
             </h2>
             <div className="flex items-center min-w-0 shrink">
@@ -243,7 +243,7 @@ export default function AcademyPage() {
                 </svg>
                 <span className="block w-[clamp(1.5rem,8vw,10rem)] h-[2px] bg-red" />
               </div>
-              <h2 className="text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] whitespace-nowrap">
+              <h2 className="text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] text-center ">
                 {cms("first_course_heading") || t("Video Content Foundation Course", "دورة أساسيات إنتاج المحتوى المرئي", lang)}
               </h2>
               <div className="flex items-center min-w-0 shrink">
@@ -370,7 +370,7 @@ export default function AcademyPage() {
                 </svg>
                 <span className="block w-[clamp(1.5rem,8vw,10rem)] h-[2px] bg-red" />
               </div>
-              <h2 className="text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] whitespace-nowrap">
+              <h2 className="text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] text-center ">
                 {cms("expectations_heading") || t("What Students Can Expect", "ماذا يمكن أن يتوقع الطلاب", lang)}
               </h2>
               <div className="flex items-center min-w-0 shrink">
@@ -412,7 +412,7 @@ export default function AcademyPage() {
                 <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor"><polygon points="6.5,0 13,6.5 6.5,13 0,6.5" /></svg>
                 <span className="block w-[clamp(1.5rem,8vw,10rem)] h-[2px] bg-red" />
               </div>
-              <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] whitespace-nowrap">
+              <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] text-center ">
                 {cms("production_heading") || t("Beyond Just Shooting", "أبعد من مجرد التصوير", lang)}
               </h2>
               <div className="flex items-center min-w-0 shrink">
@@ -478,7 +478,7 @@ export default function AcademyPage() {
                   <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor"><polygon points="6.5,0 13,6.5 6.5,13 0,6.5" /></svg>
                   <span className="block w-[clamp(1.5rem,8vw,10rem)] h-[2px] bg-red" />
                 </div>
-                <h2 className="text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] whitespace-nowrap">
+                <h2 className="text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] text-center ">
                   {cms("beyond_heading") || t("More Than Just a Course", "أكثر من مجرد دورة", lang)}
                 </h2>
                 <div className="flex items-center min-w-0 shrink">
@@ -507,7 +507,7 @@ export default function AcademyPage() {
                 <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor"><polygon points="6.5,0 13,6.5 6.5,13 0,6.5" /></svg>
                 <span className="block w-[clamp(1.5rem,8vw,10rem)] h-[2px] bg-red" />
               </div>
-              <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] whitespace-nowrap">
+              <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] text-center ">
                 {cms("upcoming_heading") || t("Upcoming Courses", "الدورات القادمة", lang)}
               </h2>
               <div className="flex items-center min-w-0 shrink">
@@ -546,7 +546,7 @@ export default function AcademyPage() {
               <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor"><polygon points="6.5,0 13,6.5 6.5,13 0,6.5" /></svg>
               <span className="block w-[clamp(1.5rem,8vw,10rem)] h-[2px] bg-red" />
             </div>
-            <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] whitespace-nowrap">
+            <h2 className="text-navy dark:text-white font-bold text-[clamp(1.5rem,4vw,2.5rem)] leading-tight mx-[clamp(0.75rem,2vw,1.5rem)] text-center ">
               {cms("faq_heading") || t("Frequently Asked Questions", "الأسئلة الشائعة", lang)}
             </h2>
             <div className="flex items-center min-w-0 shrink">
@@ -589,7 +589,7 @@ export default function AcademyPage() {
               <div className="absolute top-[clamp(1rem,3vw,2rem)] ltr:left-[clamp(20%,35%,40%)] rtl:right-[clamp(20%,35%,40%)] w-[clamp(6rem,15vw,12rem)] h-[clamp(6rem,15vw,12rem)] rounded-full bg-[#11AFFF] opacity-[0.20] blur-[clamp(2rem,4vw,3rem)] pointer-events-none" />
               <div className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-[clamp(1.25rem,3vw,2.5rem)] px-[clamp(1.5rem,4vw,3.5rem)] py-[clamp(1.5rem,3vw,2.5rem)]">
                 <div className={`text-center ${lang === 'ar' ? 'md:text-right' : 'md:text-left'}`}>
-                  <h2 className="text-white font-bold text-[clamp(1.3rem,3vw,2.2rem)] m-0 leading-tight">
+                  <h2 className="text-white font-bold text-[clamp(1.3rem,3vw,2.2rem)] m-0 leading-tight text-center">
                     {t("Your Next Scene", "مشهدك القادم", lang)}<br />
                     {t("Starts", "يبدأ", lang)} <span className="text-[#11AFFF]">{t("Here.", "هنا", lang)}</span>
                   </h2>
