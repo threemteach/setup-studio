@@ -254,7 +254,7 @@ export default function PortfolioPageEdit() {
         categories: form.categories,
       })
       await Promise.all(videos.filter(v => v.id).map(v => upsertVideo(v).catch(() => {})))
-      window.location.reload()
+      showToast("Saved successfully!")
     } catch (err) {
       showToast("Error saving: " + sanitizeError(err.message), "error")
     }
