@@ -740,6 +740,7 @@ export default function AcademyPageEdit() {
                     </div>
                   ))}
                 </div>
+                </div>
               </div>
             </div>
         </div>
