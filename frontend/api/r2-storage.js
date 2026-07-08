@@ -1,7 +1,7 @@
-const R2_ENDPOINT = process.env.R2_ENDPOINT || process.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || process.env.VITE_R2_BUCKET_NAME || "setup-studio-videos"
+import { endpoint, bucket } from "./_r2.js"
+
 const CF_API_TOKEN = process.env.CF_API_TOKEN
-const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID || R2_ENDPOINT?.match(/https?:\/\/(.+)\.r2\.cloudflarestorage\.com/)?.[1]
+const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID || endpoint?.match(/https?:\/\/(.+)\.r2\.cloudflarestorage\.com/)?.[1]
 
 async function cfFetch(path) {
   const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}${path}`
@@ -16,13 +16,13 @@ export default async function handler(req, res) {
     if (!CF_API_TOKEN) return res.json({ error: "CF_API_TOKEN not configured", usedBytes: null })
     if (!CF_ACCOUNT_ID) return res.json({ error: "Could not determine CF_ACCOUNT_ID", usedBytes: null })
 
-    const usageResp = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}/usage`)
+    const usageResp = await cfFetch(`/r2/buckets/${bucket}/usage`)
     if (usageResp.body.success) {
       const payloadSize = usageResp.body.result?.payloadSize
       if (payloadSize != null) return res.json({ usedBytes: Number(payloadSize), raw: usageResp.body, status: usageResp.status })
     }
 
-    const bucketResp = await cfFetch(`/r2/buckets/${R2_BUCKET_NAME}`)
+    const bucketResp = await cfFetch(`/r2/buckets/${bucket}`)
     if (bucketResp.body.success) {
       const bucketSize = bucketResp.body.result?.bucketSize
       if (bucketSize != null) return res.json({ usedBytes: bucketSize, raw: bucketResp.body, status: bucketResp.status })

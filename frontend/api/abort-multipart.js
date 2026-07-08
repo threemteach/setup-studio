@@ -1,5 +1,6 @@
 import { S3Client, AbortMultipartUploadCommand } from "@aws-sdk/client-s3"
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { endpoint, bucket, accessKeyId, secretAccessKey } from "./_r2.js"
 
 export default async function handler(req, res) {
   res.setHeader("Content-Type", "application/json")
@@ -18,11 +19,6 @@ export default async function handler(req, res) {
 
   const { key, uploadId } = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {}
   if (!key || !uploadId) return res.status(400).json({ error: "Missing key or uploadId" })
-
-  const endpoint = process.env.R2_ENDPOINT || process.env.VITE_R2_ENDPOINT || "https://fba1cd78b5f83abd727ffd95bd6ce95e.r2.cloudflarestorage.com"
-  const bucket = process.env.R2_BUCKET_NAME || process.env.VITE_R2_BUCKET_NAME || "setup-studio-videos"
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID || process.env.VITE_R2_ACCESS_KEY_ID
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY || process.env.VITE_R2_SECRET_ACCESS_KEY
 
   if (!accessKeyId || !secretAccessKey) return res.status(500).json({ error: "R2 credentials not configured" })
 

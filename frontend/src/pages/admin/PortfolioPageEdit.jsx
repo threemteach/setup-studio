@@ -253,7 +253,12 @@ export default function PortfolioPageEdit() {
         hero_subtitle_ar: form.hero_subtitle_ar,
         categories: form.categories,
       })
-      await Promise.all(videos.filter(v => v.id).map(v => upsertVideo(v).catch(() => {})))
+      const results = await Promise.allSettled(videos.filter(v => v.id).map(v => upsertVideo(v)))
+      const failed = results.filter(r => r.status === "rejected")
+      if (failed.length > 0) {
+        showToast(`${failed.length} video(s) failed to save`, "error")
+        return
+      }
       window.location.reload()
     } catch (err) {
       showToast("Error saving: " + sanitizeError(err.message), "error")
@@ -267,15 +272,15 @@ export default function PortfolioPageEdit() {
     setUploadProgress(0)
     try {
       const fileList = Array.from(files)
-      const fractions = fileList.map(() => 0)
-      const results = await Promise.all(
-        fileList.map((file, i) =>
-          uploadVideo(file, activeCategory, (loaded, total) => {
-            fractions[i] = total > 0 ? loaded / total : 0
-            setUploadProgress(Math.min((fractions.reduce((a, b) => a + b, 0) / fileList.length) * 100, 99.9))
-          })
-        )
-      )
+      const results = []
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i]
+        const result = await uploadVideo(file, activeCategory, (loaded, total) => {
+          const fileFraction = total > 0 ? loaded / total : 0
+          setUploadProgress(Math.min(((i + fileFraction) / fileList.length) * 100, 99.9))
+        })
+        results.push(result)
+      }
       await Promise.all(results.map((result, i) =>
         upsertVideo({
           category: activeCategory,
