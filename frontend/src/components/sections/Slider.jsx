@@ -9,14 +9,20 @@ export default function Slider() {
   const { lang } = useTranslation()
   const items = lang === "ar" ? itemsAr : itemsEn
   const content = [...Array(6)].flatMap(() => items)
+  const isRtl = lang === "ar"
 
   return (
-    <section className="w-full bg-navy overflow-hidden py-[0.3rem]">
+    <section className="w-full bg-navy overflow-hidden py-[0.3rem]" dir="ltr">
       <div className="w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]">
-        <div className={`flex items-center w-max marquee-track${lang === "ar" ? "-rtl" : ""}`} style={{ animationDelay: '-10s' }}>
+        <div
+          dir="ltr"
+          className={`flex items-center w-max marquee-track${isRtl ? "-rtl" : ""}`}
+          style={{ animationDelay: '-10s' }}
+        >
           {content.flatMap((text, i) => [
             <span
               key={`t-${i}`}
+              dir={isRtl ? "rtl" : "ltr"}
               className="text-white text-[clamp(0.6rem,1.2vw,0.85rem)] font-semibold tracking-[0.12em] whitespace-nowrap shrink-0"
             >
               {text}
