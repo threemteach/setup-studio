@@ -263,9 +263,7 @@ export default function AcademyPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-[clamp(1.5rem,3vw,2.5rem)]">
             <Reveal className="h-full">
-              <a href="/#" className="group block h-full flex flex-col no-underline rounded-[clamp(1.5rem,3vw,3rem)] border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] overflow-hidden hover:shadow-[0_12px_48px_rgba(48,93,116,0.16)] hover:border-navy/20 dark:hover:border-white/20 transition-all duration-500 hover:-translate-y-1 cursor-pointer"
-                onClick={(e) => e.preventDefault()}
-              >
+              <div className="group block h-full flex flex-col no-underline rounded-[clamp(1.5rem,3vw,3rem)] border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] overflow-hidden hover:shadow-[0_12px_48px_rgba(48,93,116,0.16)] hover:border-navy/20 dark:hover:border-white/20 transition-all duration-500 hover:-translate-y-1">
                 <div className="relative overflow-hidden">
                   <img src={optimizeImageUrl(cmsPhoto("first_course", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214748/setup-studio/locations/podcast/ss5shyhyqpksgpxdfwld.jpg"), 800)}
                     alt="Video production course" className="w-full aspect-[16/9] object-cover" />
@@ -320,7 +318,7 @@ export default function AcademyPage() {
                     </a>
                   </div>
                 </div>
-              </a>
+              </div>
             </Reveal>
 
             <Reveal delay={0.15} className="h-full">
