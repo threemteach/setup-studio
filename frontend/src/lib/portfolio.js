@@ -1,11 +1,11 @@
 import { getSupabase } from "./supabase"
 import { uploadThumbnail } from "./cloudinary"
-import { FFmpeg } from "@ffmpeg/ffmpeg"
 import { toBlobURL, fetchFile } from "@ffmpeg/util"
 
 let ffmpeg = null
 async function getFFmpeg() {
   if (ffmpeg) return ffmpeg
+  const { FFmpeg } = await import("@ffmpeg/ffmpeg")
   ffmpeg = new FFmpeg()
   const base = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm"
   await ffmpeg.load({
