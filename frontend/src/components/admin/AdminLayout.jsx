@@ -12,7 +12,7 @@ const navItems = [
   {
     path: "/admin/locations",
     label: "Locations",
-    icon: "fa-solid fa-location-dot",
+    icon: "fa-solid fa-photo-film",
   },
   {
     path: "/admin/homepage",

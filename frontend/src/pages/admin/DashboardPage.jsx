@@ -251,7 +251,7 @@ export default function DashboardPage() {
                     className="group flex items-center gap-4 bg-[#F8FAFC] dark:bg-[#1e2d3d] hover:bg-navy hover:text-white rounded-2xl p-4.5 transition-all duration-300 border-0 cursor-pointer ltr:text-left rtl:text-right w-full shadow-sm hover:shadow-lg hover:shadow-navy/10 hover:-translate-y-0.5"
                   >
                     <div className="w-11 h-11 rounded-xl bg-navy text-white flex items-center justify-center shrink-0 group-hover:bg-white transition-all duration-300">
-                      <i className="fa-solid fa-location-dot text-lg group-hover:text-navy" />
+                      <i className="fa-solid fa-photo-film text-lg group-hover:text-navy" />
                     </div>
                     <div>
                       <p className="text-navy dark:text-white font-bold text-sm m-0 group-hover:text-white transition-colors duration-300">Manage Locations</p>

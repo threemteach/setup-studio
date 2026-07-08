@@ -124,6 +124,10 @@ export default function PlansAndContact() {
                   <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-full font-semibold cursor-pointer select-none transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--navy)] active:scale-[0.97] w-full px-6 py-3 text-[clamp(0.9rem,1.3vw,1.1rem)] bg-white text-navy border border-white shadow-[3px_3px_0_var(--red)] hover:shadow-[2px_2px_0_var(--red)] hover:-translate-y-0.5" style={{ fontFamily: "'Lexend', sans-serif" }}>
                     {t("Send Request", "إرسال الطلب", lang)}
                   </button>
+                  <a href="https://maps.app.goo.gl/1jnx5YpxZe9oZnpL7" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-full font-semibold text-[clamp(0.85rem,1.1vw,1rem)] bg-transparent text-white border-2 border-white/30 hover:border-white/60 hover:bg-white/5 transition-all duration-300 no-underline mt-2">
+                    <i className="fa-solid fa-location-dot text-red" />
+                    {t("View Location on Map", "عرض الموقع على الخريطة", lang)}
+                  </a>
                 </form>
               </Reveal>
             </div>
