@@ -75,10 +75,11 @@ function VideoCard({ video, lang }) {
     const el = previewVidRef.current
     if (!el || playing || buffering) return
     setBuffering(true)
-    el.play().then(() => {
-      setPlaying(true)
-      setBuffering(false)
-    }).catch(() => {
+
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+
+    if (isIOS) {
+      /* iOS: buffer first, then play — avoids frozen first-frame in native player */
       const onCanPlay = () => {
         el.play().then(() => {
           setPlaying(true)
@@ -87,10 +88,24 @@ function VideoCard({ video, lang }) {
       }
       el.addEventListener("canplay", onCanPlay, { once: true })
       el.load()
-    })
-    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
-    if (!isIOS && el.requestFullscreen) {
-      el.requestFullscreen().catch(() => {})
+    } else {
+      /* Desktop/Android: try play immediately, fall back to canplay */
+      el.play().then(() => {
+        setPlaying(true)
+        setBuffering(false)
+      }).catch(() => {
+        const onCanPlay = () => {
+          el.play().then(() => {
+            setPlaying(true)
+            setBuffering(false)
+          }).catch(() => setBuffering(false))
+        }
+        el.addEventListener("canplay", onCanPlay, { once: true })
+        el.load()
+      })
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {})
+      }
     }
   }
 
