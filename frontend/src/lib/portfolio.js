@@ -1,4 +1,5 @@
 import { getSupabase } from "./supabase"
+import { uploadThumbnail } from "./cloudinary"
 
 const CHUNK_SIZE = 10 * 1024 * 1024
 const MULTIPART_THRESHOLD = 50 * 1024 * 1024
