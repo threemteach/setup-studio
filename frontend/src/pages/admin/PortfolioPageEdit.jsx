@@ -481,7 +481,7 @@ export default function PortfolioPageEdit() {
                   <div className="h-full bg-red rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
                 </div>
               )}
-              <p className="text-white/30 text-xs mt-2">Supports MP4, MOV, WebM — uploaded directly to database</p>
+              <p className="text-white/30 text-xs mt-2">Supports MP4, MOV, WebM — keep videos under 80MB for best playback on all devices</p>
             </div>
 
             {/* Video List */}
