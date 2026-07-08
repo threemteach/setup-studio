@@ -8,7 +8,7 @@ import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
 /* ─── VideoCard — native <video> preview + inline playback on click ──────────── */
-function VideoCard({ video, lang }) {
+function VideoCard({ video, lang, playingVideoId, onPlay }) {
   const previewVidRef = useRef(null)
   const containerRef = useRef(null)
   const [cardRatio, setCardRatio] = useState(null)
@@ -42,6 +42,16 @@ function VideoCard({ video, lang }) {
     return () => el.removeEventListener("loadedmetadata", onMeta)
   }, [video.video_url, playing, inView, hasThumbnail])
 
+  /* pause when another video starts playing */
+  useEffect(() => {
+    if (!playing || playingVideoId === video.id) return
+    const el = previewVidRef.current
+    if (!el) return
+    el.pause()
+    setPlaying(false)
+    setBuffering(false)
+  }, [playingVideoId, video.id])
+
   /* pause when video naturally reaches end */
   useEffect(() => {
     if (!playing) return
@@ -57,6 +67,7 @@ function VideoCard({ video, lang }) {
   function handlePlay() {
     const el = previewVidRef.current
     if (!el || playing || buffering) return
+    onPlay(video.id)
     setBuffering(true)
 
     const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
@@ -176,6 +187,7 @@ export default function PortfolioPage() {
   const [cmsData, setCmsData] = useState(null)
   const [videosByCategory, setVideosByCategory] = useState({})
   const [activeCategory, setActiveCategory] = useState("")
+  const [playingVideoId, setPlayingVideoId] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -310,6 +322,8 @@ export default function PortfolioPage() {
                           <VideoCard
                             video={video}
                             lang={lang}
+                            playingVideoId={playingVideoId}
+                            onPlay={setPlayingVideoId}
                           />
                         </Reveal>
                       ))}
