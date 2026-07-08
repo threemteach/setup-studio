@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
+import SEO from "../components/SEO"
 import Reveal from "../components/ui/Reveal"
 import SectionHeader from "../components/ui/SectionHeader"
 import { optimizeImageUrl } from "../lib/images"
@@ -32,14 +33,19 @@ export default function AboutPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0A1216]">
-        <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-      </div>
+      <>
+        <SEO titleEn="About" titleAr="عننا" descEn="Learn about Setup Studio — a full-service production studio in Alexandria, Egypt." descAr="تعرف على سيت أب ستوديو — استوديو إنتاج متكامل الخدمات في الإسكندرية." path="/about" />
+        <div className="flex items-center justify-center min-h-screen bg-[#0A1216]">
+          <div className="w-10 h-10 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+        </div>
+      </>
     )
   }
 
   return (
-    <div className="page-enter">
+    <>
+      <SEO titleEn="About" titleAr="عننا" descEn="Learn about Setup Studio — a full-service production studio in Alexandria, Egypt." descAr="تعرف على سيت أب ستوديو — استوديو إنتاج متكامل الخدمات في الإسكندرية." path="/about" />
+      <div className="page-enter">
       <section className="w-full bg-[#0A1216] py-[clamp(3rem,8vw,5.5rem)] overflow-hidden relative">
         <div className="absolute -top-[clamp(8rem,15vw,12rem)] -right-[clamp(4rem,8vw,6rem)] w-[clamp(16rem,40vw,30rem)] h-[clamp(16rem,40vw,30rem)] rounded-full bg-[#11AFFF] opacity-[0.25] blur-[clamp(4rem,8vw,6rem)] pointer-events-none" />
         <div className="absolute -bottom-[clamp(6rem,12vw,10rem)] -left-[clamp(2rem,4vw,4rem)] w-[clamp(12rem,30vw,22rem)] h-[clamp(12rem,30vw,22rem)] rounded-full bg-[#11AFFF] opacity-[0.18] blur-[clamp(4rem,8vw,6rem)] pointer-events-none" />
@@ -223,5 +229,6 @@ export default function AboutPage() {
         </div>
       </section>
     </div>
+    </>
   )
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import SEO from "../components/SEO"
 import Reveal from "../components/ui/Reveal"
 import Masonry from "react-masonry-css"
 import { useTranslation } from "../context/LanguageContext"
@@ -208,7 +209,9 @@ export default function PortfolioPage() {
   const categories = cmsData?.categories || []
 
   return (
-    <div className="page-enter">
+    <>
+      <SEO titleEn="Portfolio" titleAr="أعمالنا" descEn="Browse our video production portfolio at Setup Studio in Alexandria. See our work across categories." descAr="تصفح أعمالنا في إنتاج الفيديو في سيت أب ستوديو بالإسكندرية. شاهد أعمالنا عبر مختلف الفئات." path="/portfolio" />
+      <div className="page-enter">
 
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <section className="w-full bg-[#0A1216] py-[clamp(3rem,8vw,5.5rem)] overflow-hidden relative">
@@ -329,5 +332,6 @@ export default function PortfolioPage() {
       </section>
 
     </div>
+    </>
   )
 }
