@@ -12,6 +12,7 @@ function VideoCard({ video, lang }) {
   const containerRef = useRef(null)
   const [vidRatio, setVidRatio] = useState(null)
   const [playing, setPlaying] = useState(false)
+  const [buffering, setBuffering] = useState(false)
   const [inView, setInView] = useState(false)
   const hasThumbnail = Boolean(video.thumbnail_url)
 
@@ -72,18 +73,21 @@ function VideoCard({ video, lang }) {
 
   function handlePlay() {
     const el = previewVidRef.current
-    if (!el || playing) return
-    if (!el.src) el.src = video.video_url
-    setPlaying(true)
-    el.play().catch(() => {
-      el.addEventListener("canplay", () => {
-        el.play().catch(() => {})
-      }, { once: true })
+    if (!el || playing || buffering) return
+    setBuffering(true)
+    el.play().then(() => {
+      setPlaying(true)
+      setBuffering(false)
+    }).catch(() => {
+      const onCanPlay = () => {
+        el.play().then(() => {
+          setPlaying(true)
+          setBuffering(false)
+        }).catch(() => setBuffering(false))
+      }
+      el.addEventListener("canplay", onCanPlay, { once: true })
+      el.load()
     })
-    // On iOS, requestFullscreen() hands the video off to the native
-    // AVPlayerViewController — a separate playback session from the inline
-    // preview, which adds real latency. Keep playback inline there and only
-    // use the web fullscreen API on platforms where it's cheap (desktop/Android).
     const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
     if (!isIOS && el.requestFullscreen) {
       el.requestFullscreen().catch(() => {})
@@ -109,10 +113,9 @@ function VideoCard({ video, lang }) {
           >
             <video
               ref={previewVidRef}
-              src={inView || playing ? video.video_url : undefined}
-              preload={playing ? "auto" : hasThumbnail ? "none" : inView ? "metadata" : "none"}
+              src={inView || playing || buffering ? video.video_url : undefined}
+              preload={playing || buffering ? "auto" : hasThumbnail ? "none" : inView ? "metadata" : "none"}
               controls={playing}
-              playsInline
               poster={video.thumbnail_url || undefined}
               tabIndex={-1}
               style={{
@@ -128,18 +131,22 @@ function VideoCard({ video, lang }) {
             <div
               className="absolute inset-0 flex items-center justify-center pointer-events-none transition-colors duration-200 group-hover:bg-black/20"
             >
-              <div
-                style={{
-                  width: 52, height: 52, borderRadius: "50%",
-                  background: "rgba(231,59,73,0.92)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  boxShadow: "0 8px 24px rgba(231,59,73,0.45)",
-                  transition: "transform 0.2s",
-                }}
-                className="group-hover:scale-110"
-              >
-                <i className="fa-solid fa-play text-white" style={{ fontSize: 16, marginLeft: 3 }} />
-              </div>
+              {buffering ? (
+                <div className="w-7 h-7 rounded-full border-2 border-white/20 border-t-white/80 animate-spin" />
+              ) : (
+                <div
+                  style={{
+                    width: 52, height: 52, borderRadius: "50%",
+                    background: "rgba(231,59,73,0.92)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    boxShadow: "0 8px 24px rgba(231,59,73,0.45)",
+                    transition: "transform 0.2s",
+                  }}
+                  className="group-hover:scale-110"
+                >
+                  <i className="fa-solid fa-play text-white" style={{ fontSize: 16, marginLeft: 3 }} />
+                </div>
+              )}
             </div>
           )}
         </div>
