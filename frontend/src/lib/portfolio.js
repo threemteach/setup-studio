@@ -180,7 +180,7 @@ async function uploadMultipart(file, key, contentType, onProgress) {
     const completeApiUrl = import.meta.env.PROD ? "/api/complete-multipart" : "http://localhost:3001/api/complete-multipart"
     const completeRes = await fetch(completeApiUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify({ key, uploadId }),
     })
     if (!completeRes.ok) {
@@ -193,7 +193,7 @@ async function uploadMultipart(file, key, contentType, onProgress) {
       const abortApiUrl = import.meta.env.PROD ? "/api/abort-multipart" : "http://localhost:3001/api/abort-multipart"
       await fetch(abortApiUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ key, uploadId }),
       })
     } catch {}
