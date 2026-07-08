@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import { sanitizeError } from "../../lib/errors"
 
 export default function CropModal({ file, onCrop, onCancel, initialTitle, initialDescription, initialAlt }) {
   const displayImgRef = useRef(null)
@@ -71,7 +72,7 @@ export default function CropModal({ file, onCrop, onCancel, initialTitle, initia
       const croppedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" })
       onCrop({ file: croppedFile, title: title || null, description: description || null, alt: alt || null })
     } catch (err) {
-      setError(err.message || "Crop failed")
+      setError(sanitizeError(err.message) || "Crop failed")
     }
   }
 

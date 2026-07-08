@@ -89,7 +89,7 @@ export async function deletePhoto(id, cloudinaryPublicId) {
   if (error) throw error
 
   if (cloudinaryError) {
-    throw new Error(`Photo removed from database but failed to delete from Cloudinary: ${cloudinaryError}`)
+    throw new Error(`Photo removed from database but failed to delete from the cloud: ${cloudinaryError}`)
   }
 }
 
