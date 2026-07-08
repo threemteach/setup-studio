@@ -240,6 +240,7 @@ export async function uploadVideo(file, category, onProgress) {
   const key = `${category}/${ts}-${safeName}`
   const contentType = file.type || "video/mp4"
 
+  // 1. Upload video to R2
   if (file.size < MULTIPART_THRESHOLD) {
     await uploadSimple(file, key, contentType, onProgress)
   } else {
@@ -247,6 +248,7 @@ export async function uploadVideo(file, category, onProgress) {
   }
   const video_url = `${r2PublicUrl}/${key}`
 
+  // 2. Capture + upload one thumbnail frame to Cloudinary
   let thumbnail_url = ""
   try {
     const thumbBlob = await captureVideoFrame(file)
@@ -254,7 +256,7 @@ export async function uploadVideo(file, category, onProgress) {
     const thumbFile = new File([thumbBlob], thumbKey, { type: "image/jpeg" })
     const { secure_url } = await uploadThumbnail(thumbFile, category)
     thumbnail_url = secure_url
-  } catch {}
+  } catch { /* thumbnail is optional — silently skip on failure */ }
 
   return { video_url, video_key: key, thumbnail_url }
 }
