@@ -10,43 +10,30 @@ const t = (en, ar, lang) => lang === "ar" ? ar : en
 function VideoCard({ video, lang }) {
   const previewVidRef = useRef(null)
   const containerRef = useRef(null)
-  const [vidRatio, setVidRatio] = useState(null)
+  const [cardRatio, setCardRatio] = useState(null)
   const [playing, setPlaying] = useState(false)
   const [buffering, setBuffering] = useState(false)
   const [inView, setInView] = useState(false)
   const hasThumbnail = Boolean(video.thumbnail_url)
 
-  /* only start fetching video data once the card is near the viewport —
-     prevents every card on the page from opening a network request at once,
-     which is what makes the grid crawl on mobile connections */
+  /* size the card from the poster image dimensions, not the video —
+     poster is a Cloudinary JPEG that loads instantly and already cached */
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setInView(true)
-          observer.disconnect()
-        }
-      },
-      { rootMargin: "600px 0px" } // start loading a bit before it scrolls into view
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+    if (!video.thumbnail_url) return
+    const img = new Image()
+    img.onload = () => setCardRatio((img.naturalHeight / img.naturalWidth) * 100)
+    img.src = video.thumbnail_url
+  }, [video.thumbnail_url])
 
+  /* lazy-load video metadata only if no thumbnail is available */
   useEffect(() => {
     if (playing || !inView) return
     const el = previewVidRef.current
     if (!el) return
-
-    // if we already have a real thumbnail, there's no need to touch the
-    // video file at all until the user hits play — this is the single
-    // biggest saving on mobile, since it skips a network request per card
     if (hasThumbnail) return
 
     function onMeta() {
-      if (el.videoWidth && el.videoHeight) setVidRatio((el.videoHeight / el.videoWidth) * 100)
+      if (el.videoWidth && el.videoHeight) setCardRatio((el.videoHeight / el.videoWidth) * 100)
       el.currentTime = 0.001
     }
     el.addEventListener("loadedmetadata", onMeta, { once: true })
@@ -122,7 +109,7 @@ function VideoCard({ video, lang }) {
           <div
             style={{
               position: "relative",
-              paddingTop: vidRatio ? `${vidRatio}%` : "56.25%",
+              paddingTop: cardRatio ? `${cardRatio}%` : "56.25%",
               background: "linear-gradient(135deg,#0c1e2e 0%,#162840 100%)",
             }}
           >
