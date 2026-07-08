@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom"
+import SEO from "../components/SEO"
 import Button from "../components/ui/Button"
 import { useTranslation } from "../context/LanguageContext"
 
@@ -10,6 +11,8 @@ export default function NotFoundPage() {
   const isAdmin = pathname.startsWith("/admin")
 
   return (
+    <>
+      <SEO titleEn="404" titleAr="٤٠٤" descEn="Page not found — Setup Studio" descAr="الصفحة غير موجودة — سيت أب ستوديو" path={pathname} />
     <div className="min-h-screen bg-[#0A1216] flex items-center justify-center px-6">
       <div className="text-center max-w-md">
         <div className="text-[clamp(5rem,12vw,10rem)] font-black text-red leading-none mb-2 tracking-tighter">
@@ -30,5 +33,6 @@ export default function NotFoundPage() {
         </Link>
       </div>
     </div>
+    </>
   )
 }

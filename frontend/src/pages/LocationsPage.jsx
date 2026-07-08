@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
+import SEO from "../components/SEO"
 import Reveal from "../components/ui/Reveal"
 import Button from "../components/ui/Button"
 import { fetchPhotos, fetchAllPhotos, fetchCoverPhoto } from "../lib/photos"
@@ -67,7 +68,9 @@ export default function LocationsPage() {
 
   if (lightbox) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center cursor-pointer"
+      <>
+        <SEO titleEn={category || "Locations"} titleAr={category || "المواقع"} descEn="Explore our studio spaces in Alexandria for photography, videography, and creative productions." descAr="استكشف مساحات الاستوديو الخاصة بنا في الإسكندرية للتصوير الفوتوغرافي وصناعة الفيديو والإنتاج الإبداعي." path="/locations" />
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center cursor-pointer"
         onClick={() => setLightbox(null)}
       >
         <button onClick={() => setLightbox(null)}
@@ -78,6 +81,7 @@ export default function LocationsPage() {
         <img src={lightbox} alt="" className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg cursor-default"
           onClick={(e) => e.stopPropagation()} />
       </div>
+      </>
     )
   }
 
@@ -85,7 +89,9 @@ export default function LocationsPage() {
     const cat = categoryTitles[category]
     const title = cat ? t(cat.en, cat.ar, lang) : category
     return (
-      <div className="page-enter">
+      <>
+        <SEO titleEn={title} titleAr={title} descEn={`Explore ${title} at Setup Studio in Alexandria — professional photography and videography spaces.`} descAr={`استكشف ${title} في سيت أب ستوديو بالإسكندرية — مساحات تصوير فوتوغرافي وفيديو احترافية.`} path={`/locations/${category}`} />
+        <div className="page-enter">
         <section className="w-full bg-[#0A1216] py-[clamp(2rem,5vw,4rem)] overflow-hidden relative">
           <div className="absolute -top-[clamp(8rem,15vw,12rem)] -right-[clamp(4rem,8vw,6rem)] w-[clamp(16rem,40vw,30rem)] h-[clamp(16rem,40vw,30rem)] rounded-full bg-[#11AFFF] opacity-[0.25] blur-[clamp(4rem,8vw,6rem)] pointer-events-none" />
           <div className="absolute -bottom-[clamp(6rem,12vw,10rem)] -left-[clamp(2rem,4vw,4rem)] w-[clamp(12rem,30vw,22rem)] h-[clamp(12rem,30vw,22rem)] rounded-full bg-[#11AFFF] opacity-[0.18] blur-[clamp(4rem,8vw,6rem)] pointer-events-none" />
@@ -160,10 +166,13 @@ export default function LocationsPage() {
           </div>
         </section>
       </div>
+      </>
     )
   }
 
   return (
+    <>
+      <SEO titleEn="Locations" titleAr="المواقع" descEn="Explore our studio spaces in Alexandria for photography, videography, and creative productions." descAr="استكشف مساحات الاستوديو الخاصة بنا في الإسكندرية للتصوير الفوتوغرافي وصناعة الفيديو والإنتاج الإبداعي." path="/locations" />
     <div className="page-enter">
       {allPhotos.length > 0 && (
         <style>{`
@@ -251,5 +260,6 @@ export default function LocationsPage() {
         </div>
       </section>
     </div>
+    </>
   )
 }
