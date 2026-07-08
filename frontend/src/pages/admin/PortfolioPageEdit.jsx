@@ -469,7 +469,7 @@ export default function PortfolioPageEdit() {
               <input ref={fileInputRef} type="file" accept="video/*" multiple className="hidden" onChange={(e) => handleUpload(e.target.files)} />
               <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
                 className="px-6 py-3 rounded-xl bg-red text-white text-sm font-semibold cursor-pointer hover:bg-red/90 transition-colors border-0 disabled:opacity-50">
-                <i className="fa-solid fa-cloud-arrow-up mr-2" />{uploading ? `Uploading ${Math.round(uploadProgress)}%` : "Upload Videos"}
+                <i className="fa-solid fa-cloud-arrow-up mr-2" />{uploading ? (uploadProgress < 80 ? `Compressing ${Math.round(uploadProgress)}%` : `Uploading ${Math.round(uploadProgress)}%`) : "Upload Videos"}
               </button>
               {uploading && (
                 <div className="mt-4 max-w-xs mx-auto bg-white/10 rounded-full h-2 overflow-hidden">
