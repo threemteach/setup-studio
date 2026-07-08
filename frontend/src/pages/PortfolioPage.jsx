@@ -57,7 +57,7 @@ function VideoCard({ video, lang }) {
     }
   }, [playing])
 
-  const title = t(video.title_en, video.title_ar, lang) || t("Untitled", "بدون عنوان", lang)
+  const title = t(video.title_en, video.title_ar, lang)
 
   function handlePlay() {
     const el = previewVidRef.current

@@ -268,6 +268,10 @@ export default function PortfolioPageEdit() {
 
   async function handleUpload(files) {
     if (!files?.length || !activeCategory) return
+    if (storage && storage.usedGB >= 99) {
+      showToast("Storage limit reached (99 GB). Cannot upload more videos.", "error")
+      return
+    }
     setUploading(true)
     setUploadProgress(0)
     try {
