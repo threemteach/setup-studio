@@ -1,41 +1,5 @@
 import { getSupabase } from "./supabase"
 import { uploadThumbnail } from "./cloudinary"
-import { toBlobURL, fetchFile } from "@ffmpeg/util"
-
-let ffmpeg = null
-async function getFFmpeg() {
-  if (ffmpeg) return ffmpeg
-  const { FFmpeg } = await import("@ffmpeg/ffmpeg")
-  ffmpeg = new FFmpeg()
-  const base = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm"
-  await ffmpeg.load({
-    coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
-    wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
-  })
-  return ffmpeg
-}
-
-/* ─── compress video + faststart in browser via ffmpeg.wasm ──────────── */
-async function compressVideo(file, onCompressProgress) {
-  const f = await getFFmpeg()
-  f.on("progress", ({ progress }) => {
-    if (onCompressProgress) onCompressProgress(Math.round(progress * 100))
-  })
-  await f.writeFile("in", await fetchFile(file))
-  await f.exec([
-    "-i", "in",
-    "-c:v", "libx264",
-    "-preset", "fast",
-    "-crf", "28",
-    "-c:a", "aac",
-    "-b:a", "128k",
-    "-movflags", "+faststart",
-    "out.mp4",
-  ])
-  const data = await f.readFile("out.mp4")
-  f.off("progress")
-  return new File([data], file.name.replace(/\.[^.]+$/, ".mp4"), { type: "video/mp4" })
-}
 
 const CHUNK_SIZE = 10 * 1024 * 1024
 const MULTIPART_THRESHOLD = 50 * 1024 * 1024
@@ -271,37 +235,26 @@ export async function uploadVideo(file, category, onProgress) {
   if (!r2PublicUrl) {
     throw new Error("VITE_R2_PUBLIC_URL not configured")
   }
-
-  // 1. Compress + faststart
-  const compressed = await compressVideo(file, (pct) => {
-    if (onProgress) onProgress(pct * 0.8, 100)
-  })
-
   const ts = Date.now()
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/\.[^.]+$/, ".mp4")
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_")
   const key = `${category}/${ts}-${safeName}`
-  const contentType = "video/mp4"
+  const contentType = file.type || "video/mp4"
 
-  // 2. Upload compressed video to R2
-  const uploadProgress = (loaded, total) => {
-    if (onProgress) onProgress(80 + (loaded / total) * 20, 100)
-  }
-  if (compressed.size < MULTIPART_THRESHOLD) {
-    await uploadSimple(compressed, key, contentType, uploadProgress)
+  if (file.size < MULTIPART_THRESHOLD) {
+    await uploadSimple(file, key, contentType, onProgress)
   } else {
-    await uploadMultipart(compressed, key, contentType, uploadProgress)
+    await uploadMultipart(file, key, contentType, onProgress)
   }
   const video_url = `${r2PublicUrl}/${key}`
 
-  // 3. Capture + upload one thumbnail frame to Cloudinary
   let thumbnail_url = ""
   try {
-    const thumbBlob = await captureVideoFrame(compressed)
+    const thumbBlob = await captureVideoFrame(file)
     const thumbKey = `${category}/thumb_${ts}-${safeName.replace(/\.[^.]+$/, ".jpg")}`
     const thumbFile = new File([thumbBlob], thumbKey, { type: "image/jpeg" })
     const { secure_url } = await uploadThumbnail(thumbFile, category)
     thumbnail_url = secure_url
-  } catch { /* thumbnail is optional — silently skip on failure */ }
+  } catch {}
 
   return { video_url, video_key: key, thumbnail_url }
 }
