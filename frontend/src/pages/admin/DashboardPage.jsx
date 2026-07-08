@@ -297,7 +297,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-navy dark:text-white font-bold text-sm m-0 group-hover:text-white transition-colors duration-300">Edit Academy Page</p>
-                      <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5 group-hover:text-white/70 transition-colors duration-300">Courses, instructors & FAQ</p>
+                      <p className="text-muted dark:text-white/50 text-xs m-0 mt-0.5 group-hover:text-white/70 transition-colors duration-300">Courses & FAQ</p>
                     </div>
                     <i className="fa-solid fa-chevron-right text-muted/40 dark:text-white/20 text-xs ltr:ml-auto rtl:mr-auto group-hover:text-white/80 group-hover:ltr:translate-x-0.5 group-hover:rtl:-translate-x-0.5 transition-all duration-300" />
                   </button>

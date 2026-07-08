@@ -223,11 +223,6 @@ const DEFAULT_EMPTY_FORM = {
   first_course_desc_en: "", first_course_desc_ar: "",
   first_course_photo_url: null, first_course_photo_id: null,
   focus_items: defaultFocusItems,
-  instructor_label_en: "", instructor_label_ar: "",
-  instructor_heading_en: "", instructor_heading_ar: "",
-  instructor_body_en: "", instructor_body_ar: "",
-  instructor_info_en: "", instructor_info_ar: "",
-  instructor_photo_url: null, instructor_photo_id: null,
   expectations_heading_en: "What Students Can Expect", expectations_heading_ar: "ماذا يمكن أن يتوقع الطلاب",
   expectations: defaultExpectations,
   production_label_en: "", production_label_ar: "",
@@ -269,7 +264,6 @@ export default function AcademyPageEdit() {
     hero: 16 / 9,
     why: 4 / 3,
     first_course: 16 / 9,
-    instructor: 16 / 7,
     production: 4 / 3,
     beyond: 4 / 3,
   }
@@ -375,11 +369,6 @@ export default function AcademyPageEdit() {
         first_course_desc_en: form.first_course_desc_en, first_course_desc_ar: form.first_course_desc_ar,
         first_course_photo_url: form.first_course_photo_url, first_course_photo_id: form.first_course_photo_id,
         focus_items: form.focus_items,
-        instructor_label_en: form.instructor_label_en, instructor_label_ar: form.instructor_label_ar,
-        instructor_heading_en: form.instructor_heading_en, instructor_heading_ar: form.instructor_heading_ar,
-        instructor_body_en: form.instructor_body_en, instructor_body_ar: form.instructor_body_ar,
-        instructor_info_en: form.instructor_info_en, instructor_info_ar: form.instructor_info_ar,
-        instructor_photo_url: form.instructor_photo_url, instructor_photo_id: form.instructor_photo_id,
         expectations_heading_en: form.expectations_heading_en, expectations_heading_ar: form.expectations_heading_ar,
         expectations: form.expectations,
         production_label_en: form.production_label_en, production_label_ar: form.production_label_ar,
@@ -679,7 +668,7 @@ export default function AcademyPageEdit() {
             <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="max-w-[800px] mx-auto">
             <div className="rounded-3xl border border-white/10 bg-white dark:bg-[#0f1a24] overflow-hidden">
               <PhotoField url={form?.first_course_photo_url} urlId={form?.first_course_photo_id} prefix="first_course" label="Course Card Photo" aspect="aspect-video" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
               <div className="p-5 space-y-4">
@@ -753,61 +742,6 @@ export default function AcademyPageEdit() {
                 </div>
               </div>
             </div>
-          </div>
-          <div className="rounded-3xl border border-white/10 bg-white dark:bg-[#0f1a24] overflow-hidden">
-            <PhotoField url={form?.instructor_photo_url} urlId={form?.instructor_photo_id} prefix="instructor" label="Instructor Photo" aspect="aspect-[16/7]" onPick={setPhotoPicker} onClear={(p) => setConfirmAction({ type: "photo", prefix: p })} />
-            <div className="p-5 space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:block w-5 h-[2px] bg-red rounded-full" />
-                <LabelInput value={val("instructor_label")} onChange={(v) => handleChange("instructor_label", v)} placeholder="Instructor"
-                  onTranslate={() => translateField("instructor_label", val("instructor_label"))}
-                  translating={translatingField === "instructor_label"}
-                  dir={lang === "ar" ? "rtl" : "ltr"} />
-                <span className="hidden sm:block flex-1 h-[2px] bg-red" />
-                <Diamond />
-              </div>
-              <div className="flex items-center gap-1">
-                <input type="text" value={val("instructor_heading")} onChange={(e) => handleChange("instructor_heading", e.target.value)}
-                  dir={lang === "ar" ? "rtl" : "ltr"}
-                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy dark:text-white font-bold text-lg outline-none focus:border-navy/40 transition-colors text-start" placeholder={lang === "en" ? "Meet Your Instructor" : "تعرف على مدربك"} />
-                <button onClick={() => translateField("instructor_heading", val("instructor_heading"))}
-                  className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
-                  title="Translate">
-                  <i className={`fa-solid fa-language text-[9px] ${translatingField === "instructor_heading" ? "animate-spin" : ""}`} />
-                </button>
-              </div>
-              <p className="text-[10px] text-muted dark:text-white/40 -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("instructor_heading") || "—"}</p>
-              <div className="flex items-start gap-1">
-                <textarea value={val("instructor_body")} onChange={(e) => handleChange("instructor_body", e.target.value)}
-                  dir={lang === "ar" ? "rtl" : "ltr"}
-                  className="flex-1 min-w-0 bg-gray-50 dark:bg-[#15202b] border border-border dark:border-[#1e2d3d] rounded-xl px-4 py-2 text-navy/60 dark:text-white/50 text-sm outline-none focus:border-navy/40 transition-colors resize-none text-start" rows={2} placeholder={lang === "en" ? "Our instructors are selected for their practical experience..." : "يتم اختيار مدربينا بناءً على خبرتهم العملية..."} />
-                <button onClick={() => translateField("instructor_body", val("instructor_body"))}
-                  className="shrink-0 w-7 h-7 rounded-md bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40 mt-0.5"
-                  title="Translate">
-                  <i className={`fa-solid fa-language text-[9px] ${translatingField === "instructor_body" ? "animate-spin" : ""}`} />
-                </button>
-              </div>
-              <p className="text-[10px] text-muted dark:text-white/40 -mt-2 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("instructor_body") || "—"}</p>
-              <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f9fb] dark:bg-[#15202b] border border-dashed border-navy/10 dark:border-white/10">
-                <div className="w-10 h-10 rounded-full bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0">
-                  <i className="fa-solid fa-user-tie text-navy/30 dark:text-white/30 text-lg" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start gap-1">
-                    <textarea value={val("instructor_info")} onChange={(e) => handleChange("instructor_info", e.target.value)}
-                      dir={lang === "ar" ? "rtl" : "ltr"}
-                      className="flex-1 min-w-0 bg-transparent border-0 text-navy/45 dark:text-white/40 text-xs outline-none resize-none text-start" rows={2} placeholder={lang === "en" ? "Full instructor details will be announced..." : "سيتم الإعلان عن تفاصيل المدرب لاحقاً..."} />
-                    <button onClick={() => translateField("instructor_info", val("instructor_info"))}
-                      className="shrink-0 w-5 h-5 rounded bg-navy/5 dark:bg-white/10 hover:bg-navy/10 dark:hover:bg-white/20 border-0 cursor-pointer flex items-center justify-center text-navy/40 dark:text-white/40"
-                      title="Translate">
-                      <i className={`fa-solid fa-language text-[8px] ${translatingField === "instructor_info" ? "animate-spin" : ""}`} />
-                    </button>
-                  </div>
-                  <p className="text-[9px] text-navy/30 dark:text-white/30 mt-0.5 text-start" dir={lang === "en" ? "rtl" : "ltr"}>{ref("instructor_info") || "—"}</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </DarkSection>
 

@@ -261,107 +261,64 @@ export default function AcademyPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-[clamp(1.5rem,3vw,2.5rem)]">
-            <Reveal className="h-full">
-              <div className="group block h-full flex flex-col no-underline rounded-[clamp(1.5rem,3vw,3rem)] border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] overflow-hidden hover:shadow-[0_12px_48px_rgba(48,93,116,0.16)] hover:border-navy/20 dark:hover:border-white/20 transition-all duration-500 hover:-translate-y-1">
-                <div className="relative overflow-hidden">
-                  <img src={optimizeImageUrl(cmsPhoto("first_course", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214748/setup-studio/locations/podcast/ss5shyhyqpksgpxdfwld.jpg"), 800)}
-                    alt="Video production course" className="w-full aspect-[16/9] object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-4 ltr:left-5 rtl:right-5 ltr:right-5 rtl:left-5 flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-white text-[0.75rem] font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                      <i className="fa-regular fa-clock" />
-                      {t("Coming Soon", "قريباً", lang)}
-                    </span>
-                    <span className="text-[0.65rem] font-semibold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      {t("Beginner", "مبتدئ", lang)}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-[clamp(1.25rem,2.5vw,2rem)] flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-navy/10 dark:bg-white/10 flex items-center justify-center">
-                      <i className="fa-solid fa-video text-navy dark:text-white/80" />
-                    </div>
-                    <h3 className="text-navy dark:text-white font-bold text-[clamp(1.2rem,2.5vw,1.5rem)] m-0">
-                      {cms("first_course_heading") || t("Video Content Foundation Course", "دورة أساسيات إنتاج المحتوى المرئي", lang)}
-                    </h3>
-                  </div>
-                  <p className={`text-navy/60 dark:text-white/50 text-[clamp(0.85rem,1.2vw,0.95rem)] leading-relaxed m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
-                    {cms("first_course_desc") || t("Learn professional video production through hands-on practice inside Setup Studio with real lighting, audio, and shooting setups.", "تعلم إنتاج الفيديو الاحترافي من خلال التطبيق العملي داخل سيت أب ستوديو بإضاءة حقيقية وصوت وإعدادات تصوير احترافية.", lang)}
-                  </p>
-                  <div className="bg-[#f8f9fb] dark:bg-[#15202b] rounded-xl p-[clamp(1rem,1.5vw,1.25rem)]">
-                    <h4 className="text-navy dark:text-white font-semibold text-[clamp(0.85rem,1.2vw,0.95rem)] mb-2.5 flex items-center gap-2">
-                      <i className="fa-solid fa-list-check text-red text-[0.75rem]" />
-                      {t("Course Focus", "محاور الدورة", lang)}
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
-                      {focusItems.map((item, i) => (
-                        <span key={i} className="text-navy/60 dark:text-white/50 text-[clamp(0.75rem,1vw,0.85rem)] flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red shrink-0" />
-                          {t(item.en, item.ar, lang)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-2 border-t border-border/50 dark:border-[#1e2d3d]/50">
-                    <span className="text-muted dark:text-white/40 text-[0.75rem] flex items-center gap-1.5">
-                      <i className="fa-regular fa-clock text-navy/40 dark:text-white/40" />
-                      {t("Limited spots available", "أماكن محدودة متاحة", lang)}
-                    </span>
-                    <a href={`https://wa.me/201012846764?text=${encodeURIComponent("Hi setupstudio! I want to join the Setup Academy waiting list.")}`}
-                      target="_blank" rel="noopener noreferrer"
-                      className="text-navy dark:text-white/80 font-semibold text-[0.85rem] hover:text-red dark:hover:text-red transition-colors duration-200 flex items-center gap-2 no-underline"
-                    >
-                      {cms("cta_button") || t("Join the Waiting List", "انضم لقائمة الانتظار", lang)}
-                      <i className="fa-solid fa-arrow-right text-[0.7rem] group-hover:ltr:translate-x-1 group-hover:rtl:-translate-x-1 transition-transform duration-200" />
-                    </a>
-                  </div>
+          <Reveal className="h-full max-w-[800px] mx-auto">
+            <div className="group block h-full flex flex-col no-underline rounded-[clamp(1.5rem,3vw,3rem)] border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] overflow-hidden hover:shadow-[0_12px_48px_rgba(48,93,116,0.16)] hover:border-navy/20 dark:hover:border-white/20 transition-all duration-500 hover:-translate-y-1">
+              <div className="relative overflow-hidden">
+                <img src={optimizeImageUrl(cmsPhoto("first_course", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214748/setup-studio/locations/podcast/ss5shyhyqpksgpxdfwld.jpg"), 800)}
+                  alt="Video production course" className="w-full aspect-[16/9] object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-4 ltr:left-5 rtl:right-5 ltr:right-5 rtl:left-5 flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-white text-[0.75rem] font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                    <i className="fa-regular fa-clock" />
+                    {t("Coming Soon", "قريباً", lang)}
+                  </span>
+                  <span className="text-[0.65rem] font-semibold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {t("Beginner", "مبتدئ", lang)}
+                  </span>
                 </div>
               </div>
-            </Reveal>
-
-            <Reveal delay={0.15} className="h-full">
-              <div className="rounded-[clamp(1.5rem,3vw,3rem)] border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] overflow-hidden h-full flex flex-col">
-                <div className="relative">
-                  <img src={optimizeImageUrl(cmsPhoto("instructor", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214750/setup-studio/locations/podcast/nazipuzb6ndg6pvzfam7.jpg"), 800)}
-                    alt="Instructor" className="w-full aspect-[16/7] object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <div className="absolute bottom-4 ltr:left-5 rtl:right-5">
-                    <span className="text-white/70 text-[0.65rem] font-medium uppercase tracking-wider bg-black/30 backdrop-blur-sm px-2.5 py-1 rounded-full">
-                      {t("Learn From Market Experience", "تعلم من خبراء السوق", lang)}
-                    </span>
+              <div className="p-[clamp(1.25rem,2.5vw,2rem)] flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-navy/10 dark:bg-white/10 flex items-center justify-center">
+                    <i className="fa-solid fa-video text-navy dark:text-white/80" />
+                  </div>
+                  <h3 className="text-navy dark:text-white font-bold text-[clamp(1.2rem,2.5vw,1.5rem)] m-0">
+                    {cms("first_course_heading") || t("Video Content Foundation Course", "دورة أساسيات إنتاج المحتوى المرئي", lang)}
+                  </h3>
+                </div>
+                <p className={`text-navy/60 dark:text-white/50 text-[clamp(0.85rem,1.2vw,0.95rem)] leading-relaxed m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
+                  {cms("first_course_desc") || t("Learn professional video production through hands-on practice inside Setup Studio with real lighting, audio, and shooting setups.", "تعلم إنتاج الفيديو الاحترافي من خلال التطبيق العملي داخل سيت أب ستوديو بإضاءة حقيقية وصوت وإعدادات تصوير احترافية.", lang)}
+                </p>
+                <div className="bg-[#f8f9fb] dark:bg-[#15202b] rounded-xl p-[clamp(1rem,1.5vw,1.25rem)]">
+                  <h4 className="text-navy dark:text-white font-semibold text-[clamp(0.85rem,1.2vw,0.95rem)] mb-2.5 flex items-center gap-2">
+                    <i className="fa-solid fa-list-check text-red text-[0.75rem]" />
+                    {t("Course Focus", "محاور الدورة", lang)}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5">
+                    {focusItems.map((item, i) => (
+                      <span key={i} className="text-navy/60 dark:text-white/50 text-[clamp(0.75rem,1vw,0.85rem)] flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red shrink-0" />
+                        {t(item.en, item.ar, lang)}
+                      </span>
+                    ))}
                   </div>
                 </div>
-                <div className="p-[clamp(1.25rem,2.5vw,2rem)] flex flex-col gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-5 h-[2px] bg-red rounded-full" />
-                      <span className="text-[clamp(0.7rem,1vw,0.8rem)] font-semibold uppercase tracking-wider text-red/70">{cms("instructor_label") || t("Instructor", "المدرب", lang)}</span>
-                      <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
-                      <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
-                        <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
-                      </svg>
-                    </div>
-                    <h3 className="text-navy dark:text-white font-bold text-[clamp(1.35rem,2.8vw,1.65rem)] m-0 leading-tight">
-                      {cms("instructor_heading") || t("Meet Your Instructor", "تعرف على مدربك", lang)}
-                    </h3>
-                  </div>
-                  <p className={`text-navy/60 dark:text-white/50 text-[clamp(0.85rem,1.2vw,0.95rem)] leading-relaxed m-0 ${lang === 'ar' ? 'text-right' : ''}`}>
-                    {cms("instructor_body") || t("Our instructors are selected for their practical experience and ability to turn real production knowledge into clear learning steps.", "يتم اختيار مدربينا بناءً على خبرتهم العملية وقدرتهم على تحويل المعرفة الإنتاجية إلى خطوات تعليمية واضحة.", lang)}
-                  </p>
-                  <div className="flex items-center gap-3 p-3 rounded-xl bg-[#f8f9fb] dark:bg-[#15202b] border border-dashed border-navy/10 dark:border-white/10">
-                    <div className="w-10 h-10 rounded-full bg-navy/5 dark:bg-white/10 flex items-center justify-center shrink-0">
-                      <i className="fa-solid fa-user-tie text-navy/30 dark:text-white/30 text-lg" />
-                    </div>
-                    <p className={`text-navy/45 dark:text-white/40 text-[clamp(0.7rem,0.9vw,0.8rem)] m-0 leading-relaxed ${lang === 'ar' ? 'text-right' : ''}`}>
-                      {cms("instructor_info") || t("Full instructor details will be announced before the course launch.", "سيتم الإعلان عن تفاصيل المدرب قبل إطلاق الدورة.", lang)}
-                    </p>
-                  </div>
+                <div className="flex items-center justify-between pt-2 border-t border-border/50 dark:border-[#1e2d3d]/50">
+                  <span className="text-muted dark:text-white/40 text-[0.75rem] flex items-center gap-1.5">
+                    <i className="fa-regular fa-clock text-navy/40 dark:text-white/40" />
+                    {t("Limited spots available", "أماكن محدودة متاحة", lang)}
+                  </span>
+                  <a href={`https://wa.me/201012846764?text=${encodeURIComponent("Hi setupstudio! I want to join the Setup Academy waiting list.")}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-navy dark:text-white/80 font-semibold text-[0.85rem] hover:text-red dark:hover:text-red transition-colors duration-200 flex items-center gap-2 no-underline"
+                  >
+                    {cms("cta_button") || t("Join the Waiting List", "انضم لقائمة الانتظار", lang)}
+                    <i className="fa-solid fa-arrow-right text-[0.7rem] group-hover:ltr:translate-x-1 group-hover:rtl:-translate-x-1 transition-transform duration-200" />
+                  </a>
                 </div>
               </div>
-            </Reveal>
-          </div>
+            </div>
+          </Reveal>
 
           <div className="mt-[clamp(3rem,6vw,5rem)]">
             <div className="flex items-center justify-center w-full mb-[clamp(2rem,4vw,4rem)]">
