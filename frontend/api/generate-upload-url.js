@@ -45,7 +45,10 @@ export default async function handler(req, res) {
       CacheControl: "public, max-age=31536000, immutable",
     })
     const uploadUrl = await getSignedUrl(client, command, { expiresIn: 3600 })
-    const createRes = await fetch(uploadUrl, { method: "POST" })
+    const createRes = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": contentType || "video/mp4" },
+    })
     if (!createRes.ok) return res.status(502).json({ error: `CreateMultipartUpload failed: HTTP ${createRes.status}` })
     const xml = await createRes.text()
     const uploadId = xml.match(/<UploadId>([^<]+)<\/UploadId>/)?.[1]
