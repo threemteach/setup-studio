@@ -46,7 +46,7 @@ export async function upsertVideo(video) {
   return data
 }
 
-export async function deleteVideo(id, videoKey) {
+export async function deleteVideo(id, videoKey, thumbnailUrl) {
   const token = (await getSupabase().auth.getSession()).data.session?.access_token
   if (videoKey) {
     try {
@@ -57,6 +57,12 @@ export async function deleteVideo(id, videoKey) {
         body: JSON.stringify({ video_key: videoKey }),
       })
     } catch { /* ignore R2 delete errors */ }
+  }
+  if (thumbnailUrl) {
+    try {
+      const { deleteCloudinaryImage } = await import("./cloudinary")
+      await deleteCloudinaryImage(thumbnailUrl, token)
+    } catch { /* ignore thumbnail delete errors */ }
   }
   const supabase = getSupabase()
   const { error } = await supabase.from("portfolio_videos").delete().eq("id", id)
@@ -194,19 +200,64 @@ async function uploadMultipart(file, key, contentType, onProgress) {
   }
 }
 
+/* ─── capture a single video frame as a JPEG blob ──────────────────────── */
+function captureVideoFrame(file) {
+  return new Promise((resolve, reject) => {
+    const vid = document.createElement("video")
+    vid.muted = true
+    vid.playsInline = true
+    vid.preload = "metadata"
+    vid.src = URL.createObjectURL(file)
+    vid.addEventListener("loadeddata", () => {
+      vid.currentTime = Math.min(0.5, vid.duration / 2 || 0.5)
+    }, { once: true })
+    vid.addEventListener("seeked", () => {
+      const canvas = document.createElement("canvas")
+      canvas.width = vid.videoWidth
+      canvas.height = vid.videoHeight
+      canvas.getContext("2d").drawImage(vid, 0, 0)
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(vid.src)
+        if (blob) resolve(blob)
+        else reject(new Error("Canvas toBlob failed"))
+      }, "image/jpeg", 0.85)
+    }, { once: true })
+    vid.addEventListener("error", () => {
+      URL.revokeObjectURL(vid.src)
+      reject(new Error("Video load failed"))
+    }, { once: true })
+    vid.load()
+  })
+}
+
 export async function uploadVideo(file, category, onProgress) {
   if (!r2PublicUrl) {
     throw new Error("VITE_R2_PUBLIC_URL not configured")
   }
-  const key = `${category}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`
+  const ts = Date.now()
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_")
+  const key = `${category}/${ts}-${safeName}`
   const contentType = file.type || "video/mp4"
+
+  // 1. Upload video to R2
   if (file.size < MULTIPART_THRESHOLD) {
     await uploadSimple(file, key, contentType, onProgress)
   } else {
     await uploadMultipart(file, key, contentType, onProgress)
   }
   const video_url = `${r2PublicUrl}/${key}`
-  return { video_url, video_key: key }
+
+  // 2. Capture + upload one thumbnail frame to Cloudinary
+  let thumbnail_url = ""
+  try {
+    const thumbBlob = await captureVideoFrame(file)
+    const thumbKey = `${category}/thumb_${ts}-${safeName.replace(/\.[^.]+$/, ".jpg")}`
+    const thumbFile = new File([thumbBlob], thumbKey, { type: "image/jpeg" })
+    const { secure_url } = await uploadThumbnail(thumbFile, category)
+    thumbnail_url = secure_url
+  } catch { /* thumbnail is optional — silently skip on failure */ }
+
+  return { video_url, video_key: key, thumbnail_url }
 }
 
 export async function fetchStorageUsage() {

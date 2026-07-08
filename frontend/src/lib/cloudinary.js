@@ -36,3 +36,22 @@ export async function deleteCloudinaryImage(thumbnailUrl, accessToken) {
     body: JSON.stringify({ public_id: match[1] }),
   })
 }
+
+/* ─── upload a single thumbnail JPEG to Cloudinary ───────────────────── */
+export async function uploadThumbnail(file, category) {
+  const formData = new FormData()
+  formData.append("file", file)
+  formData.append("upload_preset", preset)
+  formData.append("folder", `setup-studio/portfolio-thumbs/${category}`)
+  formData.append("asset_folder", `setup-studio/portfolio-thumbs/${category}`)
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+    { method: "POST", body: formData }
+  )
+  if (!res.ok) {
+    const err = await res.json().catch(() => null)
+    throw new Error(err?.error?.message || "Thumbnail upload failed")
+  }
+  return res.json()
+}
