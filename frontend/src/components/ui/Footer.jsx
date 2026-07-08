@@ -77,8 +77,8 @@ export default function Footer() {
         <p className="text-[#0A1216]/50 dark:text-white/40 text-xs m-0">
           &copy; {new Date().getFullYear()} {t("Setup Studio. All rights reserved.", "سيت أب ستوديو. جميع الحقوق محفوظة.", lang)}
         </p>
-        <p className="text-[#0A1216]/40 dark:text-white/30 text-[10px] m-0 mt-2">
-          {t("Designed by 3m Tech", "تم التصميم بواسطة 3m Tech", lang)}
+        <p className="text-[#0A1216]/40 dark:text-white/30 text-sm m-0 mt-2">
+          {t("by 3m Tech", " بواسطة 3m Tech", lang)}
         </p>
       </div>
     </footer>
