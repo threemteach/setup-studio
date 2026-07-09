@@ -494,7 +494,7 @@ export default function PortfolioPageEdit() {
               {videos.length === 0 ? (
                 <p className="text-white/40 text-sm text-center py-4">No videos in this category yet</p>
               ) : (
-                videos.map((video) => (
+                [...videos].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)).map((video) => (
                   <div key={video.id} className="p-4 rounded-2xl border border-white/10 bg-white/5 relative group">
                     <button onClick={() => handleDeleteVideo(video)}
                       className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red/80 text-white text-xs border-0 cursor-pointer hover:bg-red transition-colors flex items-center justify-center z-10">
