@@ -71,6 +71,7 @@ export default function AcademyPage() {
   const faqs = cmsData?.faqs || defaultFaqs
   const audiences = cmsData?.audiences || defaultAudiences
   const audienceHeading = cms("audience_heading")
+  const plans = cmsData?.cta_plans || []
 
   return (
     <>
@@ -547,21 +548,35 @@ export default function AcademyPage() {
               <div className="absolute top-[clamp(1rem,3vw,2rem)] ltr:left-[clamp(20%,35%,40%)] rtl:right-[clamp(20%,35%,40%)] w-[clamp(6rem,15vw,12rem)] h-[clamp(6rem,15vw,12rem)] rounded-full bg-[#11AFFF] opacity-[0.20] blur-[clamp(2rem,4vw,3rem)] pointer-events-none" />
               <div className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between gap-[clamp(1.25rem,3vw,2.5rem)] px-[clamp(1.5rem,4vw,3.5rem)] py-[clamp(1.5rem,3vw,2.5rem)]">
                 <div className={`text-center ${lang === 'ar' ? 'md:text-right' : 'md:text-left'}`}>
-                  <h2 className="text-white font-bold text-[clamp(1.3rem,3vw,2.2rem)] m-0 leading-tight text-center">
-                    {t("Your Next Scene", "مشهدك القادم", lang)}<br />
-                    {t("Starts", "يبدأ", lang)} <span className="text-[#11AFFF]">{t("Here.", "هنا", lang)}</span>
-                  </h2>
-                  <p className={`text-white/50 text-[clamp(0.8rem,1.3vw,1rem)] mt-2 m-0 max-w-[36rem] leading-relaxed ${lang === 'ar' ? 'text-right' : ''}`}>
-                    {t("Contact our team to book the perfect location for your production.", "تواصل مع فريقنا لحجز الموقع المثالي لإنتاجك.", lang)}
-                  </p>
+                  <div className="flex items-center w-full justify-center">
+                    <div className="flex items-center min-w-0 shrink">
+                      <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+                        <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
+                      </svg>
+                      <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
+                    </div>
+                    <h2 className="text-white font-bold text-[clamp(1.3rem,3vw,2.2rem)] m-0 leading-tight text-center px-[clamp(0.4rem,2vw,1.5rem)]">
+                      {cms("cta_title")}
+                    </h2>
+                    <div className="flex items-center min-w-0 shrink">
+                      <span className="block w-[clamp(1.5rem,12vw,16rem)] h-[2px] bg-red" />
+                      <svg className="w-[clamp(0.4rem,0.9vw,0.8rem)] h-[clamp(0.4rem,0.9vw,0.8rem)] text-red shrink-0" viewBox="0 0 13 13" fill="currentColor">
+                        <polygon points="6.5,0 13,6.5 6.5,13 0,6.5" />
+                      </svg>
+                    </div>
+                  </div>
+                  {cms("cta_body") && (
+                    <p className={`text-white/50 text-[clamp(0.8rem,1.3vw,1rem)] mt-2 m-0 max-w-[36rem] leading-relaxed ${lang === 'ar' ? 'text-right' : ''}`}>
+                      {cms("cta_body")}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-[clamp(0.6rem,1.5vw,1rem)] shrink-0">
-                  <a href="/#contact" className="inline-flex items-center gap-2 bg-white text-[#0A1216] font-semibold text-[clamp(0.85rem,1.2vw,1rem)] px-[clamp(1.25rem,2.5vw,2rem)] py-[clamp(0.6rem,1.2vw,1rem)] rounded-full hover:bg-white/90 transition-all duration-300 shadow-lg">
-                    {t("Get Quote", "احصل على عرض", lang)}
+                  <a href={`https://wa.me/201012846764?text=${encodeURIComponent(t("Hi setupstudio! I'm interested in: ", "مرحباً سيت أب ستوديو! أنا مهتم بـ: ", lang) + (cms("cta_title") || t("Setup Academy", "أكاديمية سيت أب", lang)))}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-white text-[#0A1216] font-semibold text-[clamp(0.85rem,1.2vw,1rem)] px-[clamp(1.25rem,2.5vw,2rem)] py-[clamp(0.6rem,1.2vw,1rem)] rounded-full hover:bg-white/90 transition-all duration-300 shadow-lg">
+                    {cms("cta_button")}
                   </a>
-                  <Link to="/locations" className="inline-flex items-center gap-2 border-2 border-white text-white font-semibold text-[clamp(0.85rem,1.2vw,1rem)] px-[clamp(1.25rem,2.5vw,2rem)] py-[clamp(0.6rem,1.2vw,1rem)] rounded-full hover:bg-white/10 transition-all duration-300">
-                    {t("View Studios", "شاهد الاستوديوهات", lang)}
-                  </Link>
                 </div>
               </div>
             </div>
