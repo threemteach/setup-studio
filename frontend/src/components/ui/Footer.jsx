@@ -38,7 +38,14 @@ export default function Footer() {
           <path d="M335.134 -0.000393149L315.032 26.6885L335.14 53.1257L355.243 26.4368L335.134 -0.000393149Z" fill="#E73B49"/>
           <path d="M550.448 179.68H522.21V216.987H550.448V179.68Z" fill="#E73B49"/>
         </svg>
-        <img src="/images/byVita.png" alt="BY VITA" className="h-[clamp(1.2rem,2.8vw,2.5rem)] w-auto self-end" />
+        <div aria-hidden="true"
+  className="h-[clamp(1.2rem,2.8vw,2.5rem)] w-[clamp(3.5rem,8vw,7rem)] self-end"
+  style={{
+    backgroundColor: '#305D74',
+    WebkitMask: 'url(/images/byVita.png) no-repeat center / contain',
+    mask: 'url(/images/byVita.png) no-repeat center / contain',
+  }}
+/>
         </a>
 
         <div className="flex items-center justify-center gap-6 mb-8">
