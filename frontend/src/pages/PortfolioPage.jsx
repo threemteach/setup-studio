@@ -49,6 +49,8 @@ function VideoCard({ video, lang, playingVideoId, onPlay }) {
     const el = previewVidRef.current
     if (!el) return
     el.pause()
+    el.src = ""
+    el.load()
     setPlaying(false)
     setBuffering(false)
   }, [playingVideoId, video.id])
@@ -70,6 +72,9 @@ function VideoCard({ video, lang, playingVideoId, onPlay }) {
     if (!el || playing || buffering) return
     onPlay(video.id)
     setBuffering(true)
+
+    // Set source directly on DOM so video starts loading immediately
+    if (video.video_url) el.src = video.video_url
 
     const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
 
@@ -120,9 +125,10 @@ function VideoCard({ video, lang, playingVideoId, onPlay }) {
           >
             <video
               ref={previewVidRef}
-              src={inView || playing || buffering ? video.video_url : undefined}
+              src={playing || buffering ? video.video_url : undefined}
               preload={playing || buffering ? "auto" : hasThumbnail ? "none" : inView ? "metadata" : "none"}
               controls
+              playsInline
               poster={video.thumbnail_url ? optimizeImageUrl(video.thumbnail_url, 600) : undefined}
               tabIndex={-1}
               style={{
