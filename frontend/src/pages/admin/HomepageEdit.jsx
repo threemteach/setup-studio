@@ -177,6 +177,13 @@ export default function HomepageEdit() {
     const plans = [...getLocalized("quotes").plans]
     plans[i].features = plans[i].features.filter((_, k) => k !== j)
     setLocalized("quotes", { ...getLocalized("quotes"), plans })
+    const otherPlans = [...getOtherLocalized("quotes").plans]
+    if (otherPlans[i]) {
+      otherPlans[i].features = (otherPlans[i].features || []).filter((_, k) => k !== j)
+      const other = getOtherLocalized("quotes")
+      other.plans = otherPlans
+      setOtherLocalized("quotes", other)
+    }
     setConfirmAction(null)
   }
 
