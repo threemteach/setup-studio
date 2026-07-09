@@ -254,7 +254,8 @@ export default function PortfolioPageEdit() {
         hero_subtitle_ar: form.hero_subtitle_ar,
         categories: form.categories,
       })
-      const results = await Promise.allSettled(videos.filter(v => v.id).map(v => upsertVideo(v)))
+      const ordered = [...videos].filter(v => v.id).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+      const results = await Promise.allSettled(ordered.map((v, i) => upsertVideo({ ...v, sort_order: i })))
       const failed = results.filter(r => r.status === "rejected")
       if (failed.length > 0) {
         showToast(`${failed.length} video(s) failed to save`, "error")
