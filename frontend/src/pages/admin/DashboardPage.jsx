@@ -177,7 +177,7 @@ export default function DashboardPage() {
                   <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${Math.min(pct, 100)}%` }} />
                 </div>
                 <div className="flex justify-between text-[10px] text-muted/50 dark:text-white/30 mt-1">
-                  <span>0 GB</span>
+                  <span>{storage.usedGB.toFixed(2)} GB</span>
                   <span>{pct < 100 ? `${pct.toFixed(1)}% used` : "FULL"}</span>
                   <span>{storage.limitGB} GB</span>
                 </div>

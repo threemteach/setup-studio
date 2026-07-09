@@ -7,6 +7,7 @@ export async function uploadToCloudinary(file, category) {
   formData.append("upload_preset", preset)
   formData.append("folder", `setup-studio/locations/${category}`)
   formData.append("asset_folder", `setup-studio/locations/${category}`)
+  formData.append("transformation", "f_auto,q_auto")
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -44,6 +45,7 @@ export async function uploadThumbnail(file, category) {
   formData.append("upload_preset", preset)
   formData.append("folder", `setup-studio/portfolio-thumbs/${category}`)
   formData.append("asset_folder", `setup-studio/portfolio-thumbs/${category}`)
+  formData.append("transformation", "f_auto,q_auto")
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
