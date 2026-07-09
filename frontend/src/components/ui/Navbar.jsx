@@ -21,9 +21,12 @@ export default function Navbar() {
   const location = useLocation()
 
   const handleContactClick = useCallback((e) => {
+    setMenuOpen(false)
     if (location.pathname === "/") {
       e.preventDefault()
-      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+      setTimeout(() => {
+        document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })
+      }, 100)
     }
   }, [location.pathname])
 

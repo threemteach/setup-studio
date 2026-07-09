@@ -19,13 +19,13 @@ const socialLinks = [
 export default function Footer() {
   const { lang } = useTranslation()
   return (
-    <footer className="w-full bg-white dark:bg-[#0A1216]">
+    <footer className="w-full bg-white dark:bg-[#0A1216] pb-[clamp(5rem,12vw,6rem)] md:pb-0">
       <div className="h-[1.5px] bg-[#305D74] w-3/5 mx-auto" />
 
       <div className="max-w-[1280px] mx-auto px-[clamp(1rem,4vw,3rem)] py-[clamp(2rem,4vw,3.5rem)] flex flex-col items-center text-center">
-        <a href="/" onClick={() => window.location.reload()} className="flex items-center justify-center gap-2 mb-8" dir="ltr">
+        <a href="/" onClick={() => window.location.reload()} className="flex items-center justify-center gap-1.5 mb-8" dir="ltr">
         <svg
-          className="h-[clamp(3rem,7vw,6rem)] w-auto"
+          className="h-[clamp(3rem,7vw,6rem)] w-auto shrink-0"
           viewBox="0 0 551 218"
           fill="none"
           aria-label="SETUP"
@@ -38,7 +38,7 @@ export default function Footer() {
           <path d="M335.134 -0.000393149L315.032 26.6885L335.14 53.1257L355.243 26.4368L335.134 -0.000393149Z" fill="#E73B49"/>
           <path d="M550.448 179.68H522.21V216.987H550.448V179.68Z" fill="#E73B49"/>
         </svg>
-        <span className="text-[clamp(0.65rem,1.5vw,1rem)] text-navy dark:text-white/80 font-bold self-end tracking-wider">BY VITA</span>
+        <img src="/images/byVita.png" alt="BY VITA" className="h-[clamp(1.2rem,2.8vw,2.5rem)] w-auto self-end" />
         </a>
 
         <div className="flex items-center justify-center gap-6 mb-8">
