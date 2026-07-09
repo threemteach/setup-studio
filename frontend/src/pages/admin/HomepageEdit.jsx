@@ -511,6 +511,11 @@ export default function HomepageEdit() {
                         const plans = [...getLocalized("quotes").plans]
                         plans[i] = { ...plans[i], popular: !plan.popular }
                         setLocalized("quotes", { ...getLocalized("quotes"), plans })
+                        const otherPlans = [...getOtherLocalized("quotes").plans]
+                        otherPlans[i] = { ...otherPlans[i], popular: !plan.popular }
+                        const other = getOtherLocalized("quotes")
+                        other.plans = otherPlans
+                        setOtherLocalized("quotes", other)
                       }}
                       className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 shrink-0 mt-0.5 ${
                         plan.popular ? "bg-red" : "bg-gray-300 dark:bg-[#1e2d3d]"
