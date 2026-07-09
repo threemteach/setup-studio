@@ -4,7 +4,6 @@ import { fetchPortfolioContent, updatePortfolioContent, fetchPortfolioVideos, up
 import { translateObject } from "../../lib/homepage"
 import { sanitizeError } from "../../lib/errors"
 import Toast from "../../components/ui/Toast"
-import { optimizeImageUrl } from "../../lib/images"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 
 const Diamond = () => (
@@ -372,7 +371,7 @@ export default function PortfolioPageEdit() {
               <div className={`h-full rounded-full transition-all duration-500 ${barColor}`} style={{ width: `${Math.min(pct, 100)}%` }} />
             </div>
             <div className="flex justify-between text-[10px] text-muted/50 dark:text-white/30 mt-1">
-              <span>{storage.usedGB.toFixed(2)} GB</span>
+              <span>0 GB</span>
               <span>{pct < 100 ? `${pct.toFixed(1)}% used` : "FULL"}</span>
               <span>{storage.limitGB} GB</span>
             </div>
@@ -503,7 +502,7 @@ export default function PortfolioPageEdit() {
                     <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-4">
                       {/* Video Preview */}
                       <div className="rounded-xl overflow-hidden">
-                        <video src={video.video_url} className="w-full h-auto max-h-[200px] sm:max-h-[300px] object-contain rounded-xl" controls poster={video.thumbnail_url ? optimizeImageUrl(video.thumbnail_url, 600) : undefined}
+                        <video src={video.video_url} className="w-full h-auto max-h-[200px] sm:max-h-[300px] object-contain rounded-xl" controls poster={video.thumbnail_url || undefined}
                           onPlay={(e) => {
                             if (currentVideoRef.current && currentVideoRef.current !== e.target) {
                               currentVideoRef.current.pause()

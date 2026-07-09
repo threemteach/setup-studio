@@ -39,7 +39,6 @@ export async function uploadHomepageImage(file, sectionName) {
   formData.append("upload_preset", preset)
   formData.append("folder", `setup-studio/home-page/${sectionName}`)
   formData.append("asset_folder", `setup-studio/home-page/${sectionName}`)
-  formData.append("transformation", "f_auto,q_auto")
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -59,7 +58,6 @@ export async function copyImageToHomepage(sourceUrl, sectionName) {
   formData.append("upload_preset", preset)
   formData.append("folder", `setup-studio/home-page/${sectionName}`)
   formData.append("asset_folder", `setup-studio/home-page/${sectionName}`)
-  formData.append("transformation", "f_auto,q_auto")
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,

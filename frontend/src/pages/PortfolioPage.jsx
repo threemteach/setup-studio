@@ -4,7 +4,6 @@ import Reveal from "../components/ui/Reveal"
 import Masonry from "react-masonry-css"
 import { useTranslation } from "../context/LanguageContext"
 import { fetchPortfolioContent, fetchPortfolioVideos } from "../lib/portfolio"
-import { optimizeImageUrl } from "../lib/images"
 
 const t = (en, ar, lang) => lang === "ar" ? ar : en
 
@@ -123,7 +122,7 @@ function VideoCard({ video, lang, playingVideoId, onPlay }) {
               src={inView || playing || buffering ? video.video_url : undefined}
               preload={playing || buffering ? "auto" : hasThumbnail ? "none" : inView ? "metadata" : "none"}
               controls
-              poster={video.thumbnail_url ? optimizeImageUrl(video.thumbnail_url, 600) : undefined}
+              poster={video.thumbnail_url || undefined}
               tabIndex={-1}
               style={{
                   position: "absolute", inset: 0,
