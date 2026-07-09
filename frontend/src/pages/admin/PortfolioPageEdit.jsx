@@ -558,7 +558,7 @@ export default function PortfolioPageEdit() {
                           {lang === "en" ? (video.description_ar || "—") : (video.description_en || "—")}
                         </p>
                         <input type="number" value={video.sort_order}
-                          onChange={(e) => handleVideoFieldChange(video.id, "sort_order", parseInt(e.target.value) || 0)}
+                          onChange={(e) => handleVideoFieldChange(video.id, "sort_order", Math.max(0, parseInt(e.target.value) || 0))}
                           className="w-20 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-xs outline-none focus:border-white/30 transition-colors"
                           placeholder="Order" />
                       </div>
