@@ -6,7 +6,7 @@ export function optimizeImageUrl(url, width) {
   const parts = url.split("/upload/")
   if (parts.length !== 2) return url
 
-  let transforms = "f_auto,q_auto:eco"
+  let transforms = "f_auto,q_auto"
   if (width) transforms += `,w_${width}`
 
   return `${parts[0]}/upload/${transforms}/${parts[1]}`

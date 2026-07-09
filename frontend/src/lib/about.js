@@ -27,7 +27,7 @@ export async function uploadAboutImage(file, fieldName) {
   formData.append("upload_preset", preset)
   formData.append("folder", `setup-studio/about-page/${fieldName}`)
   formData.append("asset_folder", `setup-studio/about-page/${fieldName}`)
-  formData.append("transformation", "f_auto,q_auto:eco")
+  formData.append("transformation", "f_auto,q_auto")
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -46,7 +46,7 @@ export async function copyImageToAbout(sourceUrl, fieldName) {
   formData.append("upload_preset", preset)
   formData.append("folder", `setup-studio/about-page/${fieldName}`)
   formData.append("asset_folder", `setup-studio/about-page/${fieldName}`)
-  formData.append("transformation", "f_auto,q_auto:eco")
+  formData.append("transformation", "f_auto,q_auto")
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
