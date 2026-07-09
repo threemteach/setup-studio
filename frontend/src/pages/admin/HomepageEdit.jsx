@@ -473,9 +473,9 @@ export default function HomepageEdit() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
               {(getLocalized("quotes").plans || []).map((plan, i) => (
-                <div key={i} className="bg-white dark:bg-[#0f1a24] rounded-2xl p-5 flex flex-col shadow-lg relative min-h-[380px]">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1 flex-1">
+                <div key={i} className="bg-white dark:bg-[#0f1a24] rounded-2xl p-4 sm:p-5 flex flex-col shadow-lg relative">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-1 flex-1 min-w-0">
                       <input
                         type="text"
                         value={plan.name || ""}
@@ -484,7 +484,7 @@ export default function HomepageEdit() {
                           plans[i] = { ...plans[i], name: e.target.value }
                           setLocalized("quotes", { ...getLocalized("quotes"), plans })
                         }}
-                        className="flex-1 bg-transparent border-0 text-navy dark:text-white font-extrabold text-base outline-none"
+                        className="flex-1 min-w-0 bg-transparent border-0 text-navy dark:text-white font-extrabold text-sm sm:text-base outline-none"
                         placeholder={lang === "en" ? "Plan name..." : "اسم الباقة..."}
                       />
                       <button onClick={async () => {
@@ -505,19 +505,22 @@ export default function HomepageEdit() {
                         <i className="fa-solid fa-language text-[8px]" />
                       </button>
                     </div>
-                    <label className="flex items-center gap-1.5 text-[10px] text-navy dark:text-white font-semibold whitespace-nowrap cursor-pointer shrink-0">
-                      <input
-                        type="checkbox"
-                        checked={plan.popular || false}
-                        onChange={(e) => {
-                          const plans = [...getLocalized("quotes").plans]
-                          plans[i] = { ...plans[i], popular: e.target.checked }
-                          setLocalized("quotes", { ...getLocalized("quotes"), plans })
-                        }}
-                        className="w-3 h-3 accent-red"
-                      />
-                      Popular
-                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const plans = [...getLocalized("quotes").plans]
+                        plans[i] = { ...plans[i], popular: !plan.popular }
+                        setLocalized("quotes", { ...getLocalized("quotes"), plans })
+                      }}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 shrink-0 mt-0.5 ${
+                        plan.popular ? "bg-red" : "bg-gray-300 dark:bg-[#1e2d3d]"
+                      }`}
+                      aria-label={plan.popular ? "Mark as not popular" : "Mark as popular"}
+                    >
+                      <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ${
+                        plan.popular ? "translate-x-[19px]" : "translate-x-[3px]"
+                      }`} />
+                    </button>
                   </div>
                   <p className="text-[9px] text-navy/40 dark:text-white/40 -mt-2 mb-2 ml-1">
                     {lang === "en" ? (getOtherLocalized("quotes").plans?.[i]?.name || "—") : (getOtherLocalized("quotes").plans?.[i]?.name || "—")}
