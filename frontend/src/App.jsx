@@ -6,6 +6,7 @@ import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import LocationsPage from './pages/LocationsPage'
+import LocationDetailPage from './pages/LocationDetailPage'
 import AcademyPage from './pages/AcademyPage'
 import PortfolioPage from './pages/PortfolioPage'
 import LoginPage from './pages/admin/LoginPage'
@@ -28,7 +29,7 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="locations" element={<LocationsPage />} />
-            <Route path="locations/:category" element={<LocationsPage />} />
+            <Route path="locations/:category" element={<LocationDetailPage />} />
             <Route path="academy" element={<AcademyPage />} />
             <Route path="portfolio" element={<PortfolioPage />} />
             <Route path="*" element={<NotFoundPage />} />
