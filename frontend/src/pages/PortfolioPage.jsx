@@ -49,8 +49,6 @@ function VideoCard({ video, lang, playingVideoId, onPlay }) {
     const el = previewVidRef.current
     if (!el) return
     el.pause()
-    el.src = ""
-    el.load()
     setPlaying(false)
     setBuffering(false)
   }, [playingVideoId, video.id])
