@@ -9,7 +9,6 @@ import { uploadToCloudinary } from "../../lib/cloudinary"
 import { getSupabase } from "../../lib/supabase"
 import { sanitizeError } from "../../lib/errors"
 import { fetchPhotos, createPhoto, deletePhoto, updatePhoto, reorderPhotos, setCoverPhoto } from "../../lib/photos"
-import { optimizeImageUrl } from "../../lib/images"
 
 const categories = [
   { slug: "podcast", title: "Podcast" },
@@ -370,7 +369,7 @@ export default function LocationCategory() {
                 <>
                   <div className="relative bg-gray-50">
                     <img
-                      src={optimizeImageUrl(photo.cloudinary_url, 500)}
+                      src={photo.cloudinary_url}
                       alt={photo.alt || ""}
                       className="w-full h-auto block"
                       loading="lazy"
@@ -484,7 +483,7 @@ export default function LocationCategory() {
                   ) : (
                     <>
                       <img
-                        src={optimizeImageUrl(photo.cloudinary_url, 500)}
+                        src={photo.cloudinary_url}
                         alt=""
                         className="w-full h-full object-cover"
                       />
