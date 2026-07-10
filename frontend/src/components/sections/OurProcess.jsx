@@ -17,7 +17,7 @@ export default function OurProcess() {
 
   const localized = content ? (content[`content_${lang}`] || content.content_en) : null
   const steps = localized?.steps || []
-  const font = lang === "ar" ? "'Cairo', sans-serif" : "'Lexend', sans-serif"
+  const font = lang === "ar" ? "'Cairo', sans-serif" : "'Poppins', sans-serif"
 
   return (
     <section className="w-full bg-white dark:bg-[#0A1216] py-[clamp(1rem,3vw,3rem)]">
