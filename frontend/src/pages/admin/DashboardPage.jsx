@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { fetchAllPhotos, fetchCoverPhoto } from "../../lib/photos"
+import { optimizeImageUrl } from "../../lib/images"
 import { fetchStorageUsage } from "../../lib/portfolio"
 
 const statCards = [
@@ -213,7 +214,7 @@ export default function DashboardPage() {
                         <div className="w-full aspect-square relative">
                           {coverUrl ? (
                             <img
-                              src={coverUrl}
+                              src={optimizeImageUrl(coverUrl)}
                               alt={slug}
                               className="absolute inset-0 w-full h-full object-cover"
                               loading="lazy"
@@ -354,7 +355,7 @@ export default function DashboardPage() {
                     >
                       <div className="w-12.5 h-12.5 rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] shrink-0 shadow-sm">
                         <img
-                          src={photo.cloudinary_url}
+                          src={optimizeImageUrl(photo.cloudinary_url)}
                           alt=""
                           className="w-full h-full object-cover block"
                           loading="lazy"

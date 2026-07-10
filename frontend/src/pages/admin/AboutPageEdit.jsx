@@ -5,6 +5,7 @@ import ConfirmModal from "../../components/admin/ConfirmModal"
 import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
 import { fetchAboutContent, updateAboutContent, uploadAboutImage, defaultServices, defaultValues } from "../../lib/about"
+import { optimizeImageUrl } from "../../lib/images"
 import { translateObject } from "../../lib/homepage"
 import ImageCropperModal from "../../components/admin/ImageCropper"
 
@@ -295,7 +296,7 @@ export default function AboutPageEdit() {
                 onClick={() => setPhotoPicker("hero")}
               >
                 {form?.hero_photo_url ? (
-                  <img src={form.hero_photo_url} alt="" className="w-full h-full object-cover" />
+                  <img src={optimizeImageUrl(form.hero_photo_url)} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-white/30 gap-1">
                     <i className="fa-solid fa-plus text-2xl" />
@@ -334,7 +335,7 @@ export default function AboutPageEdit() {
                 onClick={() => setPhotoPicker("story")}
               >
                 {form?.story_photo_url ? (
-                  <img src={form.story_photo_url} alt="" className="w-full h-full object-cover" />
+                  <img src={optimizeImageUrl(form.story_photo_url)} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-muted gap-1">
                     <i className="fa-solid fa-plus text-2xl" />
@@ -601,7 +602,7 @@ export default function AboutPageEdit() {
                       onClick={() => handlePickPhoto(photo)}
                       className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative"
                     >
-                      <img src={photo.cloudinary_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      <img src={optimizeImageUrl(photo.cloudinary_url)} alt="" className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] font-medium px-2 py-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">
                         {photo.category}
                       </div>
