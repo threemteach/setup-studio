@@ -72,7 +72,7 @@ export default function Hero() {
               return (
                 <motion.img
                   key={photo.id || i}
-                  src={optimizeImageUrl(photo.url, 500)}
+                  src={optimizeImageUrl(photo.url, 800)}
                   alt=""
                   className={getCardClasses(pos.wide)}
                   style={{

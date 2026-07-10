@@ -127,7 +127,7 @@ function VideoCard({ video, lang, playingVideoId, onPlay }) {
               preload={playing || buffering ? "auto" : hasThumbnail ? "none" : inView ? "metadata" : "none"}
               controls
               playsInline
-              poster={video.thumbnail_url ? optimizeImageUrl(video.thumbnail_url, 600) : undefined}
+              poster={video.thumbnail_url ? optimizeImageUrl(video.thumbnail_url, 800) : undefined}
               tabIndex={-1}
               style={{
                   position: "absolute", inset: 0,

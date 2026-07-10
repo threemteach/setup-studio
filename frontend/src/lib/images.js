@@ -1,5 +1,3 @@
-const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-
 export function optimizeImageUrl(url, width) {
   if (!url || !url.includes("res.cloudinary.com")) return url
 
@@ -10,4 +8,8 @@ export function optimizeImageUrl(url, width) {
   if (width) transforms += `,w_${width}`
 
   return `${parts[0]}/upload/${transforms}/${parts[1]}`
+}
+
+export function imgSize(width) {
+  return width ? `w_${width}` : ""
 }
