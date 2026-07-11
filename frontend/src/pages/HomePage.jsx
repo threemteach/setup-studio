@@ -11,8 +11,6 @@ export default function HomePage() {
   return (
     <>
       <SEO
-        titleEn="Home"
-        titleAr="الرئيسية"
         descEn="Setup Studio — Premium production studio in Alexandria offering photography, videography, podcasting, and creative spaces for rent."
         descAr="سيت أب ستوديو — استوديو إنتاج متميز في الإسكندرية يقدم مساحات للتصوير الفوتوغرافي وصناعة الفيديو والبودكاست والإنتاج الإبداعي للإيجار."
         path="/"
