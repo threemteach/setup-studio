@@ -4,7 +4,7 @@ import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
-import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, copyImageToHomepage, deleteHomepageImage, translateObject } from "../../lib/homepage"
+import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, deleteHomepageImage, translateObject } from "../../lib/homepage"
 import { optimizeImageUrl } from "../../lib/images"
 
 const sections = ["hero", "about", "process", "quotes"]
@@ -134,16 +134,15 @@ export default function HomepageEdit() {
     try {
       const existing = getLocalized(sectionName)
       const oldPhoto = existing?.photos?.[photoPicker.index]
-      if (oldPhoto?.id) {
+      if (oldPhoto?.id && !oldPhoto.id.startsWith("setup-studio/locations/")) {
         try { await deleteHomepageImage(oldPhoto.id) } catch {}
       }
-      const result = await copyImageToHomepage(photo.cloudinary_url, sectionName)
       const localized = getLocalized(sectionName)
       const photos = [...(localized.photos || [])]
-      photos[photoPicker.index] = { id: result.public_id, url: result.secure_url }
+      photos[photoPicker.index] = { id: photo.cloudinary_public_id, url: photo.cloudinary_url }
       setPhotos(sectionName, photos)
     } catch (err) {
-      showToast("Failed to copy photo: " + sanitizeError(err.message), "error")
+      showToast("Failed to pick photo: " + sanitizeError(err.message), "error")
     }
     setPhotoPicker(null)
   }
@@ -155,7 +154,7 @@ export default function HomepageEdit() {
     try {
       const existing = getLocalized(sectionName)
       const oldPhoto = existing?.photos?.[photoPicker.index]
-      if (oldPhoto?.id) {
+      if (oldPhoto?.id && !oldPhoto.id.startsWith("setup-studio/locations/")) {
         try { await deleteHomepageImage(oldPhoto.id) } catch {}
       }
       const result = await uploadHomepageImage(file, sectionName)
@@ -177,7 +176,7 @@ export default function HomepageEdit() {
     if (!confirmAction) return
     const existing = getLocalized(confirmAction.sectionName)
     const oldPhoto = existing?.photos?.[confirmAction.index]
-    if (oldPhoto?.id) {
+    if (oldPhoto?.id && !oldPhoto.id.startsWith("setup-studio/locations/")) {
       try { await deleteHomepageImage(oldPhoto.id) } catch {}
     }
     const localized = getLocalized(confirmAction.sectionName)
