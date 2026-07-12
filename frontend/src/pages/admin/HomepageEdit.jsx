@@ -4,7 +4,7 @@ import Toast from "../../components/ui/Toast"
 import ConfirmModal from "../../components/admin/ConfirmModal"
 import { sanitizeError } from "../../lib/errors"
 import { fetchAllPhotos } from "../../lib/photos"
-import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, copyImageToHomepage, translateObject } from "../../lib/homepage"
+import { fetchHomepageContent, updateHomepageSection, uploadHomepageImage, copyImageToHomepage, deleteHomepageImage, translateObject } from "../../lib/homepage"
 import { optimizeImageUrl } from "../../lib/images"
 
 const sections = ["hero", "about", "process", "quotes"]
@@ -132,6 +132,11 @@ export default function HomepageEdit() {
     if (!photoPicker) return
     const sectionName = photoPicker.section
     try {
+      const existing = getLocalized(sectionName)
+      const oldPhoto = existing?.photos?.[photoPicker.index]
+      if (oldPhoto?.id) {
+        try { await deleteHomepageImage(oldPhoto.id) } catch {}
+      }
       const result = await copyImageToHomepage(photo.cloudinary_url, sectionName)
       const localized = getLocalized(sectionName)
       const photos = [...(localized.photos || [])]
@@ -148,6 +153,11 @@ export default function HomepageEdit() {
     if (!file || !photoPicker) return
     const sectionName = photoPicker.section
     try {
+      const existing = getLocalized(sectionName)
+      const oldPhoto = existing?.photos?.[photoPicker.index]
+      if (oldPhoto?.id) {
+        try { await deleteHomepageImage(oldPhoto.id) } catch {}
+      }
       const result = await uploadHomepageImage(file, sectionName)
       const localized = getLocalized(sectionName)
       const photos = [...(localized.photos || [])]
@@ -163,8 +173,13 @@ export default function HomepageEdit() {
   function removePhoto(sectionName, index) {
     setConfirmAction({ type: "photo", sectionName, index })
   }
-  function confirmRemovePhoto() {
+  async function confirmRemovePhoto() {
     if (!confirmAction) return
+    const existing = getLocalized(confirmAction.sectionName)
+    const oldPhoto = existing?.photos?.[confirmAction.index]
+    if (oldPhoto?.id) {
+      try { await deleteHomepageImage(oldPhoto.id) } catch {}
+    }
     const localized = getLocalized(confirmAction.sectionName)
     const photos = [...(localized.photos || [])]
     photos[confirmAction.index] = null
