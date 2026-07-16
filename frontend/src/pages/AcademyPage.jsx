@@ -165,6 +165,7 @@ export default function AcademyPage() {
                     src={optimizeImageUrl(cmsPhoto("why", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214895/setup-studio/locations/reels/acphlvi0gzn7ag29zstf.jpg"), 800)}
                     alt="Studio production setup"
                     className="w-full aspect-[4/3] object-cover"
+                    loading="lazy"
                   />
                 </div>
                 <div className="absolute -bottom-4 ltr:-left-4 rtl:-right-4 w-20 h-20 rounded-xl bg-red/10 -z-10" />
@@ -266,7 +267,7 @@ export default function AcademyPage() {
             <div className="group block h-full flex flex-col no-underline rounded-[clamp(1.5rem,3vw,3rem)] border border-border dark:border-[#1e2d3d] bg-white dark:bg-[#0f1a24] overflow-hidden hover:shadow-[0_12px_48px_rgba(48,93,116,0.16)] hover:border-navy/20 dark:hover:border-white/20 transition-all duration-500 hover:-translate-y-1">
               <div className="relative overflow-hidden">
                 <img src={optimizeImageUrl(cmsPhoto("first_course", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214748/setup-studio/locations/podcast/ss5shyhyqpksgpxdfwld.jpg"), 800)}
-                  alt="Video production course" className="w-full aspect-[16/9] object-cover" />
+                  alt="Video production course" className="w-full aspect-[16/9] object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute bottom-4 ltr:left-5 rtl:right-5 ltr:right-5 rtl:left-5 flex items-center justify-between">
                   <span className="flex items-center gap-2 text-white text-[0.75rem] font-medium bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full">
@@ -387,7 +388,7 @@ export default function AcademyPage() {
             <Reveal>
               <div className="relative">
                 <div className="rounded-[clamp(1.25rem,2.5vw,2.5rem)] overflow-hidden shadow-[0_8px_32px_rgba(48,93,116,0.12)]">
-                  <img src={optimizeImageUrl(cmsPhoto("production", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214897/setup-studio/locations/reels/lfe2rvpyltmegs7viffh.jpg"), 800)} alt="Full production setup" className="w-full aspect-[4/3] object-cover" />
+                  <img src={optimizeImageUrl(cmsPhoto("production", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214897/setup-studio/locations/reels/lfe2rvpyltmegs7viffh.jpg"), 800)} alt="Full production setup" className="w-full aspect-[4/3] object-cover" loading="lazy" />
                 </div>
               </div>
             </Reveal>
@@ -426,7 +427,7 @@ export default function AcademyPage() {
             <Reveal>
               <div className="relative">
                 <div className="rounded-[clamp(1.25rem,2.5vw,2.5rem)] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-                  <img src={optimizeImageUrl(cmsPhoto("beyond", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214898/setup-studio/locations/reels/jigcuog93qjqliqk8ucv.jpg"), 800)} alt="Creative community" className="w-full aspect-[4/3] object-cover" />
+                  <img src={optimizeImageUrl(cmsPhoto("beyond", "https://res.cloudinary.com/yscxguwn/image/upload/v1783214898/setup-studio/locations/reels/jigcuog93qjqliqk8ucv.jpg"), 800)} alt="Creative community" className="w-full aspect-[4/3] object-cover" loading="lazy" />
                 </div>
               </div>
             </Reveal>

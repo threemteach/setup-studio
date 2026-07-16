@@ -135,7 +135,7 @@ export default function LocationsManage() {
                   >
                     <div className="w-12.5 h-12.5 rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] shrink-0 shadow-sm">
                       <img
-                        src={optimizeImageUrl(photo.cloudinary_url)}
+                        src={optimizeImageUrl(photo.cloudinary_url, 800)}
                         alt=""
                         className="w-full h-full object-cover block"
                         loading="lazy"

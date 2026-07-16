@@ -369,12 +369,12 @@ export default function LocationCategory() {
               {photo.cloudinary_url ? (
                 <>
                   <div className="relative bg-gray-50">
-                    <img
-                      src={optimizeImageUrl(photo.cloudinary_url)}
-                      alt={photo.alt || ""}
-                      className="w-full h-auto block"
-                      loading="lazy"
-                    />
+                      <img
+                        src={optimizeImageUrl(photo.cloudinary_url, 800)}
+                        alt={photo.alt || ""}
+                        className="w-full h-auto block"
+                        loading="lazy"
+                      />
                     {/* Always-visible gradient + overlay for title/desc on mobile */}
                     <div className="absolute inset-0 bg-gradient-to-t from-blue-400/60 via-transparent to-transparent sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                     {(photo.title || photo.description) && (
@@ -484,7 +484,7 @@ export default function LocationCategory() {
                   ) : (
                     <>
                       <img
-                        src={optimizeImageUrl(photo.cloudinary_url)}
+                        src={optimizeImageUrl(photo.cloudinary_url, 800)}
                         alt=""
                         className="w-full h-full object-cover"
                       />

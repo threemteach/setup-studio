@@ -67,7 +67,7 @@ const PhotoField = ({ url, urlId, prefix, label, aspect = "aspect-[4/3]", dark =
         onClick={() => onPick(prefix)}
       >
         {url ? (
-          <img src={optimizeImageUrl(url)} alt="" className="w-full h-full object-cover" />
+          <img src={optimizeImageUrl(url, 800)} alt="" className="w-full h-full object-cover" />
         ) : (
           <div className={`w-full h-full flex flex-col items-center justify-center gap-1 ${dark ? "text-white/30" : "text-muted"}`}>
             <i className="fa-solid fa-plus text-2xl" />
@@ -1144,7 +1144,7 @@ export default function AcademyPageEdit() {
                   {allPhotos.map((photo) => (
                     <button key={photo.id} onClick={() => handlePickPhoto(photo)}
                       className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative">
-                      <img src={optimizeImageUrl(photo.cloudinary_url)} alt="" className="w-full h-full object-cover" loading="lazy" />
+                       <img src={optimizeImageUrl(photo.cloudinary_url, 800)} alt="" className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] font-medium px-2 py-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">{photo.category}</div>
                     </button>
                   ))}

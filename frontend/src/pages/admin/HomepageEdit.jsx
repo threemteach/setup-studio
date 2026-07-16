@@ -282,7 +282,7 @@ export default function HomepageEdit() {
                   return (
                     <div key={i} className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-white dark:border-[#1e2d3d] shadow-md group cursor-pointer" onClick={() => setPhotoPicker({ section: "hero", index: i })}>
                       {photo ? (
-                        <img src={optimizeImageUrl(photo.url)} alt="" className="w-full h-full object-cover" />
+                        <img src={optimizeImageUrl(photo.url, 800)} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted text-lg">
                           <i className="fa-solid fa-plus" />
@@ -681,7 +681,7 @@ export default function HomepageEdit() {
                       onClick={() => handlePickPhoto(photo)}
                       className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] border-2 border-transparent hover:border-navy transition-all cursor-pointer p-0 group relative"
                     >
-                      <img src={optimizeImageUrl(photo.cloudinary_url)} alt="" className="w-full h-full object-cover" loading="lazy" />
+                       <img src={optimizeImageUrl(photo.cloudinary_url, 800)} alt="" className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] font-medium px-2 py-1 truncate opacity-0 group-hover:opacity-100 transition-opacity">
                         {photo.category}
                       </div>

@@ -111,7 +111,7 @@ export default function LocationDetailPage() {
                 {photos.map((photo, i) => (
                   <div key={photo.id} className="break-inside-avoid inline-block w-full mb-[clamp(0.75rem,2vw,1.5rem)]">
                     <Reveal delay={i * 0.06}>
-                      <button onClick={() => setLightbox(optimizeImageUrl(photo.cloudinary_url))}
+                      <button onClick={() => setLightbox(optimizeImageUrl(photo.cloudinary_url, 1600))}
                         className="group relative w-full rounded-[clamp(1rem,2vw,2rem)] overflow-hidden shadow-[0_4px_24px_rgba(48,93,116,0.08)] hover:shadow-[0_8px_32px_rgba(48,93,116,0.16)] transition-shadow duration-300 border-0 cursor-pointer p-0 bg-transparent"
                       >
                         <img src={optimizeImageUrl(photo.cloudinary_url, 800)} alt={photo.alt || ""} className="w-full h-auto block" loading="lazy" />

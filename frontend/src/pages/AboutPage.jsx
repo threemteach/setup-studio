@@ -111,6 +111,7 @@ export default function AboutPage() {
                   src={optimizeImageUrl(storyPhoto, 800)}
                   alt="Setup Studio interior"
                   className="w-full aspect-[4/3] object-cover"
+                  loading="lazy"
                 />
               </div>
             </Reveal>

@@ -214,7 +214,7 @@ export default function DashboardPage() {
                         <div className="w-full aspect-square relative">
                           {coverUrl ? (
                             <img
-                              src={optimizeImageUrl(coverUrl)}
+                              src={optimizeImageUrl(coverUrl, 800)}
                               alt={slug}
                               className="absolute inset-0 w-full h-full object-cover"
                               loading="lazy"
@@ -355,7 +355,7 @@ export default function DashboardPage() {
                     >
                       <div className="w-12.5 h-12.5 rounded-xl overflow-hidden bg-gray-100 dark:bg-[#0f1a24] shrink-0 shadow-sm">
                         <img
-                          src={optimizeImageUrl(photo.cloudinary_url)}
+                          src={optimizeImageUrl(photo.cloudinary_url, 800)}
                           alt=""
                           className="w-full h-full object-cover block"
                           loading="lazy"
