@@ -119,21 +119,10 @@ export default function Navbar() {
               : "opacity-0 pointer-events-none lg:opacity-100 lg:pointer-events-auto"
           }`}
         >
-          <ul className="flex flex-col lg:flex-row items-start lg:items-center justify-center gap-7 lg:gap-[clamp(1.2rem,3vw,2.8rem)] list-none m-0 p-0">
-            {navLinks.map((link) => (
-              <li key={link.to} className={link.external ? "lg:hidden" : undefined}>
-                {link.external ? (
-                  <a
-                    href={link.to}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 no-underline text-[0.9rem] font-semibold text-navy dark:text-white border border-navy/20 dark:border-white/20 rounded-full px-3 py-2 transition-all duration-200 hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy"
-                  >
-                    <span>{t(link.labelEn, link.labelAr, lang)}</span>
-                    <i className="fa-solid fa-arrow-up-right-from-square text-[0.65rem]" aria-hidden="true" />
-                  </a>
-                ) : (
-                  <NavLink
+          <ul className="flex flex-col lg:flex-row items-start lg:items-center justify-center gap-7 lg:gap-[clamp(1.2rem,3vw,2.8rem)] h-full lg:h-auto pb-8 lg:pb-0 list-none m-0 p-0">
+            {navLinks.filter((link) => !link.external).map((link) => (
+              <li key={link.to}>
+                <NavLink
                       to={link.to}
                       end={link.to === "/"}
                       className={({ isActive }) =>
@@ -145,8 +134,7 @@ export default function Navbar() {
                       }
                     >
                     {t(link.labelEn, link.labelAr, lang)}
-                  </NavLink>
-                )}
+                </NavLink>
               </li>
             ))}
             <li className="lg:hidden w-full pt-2">
@@ -156,6 +144,17 @@ export default function Navbar() {
                 className="flex items-center justify-center w-full no-underline text-white bg-navy border border-navy rounded-full px-6 py-3.5 font-semibold text-sm shadow-[3px_3px_0_var(--color-red)] active:shadow-[1px_1px_0_var(--color-red)] transition-shadow duration-200"
               >
                 {t("Contact", "اتصل بنا", lang)}
+              </a>
+            </li>
+            <li className="lg:hidden w-full mt-auto pt-5 border-t border-navy/10 dark:border-white/10 text-center">
+              <a
+                href="https://3mtechs.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-[#8899a6] dark:text-white/50 underline underline-offset-4 transition-colors duration-200 hover:text-navy dark:hover:text-white"
+              >
+                <span>{t("Designed & Built by 3M Tech", "تصميم وبرمجة 3M Tech", lang)}</span>
+                <i className="fa-solid fa-arrow-up-right-from-square text-[0.6rem]" aria-hidden="true" />
               </a>
             </li>
           </ul>
