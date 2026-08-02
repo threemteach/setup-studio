@@ -151,9 +151,14 @@ export default function Navbar() {
                 href="https://3mtechs.com"
                 target="_blank"
                 rel="noopener noreferrer"
+                dir={lang === "ar" ? "rtl" : "ltr"}
                 className="inline-flex items-center gap-1.5 text-xs font-medium text-[#8899a6] dark:text-white/50 underline underline-offset-4 transition-colors duration-200 hover:text-navy dark:hover:text-white"
               >
-                <span>{t("Designed & Built by 3M Tech", "تصميم وتنفيذ بواسطة 3M Tech", lang)}</span>
+                {lang === "ar" ? (
+                  <span>تصميم وتنفيذ بواسطة <bdi dir="ltr">3M Tech</bdi></span>
+                ) : (
+                  <span>Designed &amp; Built by 3M Tech</span>
+                )}
                 <i className="fa-solid fa-arrow-up-right-from-square text-[0.6rem]" aria-hidden="true" />
               </a>
             </li>
