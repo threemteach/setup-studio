@@ -68,9 +68,10 @@ export default function Footer() {
             href="https://3mtechs.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-inherit no-underline transition-colors duration-200 hover:text-navy dark:hover:text-white"
+            className="inline-flex items-center gap-1.5 text-navy dark:text-white font-semibold underline underline-offset-4 decoration-1 transition-opacity duration-200 hover:opacity-70"
           >
-            {t("by 3m Tech", " بواسطة 3m Tech", lang)}
+            <span>{t("Designed & Built by 3M Tech", "تصميم وبرمجة 3M Tech", lang)}</span>
+            <i className="fa-solid fa-arrow-up-right-from-square text-[0.65rem]" aria-hidden="true" />
           </a>
         </p>
       </div>

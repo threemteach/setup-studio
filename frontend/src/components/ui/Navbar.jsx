@@ -121,13 +121,13 @@ export default function Navbar() {
         >
           <ul className="flex flex-col lg:flex-row items-start lg:items-center justify-center gap-7 lg:gap-[clamp(1.2rem,3vw,2.8rem)] list-none m-0 p-0">
             {navLinks.map((link) => (
-              <li key={link.to}>
+              <li key={link.to} className={link.external ? "lg:hidden" : undefined}>
                 {link.external ? (
                   <a
                     href={link.to}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 no-underline text-[0.9rem] lg:text-[0.72rem] font-semibold text-navy dark:text-white border border-navy/20 dark:border-white/20 rounded-full px-3 py-2 transition-all duration-200 hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy"
+                    className="inline-flex items-center gap-2 no-underline text-[0.9rem] font-semibold text-navy dark:text-white border border-navy/20 dark:border-white/20 rounded-full px-3 py-2 transition-all duration-200 hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy"
                   >
                     <span>{t(link.labelEn, link.labelAr, lang)}</span>
                     <i className="fa-solid fa-arrow-up-right-from-square text-[0.65rem]" aria-hidden="true" />
