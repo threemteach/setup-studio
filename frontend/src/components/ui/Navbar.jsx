@@ -11,6 +11,7 @@ const navLinks = [
   { labelEn: "Locations", labelAr: "المواقع", to: "/locations" },
   { labelEn: "About Us", labelAr: "عن سيت أب", to: "/about" },
   { labelEn: "Setup Academy", labelAr: "أكاديمية سيت أب", to: "/academy" },
+  { labelEn: "3M Tech", labelAr: "3M Tech", to: "https://3mtechs.com", external: true },
 ]
 
 export default function Navbar() {
@@ -116,6 +117,16 @@ export default function Navbar() {
           <ul className="flex flex-col lg:flex-row items-start lg:items-center justify-center gap-7 lg:gap-[clamp(1.2rem,3vw,2.8rem)] list-none m-0 p-0">
             {navLinks.map((link) => (
               <li key={link.to}>
+                {link.external ? (
+                  <a
+                    href={link.to}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="no-underline text-[1.1rem] lg:text-[0.85rem] font-medium text-[#8899a6] dark:text-white/50 transition-colors duration-200 hover:text-navy dark:hover:text-white"
+                  >
+                    {t(link.labelEn, link.labelAr, lang)}
+                  </a>
+                ) : (
                   <NavLink
                       to={link.to}
                       end={link.to === "/"}
@@ -127,8 +138,9 @@ export default function Navbar() {
                         }`
                       }
                     >
-                  {t(link.labelEn, link.labelAr, lang)}
-                </NavLink>
+                    {t(link.labelEn, link.labelAr, lang)}
+                  </NavLink>
+                )}
               </li>
             ))}
             <li className="lg:hidden w-full pt-2">

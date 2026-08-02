@@ -64,7 +64,14 @@ export default function Footer() {
           &copy; {new Date().getFullYear()} {t("Setup Studio. All rights reserved.", "سيت أب ستوديو. جميع الحقوق محفوظة.", lang)}
         </p>
         <p className="text-[#0A1216]/40 dark:text-white/30 text-sm m-0 mt-2">
-          {t("by 3m Tech", " بواسطة 3m Tech", lang)}
+          <a
+            href="https://3mtechs.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-inherit no-underline transition-colors duration-200 hover:text-navy dark:hover:text-white"
+          >
+            {t("by 3m Tech", " بواسطة 3m Tech", lang)}
+          </a>
         </p>
       </div>
     </footer>
