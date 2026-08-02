@@ -13,7 +13,7 @@ const navLinks = [
   { labelEn: "Setup Academy", labelAr: "أكاديمية سيت أب", to: "/academy" },
   {
     labelEn: "Designed & Built by 3M Tech",
-    labelAr: "تصميم وبرمجة 3M Tech",
+    labelAr: "تصميم وتنفيذ بواسطة 3M Tech",
     to: "https://3mtechs.com",
     external: true,
   },
@@ -153,7 +153,7 @@ export default function Navbar() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-medium text-[#8899a6] dark:text-white/50 underline underline-offset-4 transition-colors duration-200 hover:text-navy dark:hover:text-white"
               >
-                <span>{t("Designed & Built by 3M Tech", "تصميم وبرمجة 3M Tech", lang)}</span>
+                <span>{t("Designed & Built by 3M Tech", "تصميم وتنفيذ بواسطة 3M Tech", lang)}</span>
                 <i className="fa-solid fa-arrow-up-right-from-square text-[0.6rem]" aria-hidden="true" />
               </a>
             </li>
