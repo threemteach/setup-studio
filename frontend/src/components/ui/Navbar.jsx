@@ -11,7 +11,12 @@ const navLinks = [
   { labelEn: "Locations", labelAr: "المواقع", to: "/locations" },
   { labelEn: "About Us", labelAr: "عن سيت أب", to: "/about" },
   { labelEn: "Setup Academy", labelAr: "أكاديمية سيت أب", to: "/academy" },
-  { labelEn: "3M Tech", labelAr: "3M Tech", to: "https://3mtechs.com", external: true },
+  {
+    labelEn: "Designed & Built by 3M Tech",
+    labelAr: "تصميم وبرمجة 3M Tech",
+    to: "https://3mtechs.com",
+    external: true,
+  },
 ]
 
 export default function Navbar() {
@@ -122,9 +127,10 @@ export default function Navbar() {
                     href={link.to}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="no-underline text-[1.1rem] lg:text-[0.85rem] font-medium text-[#8899a6] dark:text-white/50 transition-colors duration-200 hover:text-navy dark:hover:text-white"
+                    className="inline-flex items-center gap-2 no-underline text-[0.9rem] lg:text-[0.72rem] font-semibold text-navy dark:text-white border border-navy/20 dark:border-white/20 rounded-full px-3 py-2 transition-all duration-200 hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy"
                   >
-                    {t(link.labelEn, link.labelAr, lang)}
+                    <span>{t(link.labelEn, link.labelAr, lang)}</span>
+                    <i className="fa-solid fa-arrow-up-right-from-square text-[0.65rem]" aria-hidden="true" />
                   </a>
                 ) : (
                   <NavLink
